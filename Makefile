@@ -22,3 +22,9 @@ certs:
 		-keyout nginx/certs/dev.key \
 		-out nginx/certs/dev.crt \
 		-subj "/CN=localhost"
+
+db:
+	$(COMPOSE) up -d db
+	
+api:
+	$(COMPOSE) up -d --build api
