@@ -1,6 +1,6 @@
 import Fastify from "fastify";
-import { Server as SocketIOServer } from "socket.io";
 import { PrismaClient } from "@prisma/client";
+import { setupSocket } from "./socket/socket";
 
 const prisma = new PrismaClient();
 const app = Fastify({ logger: true });
@@ -16,17 +16,8 @@ const port = Number(process.env.PORT || "3000");
 
 const start = async () => {
   await app.listen({ port, host: "0.0.0.0" });
-
-  const io = new SocketIOServer(app.server, {
-    path: "/socket.io",
-    cors: { origin: true }
-  });
-
-  io.on("connection", (socket) => {
-    app.log.info(`socket connected: ${socket.id}`);
-    socket.emit("hello", { message: "Hello from Socket.IO" });
-    socket.on("ping", () => socket.emit("pong"));
-  });
+  
+  setupSocket(app);
 };
 
 start().catch((err) => {
