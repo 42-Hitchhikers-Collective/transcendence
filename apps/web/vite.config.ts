@@ -10,7 +10,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: { hmr: { protocol: 'wss', clientPort: 443 } } // added for https
+
+export default defineConfig(({ mode }) => {
+  return {
+    plugins: [react()],
+    server: {
+      hmr: mode === 'development' // sets Vite's HMR to default or 443 depending where it is being run
+        ? true  // if true, it means we are running the frontend locally, this enables HMR when testing frontedn via "npm run dev"
+        : { protocol: 'wss', clientPort: 443 } // used for https for docker deployment - left as previously set up from @Welf
+    }
+  }
 })
