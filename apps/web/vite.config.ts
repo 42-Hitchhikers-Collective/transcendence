@@ -1,3 +1,5 @@
+import path from "path";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 /* 
   Switched to REACT-SWC: it builds faster and good for game development.
@@ -13,12 +15,12 @@ import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [react()],
-    server: {
-      hmr:
-        mode === "development" // sets Vite's HMR to default or 443 depending where it is being run
-          ? true // if true, it means we are running the frontend locally, this enables HMR when testing frontedn via "npm run dev"
-          : { protocol: "wss", clientPort: 443 }, // used for https for docker deployment - left as previously set up from @Welf
+    plugins: [react(), tailwindcss()],
+    resolve: {
+      alias: {
+        // This tells Vite: whenever you see "@", look in the "src" folder
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
   };
 });
