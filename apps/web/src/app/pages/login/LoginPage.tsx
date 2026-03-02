@@ -1,18 +1,28 @@
-import { Link } from "react-router";
+import { useState } from "react";
 import { GalleryVerticalEnd } from "lucide-react";
-import { LoginForm } from "@/shared/components/login-form";
+import { LoginCard } from "@/app/pages/login/components/LoginCard";
+import { SignupForm } from "@/shared/components/signup-form";
+
+type Mode = "login" | "signup";
 
 export default function LoginPage() {
+  // const [mode, setMode] = useState<Mode>("login"); // tbd when implementing login/signup toggle functionality
+
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-            <GalleryVerticalEnd className="size-4" />
-          </div>
-          Acme Inc.
-        </a>
-        <LoginForm />
+    <div className="relative min-h-svh overflow-hidden">
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-black/50"
+      />
+      <div className="relative z-10 flex min-h-svh items-center justify-center p-6">
+        <div className="w-full max-w-sm rounded-xl  p-8 "> 
+          {/* bg-white/90 shadow-xl backdrop-blur-md */}
+          <LoginCard
+            className="w-full"
+            handleLogin={() => Promise.resolve()}
+            error={null}
+            isLoading={false}
+          />
+        </div>
       </div>
     </div>
   );

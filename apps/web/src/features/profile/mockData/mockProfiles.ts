@@ -1,3 +1,8 @@
+/* 
+- This file contains sample user profiles data samples that can be tested on the frontend.
+- This is common practice in frontend development and used so frontend developers can focus on building user interfaces without waiting for backend integration.
+- The data coming fron mock is only temporary, once the backend is ready, the mock data and related code can be removed.
+*/
 export interface UserProfile {
   id: number;
   username: string;
