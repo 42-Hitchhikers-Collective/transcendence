@@ -4,7 +4,7 @@ https://reactrouter.com/start/data/routing - how to use the createBrowserRouter 
 */
 
 import { createBrowserRouter, RouterProvider } from "react-router";
-import LoginPage from "../pages/login/LoginPage"; // pages are imported as deafult exports as they are specific non-shared route components and ro enable lazy loading (thet are loaded only when the user navigates to that route)
+import AuthPage from "../pages/login/AuthPage"; // pages are imported as deafult exports as they are specific non-shared route components and ro enable lazy loading (thet are loaded only when the user navigates to that route)
 import GamePage from "../pages/game/GamePage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import SignupPage from "../pages/signup/SignupPage";
@@ -13,7 +13,7 @@ import SignupPage from "../pages/signup/SignupPage";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <LoginPage />,
+    element: <AuthPage />,
   },
   {
     path: "/profile",

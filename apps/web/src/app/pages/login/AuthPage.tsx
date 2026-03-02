@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { GalleryVerticalEnd } from "lucide-react";
-import { LoginCard } from "@/app/pages/login/components/LoginCard";
-import { SignupForm } from "@/shared/components/signup-form";
+// import { useState } from "react";
+import { AuthCard } from "@/app/pages/login/components/AuthCard";
 
-type Mode = "login" | "signup";
+// type Mode = "login" | "signup";
 
-export default function LoginPage() {
+export default function AuthPage() {
   // const [mode, setMode] = useState<Mode>("login"); // tbd when implementing login/signup toggle functionality
 
   return (
@@ -16,7 +14,7 @@ export default function LoginPage() {
       <div className="relative z-10 flex min-h-svh items-center justify-center p-6">
         <div className="w-full max-w-sm rounded-xl  p-8 "> 
           {/* bg-white/90 shadow-xl backdrop-blur-md */}
-          <LoginCard
+          <AuthCard
             className="w-full"
             handleLogin={() => Promise.resolve()}
             error={null}

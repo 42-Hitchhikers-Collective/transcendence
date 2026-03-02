@@ -5,7 +5,7 @@ import {
   FieldSeparator,
 } from "@/shared/components/ui/field";
 
-export function LoginSocial() {
+export function AuthSocial() {
   const socialProviders = [
     {
       name: "Apple",

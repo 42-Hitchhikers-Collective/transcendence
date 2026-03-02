@@ -1,36 +1,36 @@
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { LoginForm } from "./LoginForm";
-import { LoginSocial } from "./LoginSocial";
-import { LoginHeader } from "./LoginHeader";
+import { AuthForm } from "./AuthForm";
+import { AuthSocial } from "./AuthSocial";
+import { AuthHeader } from "./AuthHeader";
 
-interface LoginCardProps extends React.ComponentProps<"div"> {
+interface AuthCardProps extends React.ComponentProps<"div"> {
   handleLogin: (username: string, password: string) => Promise<void>;
   error: string | null;
   isLoading: boolean;
 }
 
-export function LoginCard({
+export function AuthCard({
   className,
   handleLogin,
   error,
   isLoading,
   ...props
-}: LoginCardProps) {
+}: AuthCardProps) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <LoginHeader
+        <AuthHeader
           cardTitle="Log in"
           cardDescription="Don't have an account? Sign up for free."
         />
         <CardContent className="flex flex-col gap-4">
-          <LoginForm
+          <AuthForm
             handleLogin={handleLogin}
             error={error}
             isLoading={isLoading}
           />
-          <LoginSocial />
+          <AuthSocial />
         </CardContent>
       </Card>
       {/* <FieldDescription className="px-6 text-center">

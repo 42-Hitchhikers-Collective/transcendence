@@ -3,7 +3,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 
-interface LoginFormProps {
+interface AuthFormProps {
   handleLogin: (username: string, password: string) => Promise<void>;
   error: string | null;
   isLoading: boolean;
@@ -32,7 +32,7 @@ const Fields = [
   },
 ];
 
-export function LoginForm({ handleLogin, error, isLoading }: LoginFormProps) {
+export function AuthForm({ handleLogin, error, isLoading }: AuthFormProps) {
   const [formData, setFormData] = useState<Record<string, string>>(
     Object.fromEntries(Fields.map((f) => [f.id, ""])),
   );

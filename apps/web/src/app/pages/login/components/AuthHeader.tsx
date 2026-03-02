@@ -4,7 +4,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 
-export function LoginHeader({
+export function AuthHeader({
   cardTitle,
   cardDescription,
 }: {
