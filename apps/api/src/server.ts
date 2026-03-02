@@ -30,19 +30,21 @@ async function authenticate(request: any, reply: any) {
 }
 
 /* ----------------------------- Routes ----------------------------- */
+
+// Health
 app.get("/health", async () => ({ ok: true }));
 
+// DB ping
 app.get("/db/ping", async () => {
   const r = await prisma.$queryRaw`SELECT 1 as ok`;
   return { ok: true, r };
 });
 
-// MVP: list users (public for now)
+// MVP: list users (public for now) — avoid leaking emails
 app.get("/users", async () => {
   const users = await prisma.user.findMany({
     select: {
       id: true,
-      email: true,
       createdAt: true,
       profile: { select: { displayName: true, avatarUrl: true } },
     },
@@ -50,66 +52,90 @@ app.get("/users", async () => {
   return { users };
 });
 
-// Register
-app.post("/auth/register", async (request, reply) => {
-  const body = request.body as {
-    email?: string;
-    password?: string;
-    displayName?: string;
-  };
-
-  if (!body.email || !body.password || !body.displayName) {
-    return reply.code(400).send({ error: "email, password, displayName required" });
-  }
-
-  const existing = await prisma.user.findUnique({ where: { email: body.email } });
-  if (existing) {
-    return reply.code(409).send({ error: "email already in use" });
-  }
-
-  const passwordHash = await bcrypt.hash(body.password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      email: body.email,
-      passwordHash,
-      profile: { create: { displayName: body.displayName } },
+// Register (validated)
+app.post(
+  "/auth/register",
+  {
+    schema: {
+      body: {
+        type: "object",
+        required: ["email", "password", "displayName"],
+        additionalProperties: false,
+        properties: {
+          email: { type: "string", minLength: 3 },
+          password: { type: "string", minLength: 6 },
+          displayName: { type: "string", minLength: 1 },
+        },
+      },
     },
-    select: { id: true, email: true, createdAt: true },
-  });
+  },
+  async (request, reply) => {
+    const body = request.body as { email: string; password: string; displayName: string };
 
-  return reply.code(201).send({ user });
-});
+    const existing = await prisma.user.findUnique({ where: { email: body.email } });
+    if (existing) {
+      return reply.code(409).send({ error: "email already in use" });
+    }
 
-// Login
-app.post("/auth/login", async (request, reply) => {
-  const body = request.body as { email?: string; password?: string };
+    const passwordHash = await bcrypt.hash(body.password, 10);
 
-  if (!body.email || !body.password) {
-    return reply.code(400).send({ error: "email and password required" });
+    const user = await prisma.user.create({
+      data: {
+        email: body.email,
+        passwordHash,
+        profile: { create: { displayName: body.displayName } },
+      },
+      select: { id: true, email: true, createdAt: true },
+    });
+
+    return reply.code(201).send({ user });
   }
+);
 
-  const user = await prisma.user.findUnique({
-    where: { email: body.email },
-    select: { id: true, email: true, passwordHash: true },
-  });
+// Login (validated)
+app.post(
+  "/auth/login",
+  {
+    schema: {
+      body: {
+        type: "object",
+        required: ["email", "password"],
+        additionalProperties: false,
+        properties: {
+          email: { type: "string", minLength: 3 },
+          password: { type: "string", minLength: 6 },
+        },
+      },
+    },
+  },
+  async (request, reply) => {
+    const body = request.body as { email: string; password: string };
 
-  if (!user) {
-    return reply.code(401).send({ error: "invalid credentials" });
+    const user = await prisma.user.findUnique({
+      where: { email: body.email },
+      select: { id: true, passwordHash: true },
+    });
+
+    if (!user) {
+      return reply.code(401).send({ error: "invalid credentials" });
+    }
+
+    const ok = await bcrypt.compare(body.password, user.passwordHash);
+    if (!ok) {
+      return reply.code(401).send({ error: "invalid credentials" });
+    }
+
+    const token = app.jwt.sign({ sub: user.id }, { expiresIn: "15m" });
+    return reply.send({ token });
   }
-
-  const ok = await bcrypt.compare(body.password, user.passwordHash);
-  if (!ok) {
-    return reply.code(401).send({ error: "invalid credentials" });
-  }
-
-  const token = app.jwt.sign({ sub: user.id }, { expiresIn: "15m" });
-  return reply.send({ token });
-});
+);
 
 // Me (protected)
-app.get("/users/me", { preHandler: [authenticate] }, async (request: any) => {
-  const payload = request.user as { sub: string };
+app.get("/users/me", { preHandler: [authenticate] }, async (request: any, reply) => {
+  const payload = request.user as { sub?: string };
+  if (!payload.sub) {
+    return reply.code(401).send({ error: "unauthorized" });
+  }
 
   const me = await prisma.user.findUnique({
     where: { id: payload.sub },
@@ -124,28 +150,51 @@ app.get("/users/me", { preHandler: [authenticate] }, async (request: any) => {
   return { user: me };
 });
 
-app.patch("/profiles/me", { preHandler: [authenticate] }, async (request: any, reply) => {
-  const payload = request.user as { sub: string };
-  const body = request.body as { displayName?: string; avatarUrl?: string; bio?: string };
-
-  const profile = await prisma.profile.upsert({
-    where: { userId: payload.sub },
-    update: {
-      displayName: body.displayName,
-      avatarUrl: body.avatarUrl,
-      bio: body.bio,
+// Update profile (protected + validated + upsert)
+app.patch(
+  "/profiles/me",
+  {
+    preHandler: [authenticate],
+    schema: {
+      body: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          displayName: { type: "string", minLength: 1 },
+          avatarUrl: { type: "string", minLength: 1 },
+          bio: { type: "string" },
+        },
+      },
     },
-    create: {
-      userId: payload.sub,
-      displayName: body.displayName || "User",
-      avatarUrl: body.avatarUrl,
-      bio: body.bio,
-    },
-    select: { displayName: true, avatarUrl: true, bio: true },
-  });
+  },
+  async (request: any, reply) => {
+    const payload = request.user as { sub?: string };
+    if (!payload.sub) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
 
-  return reply.send({ profile });
-});
+    const body = request.body as { displayName?: string; avatarUrl?: string; bio?: string };
+
+    const profile = await prisma.profile.upsert({
+      where: { userId: payload.sub },
+      update: {
+        displayName: body.displayName,
+        avatarUrl: body.avatarUrl,
+        bio: body.bio,
+      },
+      create: {
+        userId: payload.sub,
+        displayName: body.displayName || "User",
+        avatarUrl: body.avatarUrl,
+        bio: body.bio,
+      },
+      select: { displayName: true, avatarUrl: true, bio: true },
+    });
+
+    return reply.send({ profile });
+  }
+);
+
 /* ----------------------------- Socket.IO ----------------------------- */
 const port = Number(process.env.PORT || "3000");
 
