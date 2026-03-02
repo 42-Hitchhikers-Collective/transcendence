@@ -9,7 +9,7 @@ TODO: This might perhaps need to go into features folder, but will better check 
 
 import { useState } from "react";
 
-export type AuthMode = "login" | "signup";
+export type EntryMode = "login" | "signup";
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

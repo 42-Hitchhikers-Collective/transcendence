@@ -4,16 +4,15 @@ https://reactrouter.com/start/data/routing - how to use the createBrowserRouter 
 */
 
 import { createBrowserRouter, RouterProvider } from "react-router";
-import AuthPage from "../pages/login/AuthPage"; // pages are imported as deafult exports as they are specific non-shared route components and ro enable lazy loading (thet are loaded only when the user navigates to that route)
+import EntryPage from "../pages/entry/EntryPage"; // pages are imported as deafult exports as they are specific non-shared route components and ro enable lazy loading (thet are loaded only when the user navigates to that route)
 import GamePage from "../pages/game/GamePage";
 import ProfilePage from "../pages/profile/ProfilePage";
-import SignupPage from "../pages/signup/SignupPage";
 
 // Define your routes as a data object
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AuthPage />, // the default page will change  depending on if the user is authenticated or not, but for now we will just load the AuthPage as the default page for simplicity and to test the login/signup flow.
+    element: <EntryPage />, // the default page will change  depending on if the user is authenticated or not, but for now we will just load the EntryPage as the default page for simplicity and to test the login/signup flow.
   },
   {
     path: "/profile",

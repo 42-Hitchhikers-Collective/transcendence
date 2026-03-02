@@ -1,15 +1,15 @@
 import { cn } from "@/shared/lib/utils";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { AuthForm } from "./AuthForm";
-import { AuthSocial } from "./AuthSocial";
-import { AuthHeader } from "./AuthHeader";
+import { EntryForm } from "./EntryForm";
+import { EntrySocial } from "./EntrySocial";
+import { EntryHeader } from "./EntryHeader";
 
 //  TODO: move the interfaces to a separate files, to check if there are any duplicates and better control logic
 
-export type AuthMode = "login" | "signup";
+export type EntryMode = "login" | "signup";
 
-interface AuthCardProps extends React.ComponentProps<"div"> {
-  mode: AuthMode;
+interface EntryCardProps extends React.ComponentProps<"div"> {
+  mode: EntryMode;
   onToggleMode: () => void;
   handleLogin: (username: string, password: string) => Promise<void>;
   handleSignup: (data: {
@@ -24,7 +24,7 @@ interface AuthCardProps extends React.ComponentProps<"div"> {
 // Config is used to avoid using conditionals or ternaries in the JSX, which can get messy.
 // Instead, we can just look up the values we need based on the mode.
 const config: Record<
-  AuthMode,
+  EntryMode,
   { title: string; description: string; togglePageName: string }
 > = {
   login: {
@@ -39,7 +39,7 @@ const config: Record<
   },
 };
 
-export function AuthCard({
+export function EntryCard({
   className,
   mode,
   onToggleMode,
@@ -48,27 +48,27 @@ export function AuthCard({
   error,
   isLoading,
   ...props
-}: AuthCardProps) {
+}: EntryCardProps) {
   const { title, description, togglePageName } = config[mode];
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
-        <AuthHeader
+        <EntryHeader
           cardTitle={title}
           cardDescription={description}
           togglePageName={togglePageName}
           onToggleMode={onToggleMode}
         />
         <CardContent className="flex flex-col gap-4">
-          <AuthForm
+          <EntryForm
             mode={mode}
             handleLogin={handleLogin}
             handleSignup={handleSignup}
             error={error}
             isLoading={isLoading}
           />
-          <AuthSocial />
+          <EntrySocial />
         </CardContent>
       </Card>
       {/* <FieldDescription className="px-6 text-center">

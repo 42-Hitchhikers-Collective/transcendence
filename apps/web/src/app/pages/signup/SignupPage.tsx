@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { GalleryVerticalEnd } from "lucide-react";
 import { SignupForm } from "@/shared/components/signup-form";
 

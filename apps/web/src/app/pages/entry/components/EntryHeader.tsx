@@ -1,5 +1,5 @@
 /* 
-NOTE FOR TEAM: AuthHeader is a simple component that renders the header of the auth card (title, description and toggle button).
+NOTE FOR TEAM: EntryHeader is a simple component that renders the header of the auth card (title, description and toggle button).
 Based on what mode is active (login or signup) it will render a different title, description and what page to toggle to (Login toggles to signup and vice versa).
 */
 
@@ -11,7 +11,7 @@ import {
 
 import { Button } from "@/shared/components/ui/button";
 
-export function AuthHeader({
+export function EntryHeader({
   cardTitle,
   cardDescription,
   togglePageName,

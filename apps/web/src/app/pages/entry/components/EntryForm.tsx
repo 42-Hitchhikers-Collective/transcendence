@@ -1,7 +1,7 @@
 /* 
-NOTES FOR TEAM: AuthForm is a components that renders input lables for signing up or logging in, depending on the active mode.
+NOTES FOR TEAM: EntryForm is a components that renders input lables for signing up or logging in, depending on the active mode.
 It also handles login and signup logic by calling the appropriate functions passed as props and passes the right data depending on the active mode.
-handleLogin and handleSignup functions are defined in the useAuth hook for now but not yet implemented.
+handleLogin and handleSignup functions are defined in the useEntry hook for now but not yet implemented.
 */
 
 import { useState } from "react";
@@ -13,11 +13,11 @@ import {
   FieldDescription,
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import type { AuthMode } from "./AuthCard";
+import type { EntryMode } from "./EntryCard";
 
 //  TODO: move the interfaces to a separate files, to check if there are any duplicates and better control logic
-interface AuthFormProps {
-  mode: AuthMode;
+interface EntryFormProps {
+  mode: EntryMode;
   handleLogin: (username: string, password: string) => Promise<void>;
   handleSignup: (data: {
     name: string;
@@ -86,24 +86,24 @@ const signupFields: FieldConfig[] = [
   },
 ];
 
-const fieldsByMode: Record<AuthMode, FieldConfig[]> = {
+const fieldsByMode: Record<EntryMode, FieldConfig[]> = {
   login: loginFields,
   signup: signupFields,
 };
 
-const submitConfig: Record<AuthMode, { label: string; loadingLabel: string }> =
+const submitConfig: Record<EntryMode, { label: string; loadingLabel: string }> =
   {
     login: { label: "Login", loadingLabel: "Logging in..." },
     signup: { label: "Create Account", loadingLabel: "Creating account..." },
   };
 
-export function AuthForm({
+export function EntryForm({
   mode,
   handleLogin,
   handleSignup,
   error,
   isLoading,
-}: AuthFormProps) {
+}: EntryFormProps) {
   const fields = fieldsByMode[mode];
   const { label, loadingLabel } = submitConfig[mode];
   const [formData, setFormData] = useState<Record<string, string>>(
