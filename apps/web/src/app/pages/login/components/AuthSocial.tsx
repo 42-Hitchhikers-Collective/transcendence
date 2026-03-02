@@ -1,3 +1,10 @@
+/* 
+AuthSocial is a component that renders the social login buttons for Apple and Google.
+They were added from the original shadCN component I imported when starting the project.
+We do not require this feature for the project and can remove them when we decide if we want it ot not.
+So leaving it here fr the moment!
+*/
+
 import { Button } from "@/shared/components/ui/button";
 import {
   Field,

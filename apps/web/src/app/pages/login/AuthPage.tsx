@@ -1,24 +1,39 @@
-// import { useState } from "react";
-import { AuthCard } from "@/app/pages/login/components/AuthCard";
+/* 
+NOTES FOR TEAM: AuthPage is the main page component for the login and signup page. 
+This page is meant to load when the user navigates to our root page and is not authenticated (the logic for that still needs to be implemented).
+AuthPage is responsible for rendering the AuthCard component which appears differently based on what mode is active (login or signup).
+Signin is active by default view (as it's the most common use case) but the user can toggle to signup if they don't have an account yet and viceversa once they have an account.
+*/
 
-// type Mode = "login" | "signup";
+import { useState } from "react";
+import { AuthCard, type AuthMode } from "@/app/pages/login/components/AuthCard";
+import { useAuth } from "./hooks/useAuth";
+import background from "@/assets/backgrounds/bg_center.jpg";
 
 export default function AuthPage() {
-  // const [mode, setMode] = useState<Mode>("login"); // tbd when implementing login/signup toggle functionality
+  const { handleLogin, handleSignup, error, isLoading } = useAuth();
+
+  const [mode, setMode] = useState<AuthMode>("login");
+  const onToggleMode = () =>
+    setMode((mode) => (mode === "login" ? "signup" : "login"));
 
   return (
     <div className="relative min-h-svh overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center bg-black/50"
+        className="absolute inset-0 bg-cover bg-center bg-black/50  blur-xs"
+        style={{ backgroundImage: `url(${background})` }}
       />
       <div className="relative z-10 flex min-h-svh items-center justify-center p-6">
-        <div className="w-full max-w-sm rounded-xl  p-8 "> 
+        <div className="w-full max-w-sm rounded-xl  p-8 ">
           {/* bg-white/90 shadow-xl backdrop-blur-md */}
           <AuthCard
             className="w-full"
-            handleLogin={() => Promise.resolve()}
-            error={null}
-            isLoading={false}
+            mode={mode}
+            onToggleMode={onToggleMode}
+            handleLogin={handleLogin}
+            handleSignup={handleSignup}
+            error={error}
+            isLoading={isLoading}
           />
         </div>
       </div>

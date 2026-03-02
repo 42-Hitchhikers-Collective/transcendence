@@ -13,15 +13,11 @@ import SignupPage from "../pages/signup/SignupPage";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AuthPage />,
+    element: <AuthPage />, // the default page will change  depending on if the user is authenticated or not, but for now we will just load the AuthPage as the default page for simplicity and to test the login/signup flow.
   },
   {
     path: "/profile",
     element: <ProfilePage />,
-  },
-  {
-    path: "/signup",
-    element: <SignupPage />,
   },
   {
     path: "/game", // to be changed to "/game/:roomId" when we implement dynamic routing for different game rooms id https://reactrouter.com/start/data/routing#dynamic-segments
