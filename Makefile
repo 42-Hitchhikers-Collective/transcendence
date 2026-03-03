@@ -35,12 +35,16 @@ certs: dirs
 # Database
 db:
 	$(COMPOSE) up -d db
-	
-reset-db:
+
+db-init:
+	docker compose exec api sh -lc 'npm run prisma:migrate && npm run db:seed'
+		
+db-reset:
 	$(COMPOSE) down -v
 	rm -rf data/postgres/*
 	$(COMPOSE) up -d
-	
+
+# Prisma
 prisma-studio:
 	$(COMPOSE) exec api npx prisma studio --hostname 0.0.0.0 --port 5555
 	
