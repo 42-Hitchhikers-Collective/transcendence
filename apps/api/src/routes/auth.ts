@@ -1,6 +1,5 @@
-import bcrypt from "bcrypt";
-import { newRefreshToken, hashToken, refreshExpiryDate } from "../auth/tokens";
 import { setRefreshCookie, clearRefreshCookie, getRefreshCookie } from "../auth/cookies";
+import * as AuthService from "../services/auth.service";
 
 export async function authRoutes(app: any) {
   app.post(
@@ -22,21 +21,10 @@ export async function authRoutes(app: any) {
     async (request: any, reply: any) => {
       const body = request.body as { email: string; password: string; displayName: string };
 
-      const existing = await app.prisma.user.findUnique({ where: { email: body.email } });
-      if (existing) return reply.code(409).send({ error: "email already in use" });
+      const result = await AuthService.registerUser(app, body);
+      if (!result.ok) return reply.code(409).send({ error: "email already in use" });
 
-      const passwordHash = await bcrypt.hash(body.password, 10);
-
-      const user = await app.prisma.user.create({
-        data: {
-          email: body.email,
-          passwordHash,
-          profile: { create: { displayName: body.displayName } },
-        },
-        select: { id: true, email: true, createdAt: true },
-      });
-
-      return reply.code(201).send({ user });
+      return reply.code(201).send({ user: result.user });
     }
   );
 
@@ -58,29 +46,12 @@ export async function authRoutes(app: any) {
     async (request: any, reply: any) => {
       const body = request.body as { email: string; password: string };
 
-      const user = await app.prisma.user.findUnique({
-        where: { email: body.email },
-        select: { id: true, passwordHash: true },
-      });
+      const result = await AuthService.loginUser(app, body);
+      if (!result.ok) return reply.code(401).send({ error: "invalid credentials" });
 
-      if (!user || !user.passwordHash) return reply.code(401).send({ error: "invalid credentials" });
-
-      const ok = await bcrypt.compare(body.password, user.passwordHash);
-      if (!ok) return reply.code(401).send({ error: "invalid credentials" });
-
-      const accessToken = await reply.jwtSign({ sub: user.id }, { expiresIn: "15m" });
-
-      const refreshRaw = newRefreshToken();
-      await app.prisma.refreshToken.create({
-        data: {
-          userId: user.id,
-          tokenHash: hashToken(refreshRaw),
-          expiresAt: refreshExpiryDate(30),
-        },
-      });
-
-      setRefreshCookie(reply, refreshRaw);
-      return reply.send({ token: accessToken });
+      const token = await reply.jwtSign({ sub: result.userId }, { expiresIn: "15m" });
+      setRefreshCookie(reply, result.refreshRaw);
+      return reply.send({ token });
     }
   );
 
@@ -88,42 +59,20 @@ export async function authRoutes(app: any) {
     const raw = getRefreshCookie(request);
     if (!raw) return reply.code(401).send({ error: "missing_refresh_token" });
 
-    const tokenHash = hashToken(raw);
-
-    const existing = await app.prisma.refreshToken.findUnique({ where: { tokenHash } });
-    if (!existing || existing.revokedAt || existing.expiresAt <= new Date()) {
+    const result = await AuthService.rotateRefreshToken(app, raw);
+    if (!result.ok) {
       clearRefreshCookie(reply);
       return reply.code(401).send({ error: "invalid_refresh_token" });
     }
 
-    await app.prisma.refreshToken.update({
-      where: { tokenHash },
-      data: { revokedAt: new Date() },
-    });
-
-    const newRaw = newRefreshToken();
-    await app.prisma.refreshToken.create({
-      data: {
-        userId: existing.userId,
-        tokenHash: hashToken(newRaw),
-        expiresAt: refreshExpiryDate(30),
-      },
-    });
-
-    setRefreshCookie(reply, newRaw);
-
-    const accessToken = await reply.jwtSign({ sub: existing.userId }, { expiresIn: "15m" });
-    return reply.send({ token: accessToken });
+    const token = await reply.jwtSign({ sub: result.userId }, { expiresIn: "15m" });
+    setRefreshCookie(reply, result.refreshRaw);
+    return reply.send({ token });
   });
 
   app.post("/logout", async (request: any, reply: any) => {
     const raw = getRefreshCookie(request);
-    if (raw) {
-      await app.prisma.refreshToken.updateMany({
-        where: { tokenHash: hashToken(raw), revokedAt: null },
-        data: { revokedAt: new Date() },
-      });
-    }
+    await AuthService.logoutRefreshToken(app, raw);
     clearRefreshCookie(reply);
     return reply.send({ ok: true });
   });
@@ -132,11 +81,7 @@ export async function authRoutes(app: any) {
     const payload = request.user as { sub?: string };
     if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
 
-    await app.prisma.refreshToken.updateMany({
-      where: { userId: payload.sub, revokedAt: null },
-      data: { revokedAt: new Date() },
-    });
-
+    await AuthService.logoutAllRefreshTokens(app, payload.sub);
     clearRefreshCookie(reply);
     return reply.send({ ok: true });
   });
