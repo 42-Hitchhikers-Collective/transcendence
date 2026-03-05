@@ -93,6 +93,9 @@ curl -k -i https://localhost/api/db/ping
 docker compose exec api npm i @fastify/jwt
 docker compose exec api npm i -D  @types/jsonwebtoken
 
+## Cookies --> mainly for JWT token refresh
+docker compose exec api npm i @fastify/cookie
+
 ## Password Hashing: bcrypt
 docker compose exec api npm i bcrypt
 docker compose exec api npm i -D @types/bcrypt
@@ -101,6 +104,9 @@ docker compose exec api npm i -D @types/bcrypt
 docker compose exec api npm i socket.io
 docker compose exec web npm i socket.io-client
 
-## TailwindCSS
+## TailwindCSS (not installed.)
 docker compose exec web npm i -D @tailwindcss/cli
 docker compose exec web npm exec tailwindcss init -p
+
+# SOCKET.IO CLIENT for testing
+docker compose exec api sh -lc 'npm i -D socket.io-client'
