@@ -13,43 +13,59 @@ async function main() {
     return;
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  // 1) Ensure user exists
-  const user = await prisma.user.upsert({
+  // 1) Ensure user exists (create if missing)
+  const existing = await prisma.user.findUnique({
     where: { email },
-    update: {}, // don't overwrite existing fields
-    create: {
-      email,
-      passwordHash,
-      status: "ACTIVE",
-      isEmailVerified: true, // optional
-    },
+    select: { id: true, passwordHash: true },
   });
 
-  // 2) Ensure ADMIN role exists
+  if (!existing) {
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        status: "ACTIVE",
+        isEmailVerified: true,
+      },
+      select: { id: true, email: true },
+    });
+
+    console.log(`Seeded admin user (created): ${user.email}`);
+  } else if (!existing.passwordHash) {
+    // 2) Repair user if it exists but has no password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+      where: { email },
+      data: { passwordHash },
+    });
+
+    console.log(`Seeded admin user (repaired password): ${email}`);
+  } else {
+    console.log(`Seeded admin user (already exists): ${email}`);
+  }
+
+  // 3) Ensure ADMIN role + link (based on your schema)
+  const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } });
+  if (!user) return;
+
   const adminRole = await prisma.role.upsert({
     where: { name: "ADMIN" },
     update: {},
     create: { name: "ADMIN" },
   });
 
-  // 3) Ensure link exists (composite id)
   await prisma.userRole.upsert({
     where: {
-      userId_roleId: {
-        userId: user.id,
-        roleId: adminRole.id,
-      },
+      userId_roleId: { userId: user.id, roleId: adminRole.id },
     },
     update: {},
-    create: {
-      userId: user.id,
-      roleId: adminRole.id,
-    },
+    create: { userId: user.id, roleId: adminRole.id },
   });
 
-  console.log(`Seeded admin user: ${user.email}`);
+  console.log(`Seeded admin role link: ${email} -> ADMIN`);
 }
 
 main()
