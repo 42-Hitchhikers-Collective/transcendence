@@ -4,6 +4,54 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
+async function seedAdminUser(email: string, password: string) {
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // Upsert = idempotent: create if missing, update if exists
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {
+      passwordHash,          // ✅ always enforce expected password
+      status: "ACTIVE",
+      isEmailVerified: true,
+    },
+    create: {
+      email,
+      passwordHash,
+      status: "ACTIVE",
+      isEmailVerified: true,
+    },
+    select: { id: true, email: true },
+  });
+
+  console.log(`Seeded admin user (upserted): ${user.email}`);
+  return user;
+}
+
+async function seedAdminRole() {
+  const role = await prisma.role.upsert({
+    where: { name: "ADMIN" },
+    update: {},
+    create: { name: "ADMIN" },
+    select: { id: true, name: true },
+  });
+
+  console.log(`Seeded role: ${role.name}`);
+  return role;
+}
+
+async function linkUserRole(userId: string, roleId: string, email: string) {
+  await prisma.userRole.upsert({
+    where: {
+      userId_roleId: { userId, roleId },
+    },
+    update: {},
+    create: { userId, roleId },
+  });
+
+  console.log(`Seeded user role link: ${email} -> ADMIN`);
+}
+
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
@@ -13,59 +61,9 @@ async function main() {
     return;
   }
 
-  // 1) Ensure user exists (create if missing)
-  const existing = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true, passwordHash: true },
-  });
-
-  if (!existing) {
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        status: "ACTIVE",
-        isEmailVerified: true,
-      },
-      select: { id: true, email: true },
-    });
-
-    console.log(`Seeded admin user (created): ${user.email}`);
-  } else if (!existing.passwordHash) {
-    // 2) Repair user if it exists but has no password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    await prisma.user.update({
-      where: { email },
-      data: { passwordHash },
-    });
-
-    console.log(`Seeded admin user (repaired password): ${email}`);
-  } else {
-    console.log(`Seeded admin user (already exists): ${email}`);
-  }
-
-  // 3) Ensure ADMIN role + link (based on your schema)
-  const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } });
-  if (!user) return;
-
-  const adminRole = await prisma.role.upsert({
-    where: { name: "ADMIN" },
-    update: {},
-    create: { name: "ADMIN" },
-  });
-
-  await prisma.userRole.upsert({
-    where: {
-      userId_roleId: { userId: user.id, roleId: adminRole.id },
-    },
-    update: {},
-    create: { userId: user.id, roleId: adminRole.id },
-  });
-
-  console.log(`Seeded admin role link: ${email} -> ADMIN`);
+  const user = await seedAdminUser(email, password);
+  const adminRole = await seedAdminRole();
+  await linkUserRole(user.id, adminRole.id, email);
 }
 
 main()

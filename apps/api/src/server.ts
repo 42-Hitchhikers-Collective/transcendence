@@ -4,8 +4,9 @@ import { authPlugin } from "./plugins/auth";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
-// import { setupSocket } from "./socket";
 import { setupSocket } from "./realtime";
+import { securityRoutes } from "./routes/security";
+import { rateLimitPlugin } from "./plugins/rate_limit";
 
 const app = Fastify({ logger: true });
 
@@ -16,6 +17,8 @@ app.setErrorHandler((err, req, reply) => {
 
 app.register(prismaPlugin);
 app.register(authPlugin);
+app.register(securityRoutes, { prefix: "/api/auth" });
+app.register(rateLimitPlugin);
 
 app.get("/api/health", async () => ({ ok: true }));
 

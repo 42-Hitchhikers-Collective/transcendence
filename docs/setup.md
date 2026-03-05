@@ -110,3 +110,6 @@ docker compose exec web npm exec tailwindcss init -p
 
 # SOCKET.IO CLIENT for testing
 docker compose exec api sh -lc 'npm i -D socket.io-client'
+
+# Security Add-On for Fastify
+docker compose exec api sh -lc "npm i @fastify/rate-limit"
