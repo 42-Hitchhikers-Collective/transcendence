@@ -5,9 +5,6 @@ export async function authRoutes(app: any) {
   app.post(
     "/register",
     {
-      // Keep register simple for now: no RL here (avoids test flakiness).
-      // If you want RL later, add:
-      // config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         body: {
           type: "object",
@@ -35,11 +32,7 @@ export async function authRoutes(app: any) {
     "/login",
     {
       config: {
-        // High enough so Phase 1 never trips it, but still protects against abuse.
-        rateLimit: {
-          max: 50,
-          timeWindow: "1 minute",
-        },
+        rateLimit: { max: 50, timeWindow: "1 minute" },
       },
       schema: {
         body: {
@@ -59,7 +52,11 @@ export async function authRoutes(app: any) {
       const result = await AuthService.loginUser(app, body);
       if (!result.ok) return reply.code(401).send({ error: "invalid credentials" });
 
-      const token = await reply.jwtSign({ sub: result.userId }, { expiresIn: "15m" });
+      const token = await reply.jwtSign(
+        { sub: result.userId, roles: result.roles },
+        { expiresIn: "15m" }
+      );
+
       setRefreshCookie(reply, result.refreshRaw);
       return reply.send({ token });
     }
@@ -69,11 +66,7 @@ export async function authRoutes(app: any) {
     "/refresh",
     {
       config: {
-        // Optional: protect refresh from hammering
-        rateLimit: {
-          max: 60,
-          timeWindow: "1 minute",
-        },
+        rateLimit: { max: 60, timeWindow: "1 minute" },
       },
     },
     async (request: any, reply: any) => {
@@ -86,7 +79,11 @@ export async function authRoutes(app: any) {
         return reply.code(401).send({ error: "invalid_refresh_token" });
       }
 
-      const token = await reply.jwtSign({ sub: result.userId }, { expiresIn: "15m" });
+      const token = await reply.jwtSign(
+        { sub: result.userId, roles: result.roles },
+        { expiresIn: "15m" }
+      );
+
       setRefreshCookie(reply, result.refreshRaw);
       return reply.send({ token });
     }
@@ -96,10 +93,7 @@ export async function authRoutes(app: any) {
     "/logout",
     {
       config: {
-        rateLimit: {
-          max: 60,
-          timeWindow: "1 minute",
-        },
+        rateLimit: { max: 60, timeWindow: "1 minute" },
       },
     },
     async (request: any, reply: any) => {
@@ -115,10 +109,7 @@ export async function authRoutes(app: any) {
     {
       preHandler: [app.auth],
       config: {
-        rateLimit: {
-          max: 20,
-          timeWindow: "1 minute",
-        },
+        rateLimit: { max: 20, timeWindow: "1 minute" },
       },
     },
     async (request: any, reply: any) => {

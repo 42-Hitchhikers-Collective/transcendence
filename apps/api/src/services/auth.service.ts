@@ -10,11 +10,18 @@ export async function registerUser(app: any, input: RegisterInput) {
 
   const passwordHash = await bcrypt.hash(input.password, 10);
 
+  const role = await app.prisma.role.findUnique({
+    where: { name: "user" },
+    select: { id: true },
+  });
+  if (!role) return { ok: false as const, error: "roles_not_seeded" as const };
+
   const user = await app.prisma.user.create({
     data: {
       email: input.email,
       passwordHash,
       profile: { create: { displayName: input.displayName } },
+      userRoles: { create: [{ roleId: role.id }] },
     },
     select: { id: true, email: true, createdAt: true },
   });
@@ -25,7 +32,11 @@ export async function registerUser(app: any, input: RegisterInput) {
 export async function loginUser(app: any, input: LoginInput) {
   const user = await app.prisma.user.findUnique({
     where: { email: input.email },
-    select: { id: true, passwordHash: true },
+    select: {
+      id: true,
+      passwordHash: true,
+      userRoles: { select: { role: { select: { name: true } } } },
+    },
   });
 
   if (!user || !user.passwordHash) return { ok: false as const, error: "invalid_credentials" as const };
@@ -42,7 +53,8 @@ export async function loginUser(app: any, input: LoginInput) {
     },
   });
 
-  return { ok: true as const, userId: user.id, refreshRaw };
+  const roles = user.userRoles.map((ur: any) => ur.role.name);
+  return { ok: true as const, userId: user.id, roles, refreshRaw };
 }
 
 export async function rotateRefreshToken(app: any, raw: string) {
@@ -67,7 +79,15 @@ export async function rotateRefreshToken(app: any, raw: string) {
     },
   });
 
-  return { ok: true as const, userId: existing.userId, refreshRaw: newRaw };
+  const user = await app.prisma.user.findUnique({
+    where: { id: existing.userId },
+    select: {
+      userRoles: { select: { role: { select: { name: true } } } },
+    },
+  });
+
+  const roles = user ? user.userRoles.map((ur: any) => ur.role.name) : [];
+  return { ok: true as const, userId: existing.userId, roles, refreshRaw: newRaw };
 }
 
 export async function logoutRefreshToken(app: any, raw: string | null) {

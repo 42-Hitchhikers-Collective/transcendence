@@ -4,14 +4,32 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
+async function seedRoles() {
+  await prisma.role.createMany({
+    data: [{ name: "user" }, { name: "admin" }, { name: "moderator" }],
+    skipDuplicates: true,
+  });
+
+  const admin = await prisma.role.findUnique({
+    where: { name: "admin" },
+    select: { id: true, name: true },
+  });
+
+  if (!admin) {
+    throw new Error("seedRoles: admin role missing after createMany");
+  }
+
+  console.log("Seeded roles: user, admin, moderator");
+  return admin;
+}
+
 async function seedAdminUser(email: string, password: string) {
   const passwordHash = await bcrypt.hash(password, 10);
 
-  // Upsert = idempotent: create if missing, update if exists
   const user = await prisma.user.upsert({
     where: { email },
     update: {
-      passwordHash,          // ✅ always enforce expected password
+      passwordHash,
       status: "ACTIVE",
       isEmailVerified: true,
     },
@@ -28,28 +46,14 @@ async function seedAdminUser(email: string, password: string) {
   return user;
 }
 
-async function seedAdminRole() {
-  const role = await prisma.role.upsert({
-    where: { name: "ADMIN" },
-    update: {},
-    create: { name: "ADMIN" },
-    select: { id: true, name: true },
-  });
-
-  console.log(`Seeded role: ${role.name}`);
-  return role;
-}
-
 async function linkUserRole(userId: string, roleId: string, email: string) {
   await prisma.userRole.upsert({
-    where: {
-      userId_roleId: { userId, roleId },
-    },
+    where: { userId_roleId: { userId, roleId } },
     update: {},
     create: { userId, roleId },
   });
 
-  console.log(`Seeded user role link: ${email} -> ADMIN`);
+  console.log(`Seeded user role link: ${email} -> admin`);
 }
 
 async function main() {
@@ -61,8 +65,8 @@ async function main() {
     return;
   }
 
+  const adminRole = await seedRoles();
   const user = await seedAdminUser(email, password);
-  const adminRole = await seedAdminRole();
   await linkUserRole(user.id, adminRole.id, email);
 }
 
