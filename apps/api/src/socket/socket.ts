@@ -1,3 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   socket.ts                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/03/05 13:14:42 by ilazar            #+#    #+#             */
+/*   Updated: 2026/03/05 13:14:45 by ilazar           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
 import { Server as SocketIOServer } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { registerSocketHandlers } from "./handlers";
