@@ -6,7 +6,7 @@ export class Preloader extends Scene {
   }
 
   preload() {
-    this.load.setPath("../");
+    this.load.setPath("assets/game_assets");
 
     this.load.image("card", "uno_logo.png");
   }
