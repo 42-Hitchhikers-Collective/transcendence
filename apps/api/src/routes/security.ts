@@ -1,7 +1,8 @@
 import * as Security from "../services/security.service";
 
 function exposeDevTokens(): boolean {
-  return (process.env.EXPOSE_DEV_TOKENS || "true") === "true";
+  // return (process.env.EXPOSE_DEV_TOKENS || "true") === "true";
+  return (process.env.EXPOSE_DEV_TOKENS || "false") === "true";
 }
 
 export async function securityRoutes(app: any) {

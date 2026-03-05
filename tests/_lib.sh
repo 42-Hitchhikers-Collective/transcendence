@@ -1,20 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ---- base urls
 BASE_URL="${BASE_URL:-https://localhost}"
 API="${BASE_URL}/api"
 
-# ---- user for "basic user flow"
 TEST_EMAIL="${TEST_EMAIL:-test@example.com}"
 TEST_PASSWORD="${TEST_PASSWORD:-test1234}"
 TEST_DISPLAY_NAME="${TEST_DISPLAY_NAME:-Test}"
 
-# ---- admin for refresh-cookie and socket tests
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.com}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-ChangeMe123!}"
 
-# ---- socket test dir (for socket.io-client install)
 SOCKET_TEST_DIR="${SOCKET_TEST_DIR:-$(pwd)/.socketio-test}"
 
 say() { printf "\n==> %s\n" "$*"; }

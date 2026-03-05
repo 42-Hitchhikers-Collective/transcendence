@@ -5,6 +5,9 @@ export async function authRoutes(app: any) {
   app.post(
     "/register",
     {
+      // Keep register simple for now: no RL here (avoids test flakiness).
+      // If you want RL later, add:
+      // config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
       schema: {
         body: {
           type: "object",
@@ -31,6 +34,13 @@ export async function authRoutes(app: any) {
   app.post(
     "/login",
     {
+      config: {
+        // High enough so Phase 1 never trips it, but still protects against abuse.
+        rateLimit: {
+          max: 50,
+          timeWindow: "1 minute",
+        },
+      },
       schema: {
         body: {
           type: "object",
@@ -55,34 +65,69 @@ export async function authRoutes(app: any) {
     }
   );
 
-  app.post("/refresh", async (request: any, reply: any) => {
-    const raw = getRefreshCookie(request);
-    if (!raw) return reply.code(401).send({ error: "missing_refresh_token" });
+  app.post(
+    "/refresh",
+    {
+      config: {
+        // Optional: protect refresh from hammering
+        rateLimit: {
+          max: 60,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    async (request: any, reply: any) => {
+      const raw = getRefreshCookie(request);
+      if (!raw) return reply.code(401).send({ error: "missing_refresh_token" });
 
-    const result = await AuthService.rotateRefreshToken(app, raw);
-    if (!result.ok) {
-      clearRefreshCookie(reply);
-      return reply.code(401).send({ error: "invalid_refresh_token" });
+      const result = await AuthService.rotateRefreshToken(app, raw);
+      if (!result.ok) {
+        clearRefreshCookie(reply);
+        return reply.code(401).send({ error: "invalid_refresh_token" });
+      }
+
+      const token = await reply.jwtSign({ sub: result.userId }, { expiresIn: "15m" });
+      setRefreshCookie(reply, result.refreshRaw);
+      return reply.send({ token });
     }
+  );
 
-    const token = await reply.jwtSign({ sub: result.userId }, { expiresIn: "15m" });
-    setRefreshCookie(reply, result.refreshRaw);
-    return reply.send({ token });
-  });
+  app.post(
+    "/logout",
+    {
+      config: {
+        rateLimit: {
+          max: 60,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    async (request: any, reply: any) => {
+      const raw = getRefreshCookie(request);
+      await AuthService.logoutRefreshToken(app, raw);
+      clearRefreshCookie(reply);
+      return reply.send({ ok: true });
+    }
+  );
 
-  app.post("/logout", async (request: any, reply: any) => {
-    const raw = getRefreshCookie(request);
-    await AuthService.logoutRefreshToken(app, raw);
-    clearRefreshCookie(reply);
-    return reply.send({ ok: true });
-  });
+  app.post(
+    "/logout-all",
+    {
+      preHandler: [app.auth],
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: "1 minute",
+        },
+      },
+    },
+    async (request: any, reply: any) => {
+      const payload = request.user as { sub?: string };
+      if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
 
-  app.post("/logout-all", { preHandler: [app.auth] }, async (request: any, reply: any) => {
-    const payload = request.user as { sub?: string };
-    if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
-
-    await AuthService.logoutAllRefreshTokens(app, payload.sub);
-    clearRefreshCookie(reply);
-    return reply.send({ ok: true });
-  });
+      await AuthService.logoutAllRefreshTokens(app, payload.sub);
+      clearRefreshCookie(reply);
+      return reply.send({ ok: true });
+    }
+  );
 }

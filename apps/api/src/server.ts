@@ -8,7 +8,8 @@ import { setupSocket } from "./realtime";
 import { securityRoutes } from "./routes/security";
 import { rateLimitPlugin } from "./plugins/rate_limit";
 
-const app = Fastify({ logger: true });
+// const app = Fastify({ logger: true });
+const app = Fastify({ logger: true, trustProxy: true })
 
 app.setErrorHandler((err, req, reply) => {
   req.log.error(err);
@@ -17,8 +18,8 @@ app.setErrorHandler((err, req, reply) => {
 
 app.register(prismaPlugin);
 app.register(authPlugin);
-app.register(securityRoutes, { prefix: "/api/auth" });
 app.register(rateLimitPlugin);
+app.register(securityRoutes, { prefix: "/api/auth" });
 
 app.get("/api/health", async () => ({ ok: true }));
 
