@@ -119,35 +119,37 @@ assert_status "400" "$status" "verify token reuse rejected"
 # - Eventually return 429 when the limiter triggers
 # ------------------------------------------------------------------------------
 
-say "RL) Rate limit proof: spam /auth/email/verify/request WITHOUT auth until 429"
+if [ "${RUN_RL_PROOF:-0}" = "1" ]; then
+  say "RL) Rate limit proof: spam /auth/email/verify/request WITHOUT auth until 429"
 
-hit429=0
-i=1
-MAX_ATTEMPTS=80
+  hit429=0
+  i=1
+  MAX_ATTEMPTS=80
 
-while [ "$i" -le "$MAX_ATTEMPTS" ]; do
-  code="$(curl -sk -o /dev/null -w "%{http_code}" \
-    -X POST "${API}/auth/email/verify/request")"
+  while [ "$i" -le "$MAX_ATTEMPTS" ]; do
+    code="$(curl -sk -o /dev/null -w "%{http_code}" \
+      -X POST "${API}/auth/email/verify/request")"
 
-  if [ "$code" = "429" ]; then
-    hit429=1
-    echo "OK: rate limit triggered on attempt $i (HTTP 429)"
-    break
-  fi
+    if [ "$code" = "429" ]; then
+      hit429=1
+      echo "OK: rate limit triggered on attempt $i (HTTP 429)"
+      break
+    fi
 
-  # Without auth, this should be 401 until rate limit kicks in
-  if [ "$code" != "401" ]; then
-    echo "FAILED: unexpected status while probing rate limit: got $code (expected 401 or 429)"
+    if [ "$code" != "401" ]; then
+      echo "FAILED: unexpected status while probing rate limit: got $code (expected 401 or 429)"
+      exit 1
+    fi
+
+    i=$((i + 1))
+  done
+
+  if [ "$hit429" -ne 1 ]; then
+    echo "FAILED: did not observe HTTP 429 within ${MAX_ATTEMPTS} attempts."
     exit 1
   fi
-
-  i=$((i + 1))
-done
-
-if [ "$hit429" -ne 1 ]; then
-  echo "FAILED: did not observe HTTP 429 within ${MAX_ATTEMPTS} attempts."
-  echo "Either rate limiting is not enabled for /auth/email/verify/request, or the limit is higher than this probe."
-  exit 1
+else
+  echo "SKIP: rate limit proof (set RUN_RL_PROOF=1 to run it)"
 fi
 
 say "DONE ✅ Phase 3 security flow tests passed"

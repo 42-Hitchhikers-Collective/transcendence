@@ -60,8 +60,6 @@ Ok to proceed? (y) y
 ◇  Install with npm and start now?
 │  Yes
 │
-◇  Scaffolding project in /home/sevo/Desktop/transcendence/apps/web...
-│
 ◇  Installing dependencies with npm...
 
 added 175 packages, and audited 176 packages in 11s

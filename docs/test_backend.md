@@ -41,7 +41,7 @@ curl -k -i https://localhost/api/profiles/me \
   -X PATCH \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"displayName":"Sevo","bio":"hello"}'
+  -d '{"displayName":"Bubu","bio":"hello"}'
   
 # Prisma Studio (Open Port on 5555) [Web UI for DB Tables]
 http://localhost:5555
@@ -65,7 +65,7 @@ curl -sk -i https://localhost/api/profiles/me \
   -X PATCH \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"displayName":"Sevo","bio":"hello"}'
+  -d '{"displayName":"Bubu","bio":"hello"}'
   
 # Cookies
 ## login: saves refresh cookie + prints access token

@@ -63,7 +63,7 @@ assert_status "401" "$status" "/profiles/me is protected"
 say "1.6) /profiles/me with token should be 200"
 status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"displayName":"Sevo","bio":"hello"}')"
+  -d '{"displayName":"Bubu","bio":"hello"}')"
 assert_status "200" "$status" "profile update works with Bearer token"
 
 # ---- refresh cookie flow (admin user)
