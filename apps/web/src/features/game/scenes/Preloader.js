@@ -6,9 +6,9 @@ export class Preloader extends Scene {
   }
 
   preload() {
-    this.load.setPath("assets/game_assets");
+    this.load.setPath("assets/game_assets/cards_individual");
 
-    this.load.image("card", "uno_logo.png");
+    this.load.image("card", "blue/0_blue.png");
   }
 
   create() {
