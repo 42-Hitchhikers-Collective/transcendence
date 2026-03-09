@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Phaser from "phaser";
+import Phaser, { Physics } from "phaser";
 import { Boot } from "./scenes/Boot.js";
 import { Preloader } from "./scenes/Preloader";
 import { Game } from "./scenes/Game";
@@ -18,6 +18,7 @@ export default function PhaserGame() {
 
     const game = new Phaser.Game(config);
 
+    
     return () => {
       game.destroy(true);
     };
