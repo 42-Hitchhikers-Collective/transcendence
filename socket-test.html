@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+
+<body>
+
+<h1>Socket.IO Room Test</h1>
+
+<button onclick="createRoom()">Create Room</button>
+
+<input id="roomInput" placeholder="Room ID">
+<button onclick="joinRoom()">Join Room</button>
+
+<button onclick="leaveRoom()">Leave Room</button>
+<button onclick="debug()">Debug</button>
+
+<script>
+const socket = io("http://localhost:3000", {
+  path: "/socket.io"
+});
+
+socket.on("connect", () => {
+  console.log("Connected:", socket.id);
+});
+
+socket.on("room_created", (data) => {
+  console.log("Room created:", data);
+  //alert("Room created: " + data.roomId);
+});
+
+socket.on("room_joined", (data) => {
+  console.log("Joined room:", data);
+});
+
+socket.on("room_state", (data) => {
+  console.log("Room state:", data);
+});
+
+socket.on("error", (data) => {
+  console.log("Error:", data);
+});
+
+function createRoom() {
+  socket.emit("create_room");
+}
+
+function leaveRoom() {
+    const roomId = document.getElementById("roomInput").value;
+    socket.emit("leave_room", { roomId });
+}
+
+function debug() {
+  socket.emit("debug");
+}
+
+function joinRoom() {
+  const roomId = document.getElementById("roomInput").value;
+  socket.emit("join_room", { roomId });
+}
+</script>
+
+</body>
+</html>
