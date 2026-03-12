@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import Phaser, { Physics } from "phaser";
 import { Boot } from "./scenes/Boot.js";
-import { Preloader } from "./scenes/Preloader";
-import { Game } from "./scenes/Game";
+import { Preloader } from "./scenes/Preloader.ts";
+import { Game } from "./scenes/Game.ts";
 
 export default function PhaserGame() {
   const gameRef = useRef(null);
