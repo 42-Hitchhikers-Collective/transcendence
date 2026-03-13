@@ -4,6 +4,10 @@ It provides two functions, handleLogin and handleSignup these functions are call
 what mode us active (login or signup).
 Currently these functions are not implemented but am planning to test them out with mock data to see if they work.
 
+Backend API routes to send requests:
+- app.get("/me") in users.ts is the API route that should be used from handleLogin() ?
+- also auth.ts has the /login as a post route, but not sure this is correct as i would assume login should use get request. 
+
 TODO: This might perhaps need to go into features folder, but will better check how the logic is shared across the app before deciding on that.
 */
 
