@@ -1,32 +1,48 @@
 import Fastify from "fastify";
-import { Server as SocketIOServer } from "socket.io";
-import { PrismaClient } from "@prisma/client";
+import { prismaPlugin } from "./plugins/prisma";
+import { authPlugin } from "./plugins/auth";
+import { rateLimitPlugin } from "./plugins/rate_limit";
+import rolesPlugin from "./plugins/roles";
 
-const prisma = new PrismaClient();
-const app = Fastify({ logger: true });
+import { authRoutes } from "./routes/auth";
+import { userRoutes } from "./routes/users";
+import { profileRoutes } from "./routes/profiles";
+import { securityRoutes } from "./routes/security";
+import { adminRoutes } from "./routes/admin";
+import { setupSocket } from "./realtime";
 
-app.get("/health", async () => ({ ok: true }));
+const app = Fastify({ logger: true, trustProxy: true });
 
-app.get("/users", async () => {
-  const users = await prisma.user.findMany();
-  return { users };
+app.setErrorHandler((err, req, reply) => {
+  req.log.error(err);
+  reply.code((err as any).statusCode || 500).send(err);
+});
+
+app.get("/api/health", async () => ({ ok: true }));
+
+app.get("/api/db/ping", async () => {
+  const r = await app.prisma.$queryRaw`SELECT 1 as ok`;
+  return { ok: true, r };
 });
 
 const port = Number(process.env.PORT || "3000");
 
 const start = async () => {
+  await app.register(prismaPlugin);
+  await app.register(authPlugin);
+  await app.register(rateLimitPlugin);
+  await app.register(rolesPlugin);
+
+  await app.register(securityRoutes, { prefix: "/api/auth" });
+  await app.register(authRoutes, { prefix: "/api/auth" });
+
+  await app.register(userRoutes, { prefix: "/api/users" });
+  await app.register(profileRoutes, { prefix: "/api/profiles" });
+
+  await app.register(adminRoutes, { prefix: "/api" });
+
   await app.listen({ port, host: "0.0.0.0" });
-
-  const io = new SocketIOServer(app.server, {
-    path: "/socket.io",
-    cors: { origin: true }
-  });
-
-  io.on("connection", (socket) => {
-    app.log.info(`socket connected: ${socket.id}`);
-    socket.emit("hello", { message: "Hello from Socket.IO" });
-    socket.on("ping", () => socket.emit("pong"));
-  });
+  setupSocket(app);
 };
 
 start().catch((err) => {
