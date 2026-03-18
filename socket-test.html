@@ -10,11 +10,14 @@
 <h1>Socket.IO Room Test</h1>
 
 <button onclick="createRoom()">Create Room</button>
-
 <input id="roomInput" placeholder="Room ID">
+<br/>
 <button onclick="joinRoom()">Join Room</button>
 
 <button onclick="leaveRoom()">Leave Room</button>
+<br/>
+<button onclick="startGame()">Start Game</button>
+<br/>
 <button onclick="debug()">Debug</button>
 
 <script>
@@ -28,7 +31,6 @@ socket.on("connect", () => {
 
 socket.on("room_created", (data) => {
   console.log("Room created:", data);
-  //alert("Room created: " + data.roomId);
 });
 
 socket.on("room_joined", (data) => {
@@ -49,6 +51,10 @@ function createRoom() {
 
 function leaveRoom() {
     socket.emit("leave_room");
+}
+
+function startGame() {
+    socket.emit("start_game");
 }
 
 function debug() {
