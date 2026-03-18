@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/09 17:41:20 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/03/18 21:26:37 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,67 +23,74 @@ export function registerSocketHandlers(
  // Broadcast room state to everyone except the sender
   function broadcastRoomState(socket: Socket, roomId: string) {
   const room = gameManager.getRoom(roomId);
-  if (!room || roomId == null) return;
+  if (!room) return;
   socket.nsp.to(roomId).emit("room_state", room);
   gameManager.debugState();
 }
 
   // Disconnect and leave room if in any
   socket.on("disconnect", () => {
-  const roomId = gameManager.removePlayer(socket.id);
-  if (roomId) {
-    socket.leave(roomId);
-    broadcastRoomState(socket, roomId);
+  const res = gameManager.leaveRoom(socket.id);
+  if (res.success) {
+    socket.leave(res.roomId);
+    broadcastRoomState(socket, res.roomId);
   }
   app.log.info(`socket disconnected: ${socket.id}`);
 });
-
-    
-    
     
   // --- Room Events ---
+  
   // Create a new room
   socket.on("create_room", () => {
-    const room = gameManager.createRoom(socket.id);
+    const room = gameManager.createRoom();
     if (room) {
       socket.join(room.id);
-      gameManager.addToRoomMap(room.id, socket.id);
-      socket.emit("room_created", { roomId: room.id, maxPlayers: room.maxPlayers })
+      gameManager.joinRoom(room.id, socket.id);
+      socket.emit("room_created", { roomId: room.id })
     }
     
   });
 
   // Join an existing room
   socket.on("join_room", ({ roomId }) => {
-    const room = gameManager.getRoom(roomId);
-    if (!room) {
-      socket.emit("error", { message: "Room not found" });
+    const res = gameManager.joinRoom(roomId, socket.id);
+    if (!res.success) {
+      socket.emit("error", { message: res.error });
       return;
     }
-    if (room.players.length >= room.maxPlayers) {
-      socket.emit("error", { message: "The room is full" });
-      return;
-    }
-    
-    gameManager.addPlayerToRoom(roomId, socket.id);
     socket.join(roomId);
     socket.emit("room_joined", { roomId });
-    //broadcast to all clients
     broadcastRoomState(socket, roomId);
   });
 
   
   // Leave room
-  socket.on("leave_room", ({ roomId }) => {
-    const room = gameManager.getRoom(roomId);
-    if (!room) {
-      socket.emit("error", { message: "Room not found" });
+  socket.on("leave_room", () => {
+    const res = gameManager.leaveRoom(socket.id);
+    if (!res.success) {
+      socket.emit("error", { message: res.error });
       return;
     }
-    gameManager.removePlayer(socket.id);
-    socket.leave(roomId);
-    broadcastRoomState(socket, roomId);
+    socket.leave(res.roomId);
+    broadcastRoomState(socket, res.roomId);
 });
+
+
+// ---> Game Events ---
+
+// Start the game
+socket.on("start_game", () => {
+  const res = gameManager.startGame(socket.id);
+  if (!res.success) {
+    socket.emit("error", { message: res.error });
+    return;
+  }
+  const roomId = res.room.id;
+  broadcastRoomState(socket, roomId);
+});
+
+
+// ---> DEBUG <---
 
 socket.on("debug", () => {
   gameManager.debugState();

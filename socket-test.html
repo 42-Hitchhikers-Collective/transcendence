@@ -48,8 +48,7 @@ function createRoom() {
 }
 
 function leaveRoom() {
-    const roomId = document.getElementById("roomInput").value;
-    socket.emit("leave_room", { roomId });
+    socket.emit("leave_room");
 }
 
 function debug() {
