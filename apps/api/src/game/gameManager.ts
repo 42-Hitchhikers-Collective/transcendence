@@ -6,13 +6,13 @@
 /*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/18 21:20:47 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/03/19 16:30:33 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 //will manage all active rooms -creating rooms, players joining/leaving
 
-import { Player, Room, roomResult, roomIdResult } from "./types";
+import { Player, Room, roomResult, roomIdResult, gameInstance } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
 
 export class GameManager {
@@ -41,6 +41,9 @@ export class GameManager {
     if (!room) {
       return { success: false, error: "Room not found" };
     }
+    if (this.getPlayerRoomId(playerId) === roomId) { // Already in same room
+      return { success: true, room: room };
+    }
     if (room.players.length >= MAX_PLAYERS_PER_ROOM) {
       return { success: false, error: "Room is full" };
     }
@@ -53,7 +56,7 @@ export class GameManager {
     return { success: true, room: room };;
   }
 
-    // Player leaves room or disconnects. Removes from room. returns roomId
+  // Player leaves room or disconnects
   // Removes player from it's room object, from PlayerRoomList, deletes room if empty
   leaveRoom(playerId: string): roomIdResult {
     const currentRoomId = this.getPlayerRoomId(playerId);
@@ -87,7 +90,46 @@ export class GameManager {
     if (room.players.length < 2)
       return { success: false, error: "Not enough players" };
     room.state = "playing";
+    // 2. Initialize the "Game Slot"
+    // When Gabriel finishes, you'll do: room.game = new GabrielGame(room.players);
+    // For now, we just acknowledge the 'game' property exists in the Room type.
     return { success: true, room: room };
+  }
+
+
+  // Play a card
+  playCard(playerId: string, cardIndex: number): roomIdResult {
+    const roomId = this.getPlayerRoomId(playerId);
+    if (!roomId)
+      return {success: false, error: "Player is not in room"};
+    const room = this.getRoom(roomId);
+    if (!room || room.state !== "playing" || !room.game)
+      return {success: false, error: "No active game found"};
+    
+    // call the method defined in the Interface!
+    const res = room.game.playCard(playerId, cardIndex);
+    
+    if (!res.success)
+      return {success: false, error: res.error};
+    return {success: true, roomId: roomId};
+  };
+  
+  
+  // Draw a card
+  drawCard(playerId: string): roomIdResult {
+    const roomId = this.getPlayerRoomId(playerId);
+    if (!roomId)
+      return {success: false, error: "Player is not in room"};
+    const room = this.getRoom(roomId);
+    if (!room || room.state !== "playing" || !room.game)
+      return {success: false, error: "No active game found"};
+    
+    // call the method defined in the Interface!
+    const res = room.game.drawCard(playerId);
+    
+    if (!res.success)
+      return {success: false, error: res.error};
+    return {success: true, roomId: roomId};
   }
   
   // --- PRIVATE ---
@@ -108,19 +150,18 @@ export class GameManager {
   // Generate a unique roomId
   private generateRoomId(): string {
     let roomId;
-
     do {
       roomId = "room_" + Math.random().toString(36).substring(2, 6);
     } while (this.roomList.has(roomId));
     return roomId;
   }
   
-  
   //lookup in playerRoom map after a player. returns roomId
-  getPlayerRoomId(playerId: string): string | null {
+  private getPlayerRoomId(playerId: string): string | null {
     return this.playerRoomList.get(playerId) ?? null;
   }
   
+
 //--- Getters ---
 
   getRoom(roomId: string): Room | null  {

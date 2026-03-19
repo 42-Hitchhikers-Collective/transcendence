@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/18 21:26:37 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/03/19 16:40:40 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { FastifyInstance } from "fastify";
 import { Socket } from "socket.io";
-import { gameManager } from "../../game";
+import { gameManager, utils } from "../../game";
 
 export function registerSocketHandlers(
   app: FastifyInstance,
@@ -24,7 +24,11 @@ export function registerSocketHandlers(
   function broadcastRoomState(socket: Socket, roomId: string) {
   const room = gameManager.getRoom(roomId);
   if (!room) return;
-  socket.nsp.to(roomId).emit("room_state", room);
+  room.players.forEach((player) => {
+    const dataToSend = utils.getSanitizedRoom(room, player.id); 
+    
+    socket.nsp.to(player.id).emit("room_state", dataToSend);
+  });
   gameManager.debugState();
 }
 
@@ -89,6 +93,24 @@ socket.on("start_game", () => {
   broadcastRoomState(socket, roomId);
 });
 
+
+// Play a card
+socket.on("play_card", ({ cardIndex }) => {
+  const res = gameManager.playCard(socket.id, cardIndex);
+  if (res.success)
+      broadcastRoomState(socket, res.roomId); 
+  else
+      socket.emit("error", { message: res.error });
+});
+
+// Draw a card
+socket.on("draw_card", () => {
+  const res = gameManager.drawCard(socket.id);
+  if (res.success)
+      broadcastRoomState(socket, res.roomId); 
+  else
+      socket.emit("error", { message: res.error });
+});
 
 // ---> DEBUG <---
 
