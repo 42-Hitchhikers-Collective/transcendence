@@ -1,19 +1,27 @@
 import { Scene } from "phaser";
-import { Card } from "../models/Card";
+import { Game } from "../models/Game";
+import { Player } from "../models/Player";
 
-export class Game extends Scene {
-  deck: Card[] = [];
+export class GameScene extends Scene {
+  CurrentGame: Game;
+  players: Player[] = [];
+  
   pile!: Phaser.GameObjects.Zone;
 
   constructor() {
-    super("Game");
+    super("Game"); // excecutes the construct scene from Phaser
+
+    this.xdel_add_player();
+
+    this.CurrentGame = new Game(1, this.players);
   }
 
   create() {
-    this.createDeck();
 
     // Crear pile
-    this.pile = this.add.zone(600, 300, 120, 180).setRectangleDropZone(120, 180);
+    this.pile = this.add
+      .zone(600, 300, 120, 180)
+      .setRectangleDropZone(120, 180);
 
     const pileGraphics = this.add.graphics();
     pileGraphics.lineStyle(2, 0xffffff);
@@ -26,11 +34,11 @@ export class Game extends Scene {
         pointer: Phaser.Input.Pointer,
         gameObject: Phaser.GameObjects.Image,
         dragX: number,
-        dragY: number
+        dragY: number,
       ) => {
         gameObject.x = dragX;
         gameObject.y = dragY;
-      }
+      },
     );
 
     this.input.on(
@@ -38,7 +46,7 @@ export class Game extends Scene {
       (
         pointer: Phaser.Input.Pointer,
         gameObject: Phaser.GameObjects.Image,
-        dropZone: Phaser.GameObjects.Zone
+        dropZone: Phaser.GameObjects.Zone,
       ) => {
         gameObject.x = dropZone.x;
         gameObject.y = dropZone.y;
@@ -47,7 +55,7 @@ export class Game extends Scene {
 
         // aparece nueva carta
         this.spawnCard();
-      }
+      },
     );
 
     // primera carta
@@ -55,7 +63,7 @@ export class Game extends Scene {
   }
 
   spawnCard() {
-    const card = this.deck.pop();
+    const card = this.CurrentGame.table.drawPile.pop();
     if (!card) return;
 
     console.log("Carta cargada:", card.getKey());
@@ -73,28 +81,21 @@ export class Game extends Scene {
       (
         pointer: Phaser.Input.Pointer,
         gameObject: Phaser.GameObjects.Image,
-        dropped: boolean
+        dropped: boolean,
       ) => {
         if (!dropped) {
           gameObject.x = startX;
           gameObject.y = startY;
         }
-      }
+      },
     );
   }
 
-  private createDeck() {
-    let id = 0;
-
-    const colors = ["red", "blue", "green", "yellow"] as const;
-    const numbers = [0,1,2,3,4,5,6,7,8,9] as const;
-
-    for (const color of colors) {
-      for (const value of numbers) {
-        this.deck.push(new Card(id++, color, value));
-      }
-    }
-
-    Phaser.Utils.Array.Shuffle(this.deck);
+  xdel_add_player()
+  {
+    let player_a = new Player(1, "Beta");
+    this.players.push(player_a);
+    let player_b = new Player(2, "Gamma");
+    this.players.push(player_b);
   }
 }

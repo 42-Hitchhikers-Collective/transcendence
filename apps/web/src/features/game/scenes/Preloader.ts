@@ -37,6 +37,5 @@ export class Preloader extends Scene {
     // cartas globales
     //this.load.image("wild", "assets/cards/wild.png");
     this.load.image("back", "assets/game_assets/cards/back/card_back.png");
-    
   }
 }
