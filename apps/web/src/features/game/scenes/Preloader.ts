@@ -14,26 +14,28 @@ export class Preloader extends Scene {
   }
 
   private loadCardAssets() {
-    const colors = ["red", "blue", "green", "yellow", "wild"];
-    const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "skip", "reverse", "2plus"];
-    const specials = ["wild"];
-    const numbers = ["4plus", "color"];
+    const colors = ["red", "blue", "green", "yellow"];
 
+    const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "skip", "reverse", "2plus"];
+
+    // cartas normales
     for (const color of colors) {
-      for (const value of numbers) {
+      for (const value of values) {
         const key = `${value}_${color}`;
+
         this.load.image(key, `assets/game_assets/cards/${color}/${key}.png`);
       }
-
-      // cartas especiales (skip, reverse, draw2)
-      //for (const special of specials) {
-      //  const key = `${color}_${special}`;
-      //  this.load.image(key, `assets/cards/${key}.png`);
-      //}
     }
 
-    // cartas globales
-    //this.load.image("wild", "assets/cards/wild.png");
+    // cartas wild
+    this.load.image("4_plus_wild", "assets/game_assets/cards/wild/4plus.png");
+
+    this.load.image(
+      "color_wild",
+      "assets/game_assets/cards/wild/wild_card.png",
+    );
+
+    // carta trasera
     this.load.image("back", "assets/game_assets/cards/back/card_back.png");
   }
 }
