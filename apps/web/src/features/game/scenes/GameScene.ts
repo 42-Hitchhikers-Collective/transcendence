@@ -1,12 +1,11 @@
 import { Scene } from "phaser";
 import { Game } from "../models/Game";
+import { Card } from "../models/Card";
 import { Player } from "../models/Player";
-import type { C } from "node_modules/react-router/dist/development/index-react-server-client-EzWJGpN_.d.mts";
 
 export class GameScene extends Scene {
   CurrentGame: Game;
   players: Player[] = [];
-
   pile!: Phaser.GameObjects.Zone;
 
   constructor() {
@@ -19,13 +18,14 @@ export class GameScene extends Scene {
 
   create() {
     // Crear pile
+    let cardSprite;
     this.pile = this.add
-      .zone(540, 210, 120, 180)
-      .setRectangleDropZone(300, 180);
+      .zone(550, 375, 100, 150)
+      .setRectangleDropZone(100, 150);
 
     const pileGraphics = this.add.graphics();
     pileGraphics.lineStyle(2, 0xffffff);
-    pileGraphics.strokeRect(540, 210, 120, 180);
+    pileGraphics.strokeRect(500, 300, 50, 75);
 
     // eventos globales
     this.input.on(
@@ -48,13 +48,39 @@ export class GameScene extends Scene {
         gameObject: Phaser.GameObjects.Image,
         dropZone: Phaser.GameObjects.Zone,
       ) => {
-        gameObject.x = dropZone.x;
-        gameObject.y = dropZone.y;
+        const card = gameObject.getData("card") as Card;
 
-        gameObject.disableInteractive();
+        const topCard =
+          this.CurrentGame.table.discardPile[
+            this.CurrentGame.table.discardPile.length - 1
+          ];
 
-        // aparece nueva carta
-        this.spawnCard();
+        if (
+          !topCard ||
+          card.color === topCard.color ||
+          card.value === topCard.value
+        ) {
+          console.log("Valid Card:", card.color, card.value);
+
+          this.CurrentGame.table.discardPile.push(card);
+          this.CurrentGame.table.currentColor = card.color;
+
+          cardSprite = this.add
+          .image(550, 330, card.getKey())
+          .setScale(0.3);
+
+          gameObject.destroy();
+
+        } else {
+          console.log("Invalid Card");
+
+          const startX = gameObject.getData("startX");
+          const startY = gameObject.getData("startY");
+
+
+          gameObject.x = startX;
+          gameObject.y = startY;
+        }
       },
     );
 
@@ -66,19 +92,21 @@ export class GameScene extends Scene {
       for (const card of user.hand) {
         const cardSprite = this.add
           .image(startX, startY, card.getKey())
-          .setScale(.3);
+          .setScale(0.3);
 
         cardSprite.setInteractive();
         this.input.setDraggable(cardSprite);
-        console.log("Carta cargada:", card.getKey());
 
-        startX += 70; // siguiente carta a la derecha
+        cardSprite.setData("card", card);
+        cardSprite.setData("player", user);
+        console.log("Loaded Card:", card.getKey());
+
+        startX += 70;
       }
 
-      startY += 120; // siguiente jugador más abajo
+      startY += 120;
     }
     // primera carta
-    this.spawnCard();
   }
 
   spawnCard() {
@@ -88,7 +116,6 @@ export class GameScene extends Scene {
     console.log("Carta cargada:", card.getKey());
 
     const cardSprite = this.add.image(500, 400, card.getKey()).setScale(1);
-
 
     cardSprite.setInteractive();
     this.input.setDraggable(cardSprite);
