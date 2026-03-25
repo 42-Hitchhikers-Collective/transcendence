@@ -1,11 +1,12 @@
 import { Scene } from "phaser";
 import { Game } from "../models/Game";
 import { Player } from "../models/Player";
+import type { C } from "node_modules/react-router/dist/development/index-react-server-client-EzWJGpN_.d.mts";
 
 export class GameScene extends Scene {
   CurrentGame: Game;
   players: Player[] = [];
-  
+
   pile!: Phaser.GameObjects.Zone;
 
   constructor() {
@@ -17,11 +18,10 @@ export class GameScene extends Scene {
   }
 
   create() {
-
     // Crear pile
     this.pile = this.add
-      .zone(600, 300, 120, 180)
-      .setRectangleDropZone(120, 180);
+      .zone(540, 210, 120, 180)
+      .setRectangleDropZone(300, 180);
 
     const pileGraphics = this.add.graphics();
     pileGraphics.lineStyle(2, 0xffffff);
@@ -58,6 +58,25 @@ export class GameScene extends Scene {
       },
     );
 
+    let startY = 75;
+
+    for (const user of this.CurrentGame.players) {
+      let startX = 75;
+
+      for (const card of user.hand) {
+        const cardSprite = this.add
+          .image(startX, startY, card.getKey())
+          .setScale(.3);
+
+        cardSprite.setInteractive();
+        this.input.setDraggable(cardSprite);
+        console.log("Carta cargada:", card.getKey());
+
+        startX += 70; // siguiente carta a la derecha
+      }
+
+      startY += 120; // siguiente jugador más abajo
+    }
     // primera carta
     this.spawnCard();
   }
@@ -68,7 +87,8 @@ export class GameScene extends Scene {
 
     console.log("Carta cargada:", card.getKey());
 
-    const cardSprite = this.add.image(400, 300, card.getKey()).setScale(1);
+    const cardSprite = this.add.image(500, 400, card.getKey()).setScale(1);
+
 
     cardSprite.setInteractive();
     this.input.setDraggable(cardSprite);
@@ -91,8 +111,7 @@ export class GameScene extends Scene {
     );
   }
 
-  xdel_add_player()
-  {
+  xdel_add_player() {
     let player_a = new Player(1, "Beta");
     this.players.push(player_a);
     let player_b = new Player(2, "Gamma");
