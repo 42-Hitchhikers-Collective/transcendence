@@ -1,20 +1,17 @@
-import { mockProfiles } from "@/features/profile/mockData/mockProfiles";
-
 import { ProfileCard } from "./components/ProfileCard";
-import { JoinGameCard } from "./components/JoinGameCard";
-import { GameHistoryCard } from "./components/GameHistoryCard";
+import { JoinGameCard } from "./components/PlayGame";
+import { GameHistoryCard } from "./components/HistoryList";
 
 function ProfilePage() {
-  const profile = mockProfiles[0];
-
-  // ADD:  https://www.shadcnui-blocks.com/blocks/categories/navbar
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <ProfileCard />
-        <div className="flex flex-col gap-6">
-          <JoinGameCard />
+    <div className="space-y-6">
+      <ProfileCard />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+        <div className="order-2 lg:order-1"> {/* switchig view order between children */}
           <GameHistoryCard />
+        </div>
+        <div className="order-1 lg:order-2">
+          <JoinGameCard />
         </div>
       </div>
     </div>

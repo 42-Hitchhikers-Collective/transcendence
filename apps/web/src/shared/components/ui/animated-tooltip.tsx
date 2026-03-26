@@ -48,7 +48,7 @@ export const AnimatedTooltip = ({
   };
 
   return (
-    <>
+    <div className= "flex">
       {items.map((item) => (
         <div
           className="group relative -mr-4"
@@ -93,10 +93,10 @@ export const AnimatedTooltip = ({
             width={100}
             src={item.avatar}
             alt={item.username}
-            className="relative !m-0 h-14 w-14 rounded-full border-2 border-white object-cover object-top !p-0 transition duration-500 group-hover:z-30 group-hover:scale-105"
+            className="relative !m-0 h-8 w-8 rounded-full border-2 border-white object-cover object-top !p-0 transition duration-500 group-hover:z-30 group-hover:scale-105"
           />
         </div>
       ))}
-    </>
+    </div>
   );
 };
