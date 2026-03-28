@@ -1,7 +1,7 @@
 #root {
-  max-width: 1280px;
+/*   max-width: 1280px; */ /* left commented to have full width bg  */
   margin: 0 auto;
-  padding: 2rem;
+/*   padding: 2rem; */  /* left commented to have full width bg */
   text-align: center;
 }
 
@@ -40,3 +40,4 @@
 .read-the-docs {
   color: #888;
 }
+

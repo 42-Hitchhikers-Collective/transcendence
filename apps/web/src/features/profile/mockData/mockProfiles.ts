@@ -40,7 +40,7 @@ export const mockProfiles: UserProfile[] = [
     email: "user01@example.com",
     dob: "1995-03-15",
     avatar: "https://i.pravatar.cc/300?img=5",
-    stats: { wins: 12, losses: 5 },
+    stats: { wins: 10, losses: 5 },
     isOnline: true,
     history: [
       {

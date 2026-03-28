@@ -40,7 +40,6 @@ const config: Record<
 };
 
 export function EntryCard({
-  className,
   mode,
   onToggleMode,
   handleLogin,
@@ -52,7 +51,7 @@ export function EntryCard({
   const { title, description, togglePageName } = config[mode];
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="w-lg mx-auto">
       <Card>
         <EntryHeader
           cardTitle={title}
@@ -68,13 +67,8 @@ export function EntryCard({
             error={error}
             isLoading={isLoading}
           />
-          <EntrySocial />
         </CardContent>
       </Card>
-      {/* <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription> */}
     </div>
   );
 }

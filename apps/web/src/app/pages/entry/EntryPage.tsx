@@ -5,6 +5,8 @@ EntryPage is responsible for rendering the EntryCard component which appears dif
 Signin is active by default view (as it's the most common use case) but the user can toggle to signup if they don't have an account yet and viceversa once they have an account.
 */
 
+// https://animate-ui.com/docs/components/animate/tabs1
+
 import { useState } from "react";
 import {
   EntryCard,
@@ -21,24 +23,23 @@ export default function EntryPage() {
     setMode((mode) => (mode === "login" ? "signup" : "login"));
 
   return (
-    <div className="relative min-h-svh overflow-hidden">
+    <div className="relative min-h-screen">
+      {/* Background image */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-black/50  blur-xs"
+        className="absolute inset-0 bg-center bg-black/50 blur-xs z-0"
         style={{ backgroundImage: `url(${background})` }}
       />
-      <div className="relative z-10 flex min-h-svh items-center justify-center p-6">
-        <div className="w-full max-w-sm rounded-xl  p-8 ">
-          {/* bg-white/90 shadow-xl backdrop-blur-md */}
-          <EntryCard
-            className="w-full"
-            mode={mode}
-            onToggleMode={onToggleMode}
-            handleLogin={handleLogin}
-            handleSignup={handleSignup}
-            error={error}
-            isLoading={isLoading}
-          />
-        </div>
+
+      {/* Overlay content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen">
+        <EntryCard
+          mode={mode}
+          onToggleMode={onToggleMode}
+          handleLogin={handleLogin}
+          handleSignup={handleSignup}
+          error={error}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
