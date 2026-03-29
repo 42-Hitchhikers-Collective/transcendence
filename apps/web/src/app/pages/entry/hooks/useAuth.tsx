@@ -12,18 +12,20 @@ TODO: This might perhaps need to go into features folder, but will better check 
 */
 
 import { useState } from "react";
+import type { FieldValues } from "../Types";
 
 export type EntryMode = "login" | "signup";
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (username: string, password: string) => {
+  // FielValues are userName and password (we do not need email)
+  const handleLogin = async (data : FieldValues) => {
     setIsLoading(true);
     setError(null);
     try {
       // TODO: login logic
-      console.log("login", username, password);
+      console.log("Requesting Login details:", data.username, data.password);
     } catch {
       setError("Login failed");
     } finally {
@@ -31,16 +33,12 @@ export function useAuth() {
     }
   };
 
-  const handleSignup = async (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => {
+  const handleSignup = async (data: FieldValues) => {
     setIsLoading(true);
     setError(null);
     try {
       // TODO: signup logic
-      console.log("signup", data);
+      console.log("Requesting Signup details:", data);
     } catch {
       setError("Signup failed");
     } finally {

@@ -4,7 +4,7 @@ https://reactrouter.com/start/data/routing - how to use the createBrowserRouter 
 */
 
 import { createBrowserRouter, RouterProvider } from "react-router";
-import EntryPage from "../pages/entry/EntryPage"; // pages are imported as deafult exports as they are specific non-shared route components and ro enable lazy loading (thet are loaded only when the user navigates to that route)
+import EntryPage from "../pages/entry/AuthPage"; // pages are imported as deafult exports as they are specific non-shared route components and ro enable lazy loading (thet are loaded only when the user navigates to that route)
 import GamePage from "../pages/game/GamePage";
 import ProfilePage from "../pages/profile/ProfilePage";
 
