@@ -13,7 +13,7 @@ import {
 } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
 
-import type { FormFields } from "../../Types";
+import type { FormFields } from "../../types";
 import { useEffect } from "react";
 
 interface AuthFormProps {
@@ -76,7 +76,7 @@ export function Form({
 
         <Field>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Loading..." : submitLabel}
+            {isLoading ? `Loading ${submitLabel} request..` : submitLabel}
           </Button>
         </Field>
       </FieldGroup>

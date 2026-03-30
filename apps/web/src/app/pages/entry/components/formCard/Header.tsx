@@ -10,23 +10,30 @@ import {
 } from "@/shared/components/ui/card";
 
 import { Button } from "@/shared/components/ui/button";
+import type { AuthMode } from "../../types";
 
 export function Header({
   cardTitle,
   cardDescription,
   togglePageName,
+  toggleTarget,
   onRequestMode,
 }: {
   cardTitle?: string;
   cardDescription?: string;
   togglePageName: string;
-  onRequestMode: () => void;
+  toggleTarget?: AuthMode;
+  onRequestMode: (target?: AuthMode) => void;
 }) {
   return (
     <CardHeader className="text-center">
       <CardTitle className="text-xl">{cardTitle}</CardTitle>
       <CardDescription>{cardDescription}
-      <Button variant="link" className="px-2" onClick={onRequestMode}>
+      <Button
+        variant="link"
+        className="px-2"
+        onClick={() => onRequestMode(toggleTarget)}
+      >
         {togglePageName}
       </Button>
       </CardDescription>

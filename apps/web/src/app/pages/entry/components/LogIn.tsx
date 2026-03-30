@@ -4,7 +4,7 @@ import {
 
 import { Header } from "./formCard/Header";
 import { CardContent } from "@/shared/components/ui/card";
-import type { LoginProps, FormFields } from "../Types";
+import type { LoginProps, FormFields } from "../types";
 import { Form } from "./formCard/Fields";
 
 export function Login({
@@ -14,8 +14,8 @@ export function Login({
   isLoading,
 }: LoginProps) {
   const formFields: FormFields[] = [
-    { id: "username", label: "Username", type: "text" },
-    { id: "password", label: "PassWord", type: "text" },
+    { id: "email", label: "Email", type: "text" },
+    { id: "password", label: "Password", type: "password" },
   ];
 
   const handleSubmit = async (values: Record<string, string>) => {
@@ -30,6 +30,7 @@ export function Login({
           cardTitle={"Log in"}
           cardDescription="Don't have an account?"
           togglePageName="Sign up for free"
+          toggleTarget="signup"
           onRequestMode={onRequestMode}
         />
         <CardContent className="flex flex-col gap-4">

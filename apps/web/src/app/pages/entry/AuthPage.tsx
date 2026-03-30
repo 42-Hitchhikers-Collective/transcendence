@@ -7,8 +7,14 @@ Login is active by default view (as it's the most common use case) but the user 
 
 // https://animate-ui.com/docs/components/animate/tabs1
 
+import {
+  Tabs,
+  TabsContent,
+  TabsContents,
+} from "@/shared/animate-ui/components/animate/tabs";
+
 /* My componente */
-import {useState } from "react";
+import { useState } from "react";
 /* Hooks */
 import { useAuth } from "./hooks/useAuth";
 /* My components */
@@ -16,15 +22,14 @@ import { Login } from "./components/LogIn";
 import { Signup } from "./components/Signup";
 import background from "@/assets/backgrounds/bg_center.jpg";
 /* Types */
-import type { AuthMode } from "./Types";
-
-
 
 export default function EntryPage() {
   const { handleLogin, handleSignup, error, isLoading } = useAuth();
-  const [mode, setMode] = useState<AuthMode>("login");
-  const onRequestMode = () =>
-    setMode((pendMode) => (pendMode === "login" ? "signup" : "login"));
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const onRequestMode = (target?: "login" | "signup") =>
+    setMode((pendMode) =>
+      target ? target : pendMode === "login" ? "signup" : "login",
+    );
   // in setmode parenthesis is an updater function, a function that assigns nextState to pendingState when setMode is triggered by children
 
   return (
@@ -34,24 +39,28 @@ export default function EntryPage() {
         className="absolute inset-0 bg-center bg-black/50 blur-xs z-0"
         style={{ backgroundImage: `url(${background})` }}
       />
-
-      {/*  */}
+      {/* Login / Signup tab animated switch */}
       <div className="relative z-10 flex items-center justify-center min-h-screen">
-        {mode === "login" ? (
-          <Login
-            onRequestMode={onRequestMode}
-            onLogin={handleLogin}
-            error={error}
-            isLoading={isLoading}
-          />
-        ) : (
-          <Signup
-            onRequestMode={onRequestMode}
-            onSignup={handleSignup}
-            error={error}
-            isLoading={isLoading}
-          />
-        )}
+        <Tabs value={mode} onValueChange={(v) => setMode(v as "login" | "signup")}>
+            <TabsContents /* className="py-6" */>
+              <TabsContent value="login">
+                <Login
+                  onRequestMode={onRequestMode}
+                  onLogin={handleLogin}
+                  error={error}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+              <TabsContent value="signup">
+                <Signup
+                  onRequestMode={onRequestMode}
+                  onSignup={handleSignup}
+                  error={error}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+            </TabsContents>
+        </Tabs>
       </div>
     </div>
   );

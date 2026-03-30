@@ -28,14 +28,14 @@ export type FormErrors = Partial<Record<string, string>>;
 
 export interface LoginProps {
   onLogin: (values: Record<string, string>) => Promise<void>;
-  onRequestMode: () => void;
+  onRequestMode: (target?: AuthMode) => void;
   error?: string | null;
   isLoading?: boolean;
 }
 
 export interface SignupProps {
   onSignup: (values: Record<string, string>) => Promise<void>;
-  onRequestMode: () => void;
+  onRequestMode: (target?: AuthMode) => void;
   error?: string | null;
   isLoading?: boolean;
 }
