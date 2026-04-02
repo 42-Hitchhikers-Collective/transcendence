@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   index.ts                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/19 16:40:40 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/02 17:51:07 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ export function registerSocketHandlers(
     
   // --- Room Events ---
   
-  // Create a new room
+  // Create a new room  //TODO: will not broadcast if leaves room to join a new one
   socket.on("create_room", () => {
     const room = gameManager.createRoom();
     if (room) {
@@ -107,7 +107,7 @@ socket.on("play_card", ({ cardIndex }) => {
 socket.on("draw_card", () => {
   const res = gameManager.drawCard(socket.id);
   if (res.success)
-      broadcastRoomState(socket, res.roomId); 
+      broadcastRoomState(socket, res.roomId);
   else
       socket.emit("error", { message: res.error });
 });
