@@ -19,7 +19,7 @@ export type Player = {
 export type GameState = "waiting" | "playing" | "finished";
 
 
-export interface gameInstance {
+export interface GameInstance {
   currentPlayerId: string;
   discardTopCard: { color: string; value: string };
   drawPileCount: number;
@@ -36,7 +36,7 @@ export type Room = {
   id: string;
   players: Player[];
   state: GameState;
-  game?: gameInstance;
+  game?: GameInstance;
 };
 
 // What the frontend sees for "other" players
@@ -58,11 +58,11 @@ export type SanitizedRoom = {
   };
 };
 
-export type roomResult =
+export type RoomResult =
   | { success: true; room: Room }
   | { success: false; error: string | undefined};
 
 
-export type roomIdResult = 
+export type RoomIdResult = 
   | { success: true; roomId: string }
   | { success: false; error: string | undefined};
