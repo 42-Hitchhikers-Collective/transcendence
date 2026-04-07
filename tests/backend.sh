@@ -8,6 +8,7 @@ bash "$ROOT/1_backend_user.sh"
 # bash "$ROOT/2_backend_security.sh"
 # bash "$ROOT/3_backend_roles.sh"
 bash "$ROOT/4_backend_socket.sh"
+bash "$ROOT/4_backend_socket_v2.sh"
 
 # bash "$ROOT/5_backend_friends.sh"
 # bash "$ROOT/6_backend_lobbies.sh"
