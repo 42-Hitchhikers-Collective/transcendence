@@ -5,7 +5,6 @@ import { rateLimitPlugin } from "./plugins/rate_limit";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
-import { securityRoutes } from "./routes/security";
 import { setupSocket } from "./realtime";
 
 const app = Fastify({ logger: true, trustProxy: true });
@@ -29,7 +28,6 @@ const start = async () => {
   await app.register(authPlugin);
   await app.register(rateLimitPlugin);
 
-  await app.register(securityRoutes, { prefix: "/api/auth" });
   await app.register(authRoutes, { prefix: "/api/auth" });
 
   await app.register(userRoutes, { prefix: "/api/users" });

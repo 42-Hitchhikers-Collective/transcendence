@@ -8,3 +8,4 @@ tests/package.json
 .socketio-test
 data/postgres/
 apps/api/prisma/migrations
+transcendence.pdf

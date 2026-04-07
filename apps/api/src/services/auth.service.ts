@@ -48,39 +48,6 @@ export async function loginUser(app: any, input: LoginInput) {
   return { ok: true as const, userId: user.id, refreshRaw };
 }
 
-export async function rotateRefreshToken(app: any, raw: string) {
-  const tokenHash = hashToken(raw);
-
-  const existing = await app.prisma.refreshToken.findUnique({ where: { tokenHash } });
-  if (!existing || existing.revokedAt || existing.expiresAt <= new Date()) {
-    return { ok: false as const, error: "invalid_refresh_token" as const };
-  }
-
-  await app.prisma.refreshToken.update({
-    where: { tokenHash },
-    data: { revokedAt: new Date() },
-  });
-
-  const newRaw = newRefreshToken();
-  await app.prisma.refreshToken.create({
-    data: {
-      userId: existing.userId,
-      tokenHash: hashToken(newRaw),
-      expiresAt: refreshExpiryDate(30),
-    },
-  });
-
-  const user = await app.prisma.user.findUnique({
-    where: { id: existing.userId },
-    select: {
-      userRoles: { select: { role: { select: { name: true } } } },
-    },
-  });
-
-  const roles = user ? user.userRoles.map((ur: any) => ur.role.name) : [];
-  return { ok: true as const, userId: existing.userId, roles, refreshRaw: newRaw };
-}
-
 export async function logoutRefreshToken(app: any, raw: string | null) {
   if (!raw) return;
 
