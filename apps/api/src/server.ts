@@ -5,7 +5,8 @@ import { rateLimitPlugin } from "./plugins/rate_limit";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
-import { setupSocket } from "./realtime";
+import { setupSocket } from "./socket/socket";
+import { gameManager } from "./game";
 
 const app = Fastify({ logger: true, trustProxy: true });
 
@@ -19,6 +20,10 @@ app.get("/api/health", async () => ({ ok: true }));
 app.get("/api/db/ping", async () => {
   const r = await app.prisma.$queryRaw`SELECT 1 as ok`;
   return { ok: true, r };
+});
+
+app.get("/rooms", async () => {
+  return gameManager.getAllRooms;
 });
 
 const port = Number(process.env.PORT || "3000");
