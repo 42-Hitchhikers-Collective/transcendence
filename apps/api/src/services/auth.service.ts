@@ -1,12 +1,15 @@
 import bcrypt from "bcrypt";
 import { newRefreshToken, hashToken, refreshExpiryDate } from "../auth/tokens";
 
-type RegisterInput = { email: string; password: string; displayName: string };
+type RegisterInput = { email: string; password: string; userName: string };
 type LoginInput = { email: string; password: string };
 
 export async function registerUser(app: any, input: RegisterInput) {
-  const existing = await app.prisma.user.findUnique({ where: { email: input.email } });
-  if (existing) return { ok: false as const, error: "email_in_use" as const };
+  const existingEmail = await app.prisma.user.findUnique({ where: { email: input.email } });
+  if (existingEmail) return { ok: false as const, error: "email_in_use" as const };
+
+  const existingUsername = await app.prisma.profile.findFirst({ where: { userName: input.userName } });
+  if (existingUsername) return { ok: false as const, error: "username_in_use" as const };
 
   const passwordHash = await bcrypt.hash(input.password, 10);
 
@@ -20,7 +23,7 @@ export async function registerUser(app: any, input: RegisterInput) {
     data: {
       email: input.email,
       passwordHash,
-      profile: { create: { displayName: input.displayName } },
+      profile: { create: { userName: input.userName } },
       userRoles: { create: [{ roleId: role.id }] },
     },
     select: { id: true, email: true, createdAt: true },

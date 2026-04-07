@@ -7,3 +7,4 @@ tests/package-lock.json
 tests/package.json
 .socketio-test
 data/postgres/
+apps/api/prisma/migrations
