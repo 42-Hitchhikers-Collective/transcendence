@@ -73,9 +73,6 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
 
-  // Roles
-  userRoles UserRole[]
-
   // Game
   hostedLobbies Lobby[]       @relation("HostedLobbies")
   lobbyMembers  LobbyMember[]
@@ -149,27 +146,6 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
-}
-
-// --- Roles / Permissions ---
-
-model Role {
-  id        String     @id @default(uuid())
-  name      String     @unique
-  createdAt DateTime   @default(now())
-  userRoles UserRole[]
-}
-
-model UserRole {
-  userId     String
-  roleId     String
-  assignedAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, roleId])
-  @@index([roleId])
 }
 
 // --- Lobby & Game ---

@@ -30,7 +30,6 @@ export async function authRoutes(app: any) {
         if (!result.ok) {
           if (result.error === "email_in_use")    return reply.code(409).send({ error: "email already in use" });
           if (result.error === "username_in_use") return reply.code(409).send({ error: "username already in use" });
-          if (result.error === "roles_not_seeded") return reply.code(500).send({ error: "server configuration error" });
           return reply.code(500).send({ error: "registration failed" });
         }
         return reply.code(201).send({ user: result.user });
@@ -70,7 +69,7 @@ export async function authRoutes(app: any) {
       if (!result.ok) return reply.code(401).send({ error: "invalid credentials" });
 
       const token = await reply.jwtSign(
-        { sub: result.userId, roles: result.roles },
+        { sub: result.userId },
         { expiresIn: "15m" }
       );
 
