@@ -8,7 +8,7 @@ export async function authRoutes(app: any) {
       schema: {
         body: {
           type: "object",
-          required: ["email", "password", "userName"],
+          required: ["email", "password", "username"],
           additionalProperties: false,
           properties: {
             email: {
@@ -17,13 +17,13 @@ export async function authRoutes(app: any) {
               pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
             },
             password: { type: "string", minLength: 6 },
-            userName: { type: "string", minLength: 1 },
+            username: { type: "string", minLength: 1 },
           },
         },
       },
     },
     async (request: any, reply: any) => {
-      const body = request.body as { email: string; password: string; userName: string };
+      const body = request.body as { email: string; password: string; username: string };
 
       try {
         const result = await AuthService.registerUser(app, body);

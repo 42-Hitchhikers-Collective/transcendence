@@ -19,7 +19,7 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // FielValues are userName and password (we do not need email)
+  // FielValues are username and password (we do not need email)
   const handleLogin = async (data: FieldValues) => {
     setIsLoading(true);
     setError(null);
@@ -65,7 +65,7 @@ export function useAuth() {
       const body = {
         email: data.email,
         password: data.password,
-        displayName: data.displayName ?? data.username,
+        username: data.username,
       };
 
       const res = await fetch(`/api/auth/register`, {

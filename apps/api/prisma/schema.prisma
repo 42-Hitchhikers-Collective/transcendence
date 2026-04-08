@@ -99,7 +99,7 @@ model User {
 model Profile {
   userId    String  @id
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userName  String  @unique
+  username  String  @unique
   avatarUrl String?
   bio       String?
 

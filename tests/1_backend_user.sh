@@ -8,12 +8,12 @@ trap cleanup EXIT
 
 say "1.0) Register validation should fail (400)"
 status="$(http_status_json -i -X POST "${API}/auth/register" \
-  -d '{"email":"x","password":"1","userName":""}')"
+  -d '{"email":"x","password":"1","username":""}')"
 assert_status "400" "$status" "register invalid payload rejected"
 
 say "1.1) Register user (may be 201 or 409)"
 status="$(http_status_json -i -X POST "${API}/auth/register" \
-  -d "{\"email\":\"${TEST_EMAIL}\",\"password\":\"${TEST_PASSWORD}\",\"userName\":\"${TEST_DISPLAY_NAME}\"}")"
+  -d "{\"email\":\"${TEST_EMAIL}\",\"password\":\"${TEST_PASSWORD}\",\"username\":\"${TEST_DISPLAY_NAME}\"}")"
 
 if [ "$status" = "201" ]; then
   echo "OK: register created user (201)"
@@ -55,18 +55,18 @@ assert_status "200" "$status" "/users/me works with Bearer token"
 
 say "1.5) /profiles/me without token should be 401"
 status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
-  -d '{"userName":"HACKED"}')"
+  -d '{"username":"HACKED"}')"
 assert_status "401" "$status" "/profiles/me is protected"
 
 say "1.6) /profiles/me with token should be 200"
 status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"userName":"Bubu","bio":"hello"}')"
+  -d '{"username":"Bubu","bio":"hello"}')"
 assert_status "200" "$status" "profile update works with Bearer token"
 
 say "1.7) Register admin user (may be 201 or 409)"
 status="$(http_status_json -i -X POST "${API}/auth/register" \
-  -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\",\"userName\":\"admin\"}")"
+  -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\",\"username\":\"admin\"}")"
 
 if [ "$status" = "201" ]; then
   echo "OK: admin user created (201)"
