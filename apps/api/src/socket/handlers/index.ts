@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/08 16:17:23 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 16:57:48 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,19 @@ socket.on("draw_card", () => {
       broadcastRoomState(socket, res.roomId);
   else
       socket.emit("error", { message: res.error });
+});
+
+
+// ---> Msg Events ---
+socket.on("send_msg", ({ msg }) => {
+  const res = gameManager.sendMessage(socket.id, msg);
+  if (!res.success) {
+    socket.emit("error", { message: res.error });
+    return;
+  }
+  if (res.roomId) {
+    socket.nsp.to(res.roomId).emit("chat_msg", { msg, senderId: socket.id });
+  }
 });
 
 // ---> DEBUG <---

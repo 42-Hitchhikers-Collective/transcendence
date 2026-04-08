@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/08 16:18:39 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 16:55:43 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,19 @@ export class GameManager {
       return {success: false, error: res.error};
     return {success: true, roomId: roomId};
   }
-  
+
+
+  // ---> Msg Events ---
+  sendMessage(playerId: string, msg: string): RoomIdResult {
+    console.log("Sending message");
+    const roomId = this.getPlayerRoomId(playerId);
+    if (!roomId)
+      return {success: false, error: "Player is not in room"};
+    const room = this.getRoomById(roomId);
+    if (!room)
+      return {success: false, error: "Room not found"};
+    return {success: true, roomId: roomId};
+  }
 
   // --- HELPERS ---
 
