@@ -2,15 +2,13 @@ import { Card } from "./Card";
 import { Deck } from "./Deck";
 import { Player } from "./Player";
 
-export class Table {
+export class Room {
   gameID: number;
   players: Player[];
   currentTurn: number;
   direction: 1 | -1;
-
   drawPile: Card[];
   discardPile: Card[];
-
   currentColor: "null" | "red" | "blue" | "green" | "yellow" | "wild";
 
   constructor(gameID: number, players: Player[])

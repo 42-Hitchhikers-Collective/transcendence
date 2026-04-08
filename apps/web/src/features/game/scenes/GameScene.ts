@@ -13,7 +13,7 @@ export class GameScene extends Scene {
 
     this.xdel_add_player();
 
-    this.CurrentGame = new Game(1, this.players);
+    this.CurrentGame = new Game(1, this.players, this.players[0]);
   }
 
   create() {
@@ -51,8 +51,8 @@ export class GameScene extends Scene {
         const card = gameObject.getData("card") as Card;
 
         const topCard =
-          this.CurrentGame.table.discardPile[
-            this.CurrentGame.table.discardPile.length - 1
+          this.CurrentGame.room.discardPile[
+            this.CurrentGame.room.discardPile.length - 1
           ];
 
         if (
@@ -62,14 +62,15 @@ export class GameScene extends Scene {
         ) {
           console.log("Valid Card:", card.color, card.value);
 
-          this.CurrentGame.table.discardPile.push(card);
-          this.CurrentGame.table.currentColor = card.color;
+          this.CurrentGame.room.discardPile.push(card);
+          this.CurrentGame.room.currentColor = card.color;
 
           cardSprite = this.add
           .image(550, 330, card.getKey())
           .setScale(0.3);
 
           gameObject.destroy();
+          
 
         } else {
           console.log("Invalid Card");
@@ -110,7 +111,7 @@ export class GameScene extends Scene {
   }
 
   spawnCard() {
-    const card = this.CurrentGame.table.drawPile.pop();
+    const card = this.CurrentGame.room.drawPile.pop();
     if (!card) return;
 
     console.log("Carta cargada:", card.getKey());
