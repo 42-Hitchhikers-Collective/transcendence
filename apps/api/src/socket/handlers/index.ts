@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/02 18:22:21 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 16:17:23 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ export function registerSocketHandlers(
 
  // Broadcast room state to everyone except the sender
   function broadcastRoomState(socket: Socket, roomId: string) {
-  const room = gameManager.getRoom(roomId);
+  const room = gameManager.getRoomById(roomId);
   if (!room) return;
   room.players.forEach((player) => {
     const sanitizedRoomData = utils.getSanitizedRoom(room, player.id); 
@@ -44,27 +44,41 @@ export function registerSocketHandlers(
     
   // --- Room Events ---
   
-  // Create a new room  //TODO: will not broadcast if leaves room to join a new one
-  socket.on("create_room", () => {
-    const room = gameManager.createRoom();
+  // Create a new room. Enter it and leave old room if in any
+  socket.on("create_room", ({ roomName }) => {
+    const res = gameManager.createRoom(roomName);
+    if (!res.success)
+      return socket.emit("error", { message: res.error });
+    const room = res.room;
     if (room) {
+      if (gameManager.isInRoom(socket.id)) {
+        const res = gameManager.leaveRoom(socket.id);
+        if (!res.success) {
+          socket.emit("error", { message: res.error });
+          gameManager.deleteRoomIfEmpty(room);
+          return;
+        }
+      socket.leave(room.id);
+      broadcastRoomState(socket, room.id);        
+    }
+      gameManager.joinRoom(roomName, socket.id);
       socket.join(room.id);
-      gameManager.joinRoom(room.id, socket.id);
       socket.emit("room_created", { roomId: room.id })
     }
-    
   });
 
   // Join an existing room
-  socket.on("join_room", ({ roomId }) => {
-    const res = gameManager.joinRoom(roomId, socket.id);
+  socket.on("join_room", ({ roomName }) => {
+    // console.log(`Socket ${socket.id} requested to join room with name: ${roomName}`);
+    const res = gameManager.joinRoom(roomName, socket.id);
     if (!res.success) {
       socket.emit("error", { message: res.error });
       return;
     }
-    socket.join(roomId);
-    socket.emit("room_joined", { roomId });
-    broadcastRoomState(socket, roomId);
+    const roomId = res.room.id;
+      socket.join(roomId);
+      socket.emit("room_joined", { roomId });
+      broadcastRoomState(socket, roomId);
   });
 
   

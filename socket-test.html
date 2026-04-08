@@ -10,7 +10,7 @@
 <h1>Socket.IO Room Test</h1>
 
 <button onclick="createRoom()">Create Room</button>
-<input id="roomInput" placeholder="Room ID">
+<input id="roomInput" placeholder="Room Name">
 <br/>
 <button onclick="joinRoom()">Join Room</button>
 
@@ -46,7 +46,8 @@ socket.on("error", (data) => {
 });
 
 function createRoom() {
-  socket.emit("create_room");
+  const roomName = document.getElementById("roomInput").value;
+  socket.emit("create_room", { roomName });
 }
 
 function leaveRoom() {
@@ -62,8 +63,8 @@ function debug() {
 }
 
 function joinRoom() {
-  const roomId = document.getElementById("roomInput").value;
-  socket.emit("join_room", { roomId });
+  const roomName = document.getElementById("roomInput").value;
+  socket.emit("join_room", { roomName});
 }
 </script>
 

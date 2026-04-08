@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/02 18:24:24 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 16:18:39 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,37 +19,39 @@ export class GameManager {
   
   private roomsById: Map<string, Room> = new Map();         // roomId → Room
   private playerRooms: Map<string, string> = new Map(); // playerId → roomId
-  
+  private roomsByName: Map<string, Room> = new Map(); // roomName → Room (to allow join by name)
   
   // --- Room Events ---
 
   // Create a new room and return it
-  createRoom(): Room {
+  createRoom(roomName: string): RoomResult {
     const roomId = this.generateRoomId();
     const room: Room = {
       id: roomId,
+      name: roomName,
       players: [],
       state: "waiting",
     };
+    const validation = this.validateRoomName(roomName);
+    if (!validation.success)
+      return {success: false, error: validation.error};
     this.roomsById.set(roomId, room);
-    return room;
+    this.roomsByName.set(roomName, room);
+    return { success: true, room: room };
   }
 
   // Add player to room. removes player from old room
-  joinRoom(roomId: string, playerId: string): RoomResult {
-    const room = this.  roomsById.get(roomId);
-    if (!room) {
+  joinRoom(name: string, playerId: string): RoomResult {
+    const room = this.getRoomByName(name);
+    if (!room)
       return { success: false, error: "Room not found" };
-    }
-    if (this.getPlayerRoomId(playerId) === roomId) { // Already in same room
+    const roomId = room.id;
+    if (this.getPlayerRoomId(playerId) === roomId) // Already in same room
       return { success: true, room: room };
-    }
-    if (room.players.length >= MAX_PLAYERS_PER_ROOM) {
+    if (room.players.length >= MAX_PLAYERS_PER_ROOM)
       return { success: false, error: "Room is full" };
-    }
-    if (room.state !== "waiting") {
+    if (room.state !== "waiting")
       return { success: false, error: "Game already begun" };
-    }
     this.leaveRoom(playerId);
     room.players.push({ id: playerId });
     this.addToPlayerRoom(playerId, roomId); // add to playerRooms
@@ -69,8 +71,7 @@ export class GameManager {
     if (!removed)
       return { success: false, error: "Player not in room array" };
     this.playerRooms.delete(playerId);
-    if (room.players.length === 0)
-      this.roomsById.delete(currentRoomId);
+    this.deleteRoomIfEmpty(room);
     return { success: true, roomId: currentRoomId };
   }
   
@@ -102,7 +103,7 @@ export class GameManager {
     const roomId = this.getPlayerRoomId(playerId);
     if (!roomId)
       return {success: false, error: "Player is not in room"};
-    const room = this.getRoom(roomId);
+    const room = this.getRoomById(roomId);
     if (!room || room.state !== "playing" || !room.game)
       return {success: false, error: "No active game found"};
     
@@ -120,7 +121,7 @@ export class GameManager {
     const roomId = this.getPlayerRoomId(playerId);
     if (!roomId)
       return {success: false, error: "Player is not in room"};
-    const room = this.getRoom(roomId);
+    const room = this.getRoomById(roomId);
     if (!room || room.state !== "playing" || !room.game)
       return {success: false, error: "No active game found"};
     
@@ -130,6 +131,38 @@ export class GameManager {
     if (!res.success)
       return {success: false, error: res.error};
     return {success: true, roomId: roomId};
+  }
+  
+
+  // --- HELPERS ---
+
+  // Check for room name rules and duplicates. Returns true or false with an error message.
+  private validateRoomName(name: string): RoomResult {
+  if (!name || name.trim().length === 0)
+    return {success: false, error: "Room name cannot be empty"};
+  if (this.roomsByName.has(name))
+    return {success: false, error: "Room name already exists"};
+  if (name.length > 10)
+    return {success: false, error: "Room name cannot exceed 10 characters"};
+  const regex = /^[a-zA-Z0-9\-_!?.]+$/;
+  if (!regex.test(name))
+    return { success: false, error: "Room name contains invalid characters"};
+  return { success: true, room: null as any };
+  }
+
+  // Returns true if player is in a room, false otherwise
+  isInRoom(playerId: string): boolean {
+    return this.playerRooms.has(playerId);
+  }
+
+  // Deletes an Empty Room.
+  deleteRoomIfEmpty(room: Room): boolean {
+    if (room.players.length === 0) {
+      this.roomsByName.delete(room.name);
+      this.roomsById.delete(room.id);
+      return true;
+    }
+    return false;
   }
   
   // --- PRIVATE ---
@@ -156,7 +189,7 @@ export class GameManager {
     return roomId;
   }
   
-  //lookup in playerRoom map after a player. returns roomId
+  //lookup in playerRoom map after a player. returns roomId. Null if not in a room
   private getPlayerRoomId(playerId: string): string | null {
     return this.playerRooms.get(playerId) ?? null;
   }
@@ -164,13 +197,15 @@ export class GameManager {
 
 //--- Getters ---
 
-  getRoom(roomId: string): Room | null  {
+  getRoomById(roomId: string): Room | null  {
     const room = this.roomsById.get(roomId);
     return room ?? null;
   }
 
-  getAllRooms() {
-    return Array.from(this.roomsById.values());
+  private getRoomByName(roomName: string): Room | null {
+    const room = this.roomsByName.get(roomName);
+    console.log(`Looking up room by name: ${roomName} - Found: ${!!room}`);
+    return room ?? null;
   }
 
   getMaxPlayersPerRoom() {
@@ -184,11 +219,12 @@ export class GameManager {
     console.log("---- GAME STATE ----");
 
     for (const [roomId, room] of this.roomsById) {
-      console.log(`Room ${roomId}`);
+      const name = room.name ? `${room.name}` : "";
+      console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
       console.log("Players:", room.players.map(p => p.id));
     }
 
-    console.log("Player -> Room map:");
+    console.log("Player room list:");
     for (const [playerId, roomId] of this.playerRooms) {
       console.log(`${playerId} → ${roomId}`);
     }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameManagerUtils.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/19 15:48:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 12:16:24 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ export function getSanitizedRoom(room: Room, observerId: string): SanitizedRoom 
     } : undefined
   };
 }
-
 
 
 
