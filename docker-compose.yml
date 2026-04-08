@@ -60,6 +60,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./apps/web/public:/usr/share/nginx/html:ro
+      - ./data/avatars:/usr/share/nginx/avatars:ro
     networks: [transcendence]
 
 networks:
