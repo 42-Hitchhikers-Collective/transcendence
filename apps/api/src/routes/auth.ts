@@ -8,39 +8,34 @@ export async function authRoutes(app: any) {
       schema: {
         body: {
           type: "object",
-          required: ["email", "password", "displayName"],
+          required: ["email", "password", "userName"],
           additionalProperties: false,
           properties: {
-            email: { type: "string", minLength: 3 },
+            email: {
+              type: "string",
+              minLength: 6,
+              pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            },
             password: { type: "string", minLength: 6 },
-            displayName: { type: "string", minLength: 1 },
+            userName: { type: "string", minLength: 1 },
           },
         },
       },
     },
     async (request: any, reply: any) => {
-      const body = request.body as { email: string; password: string; displayName: string };
-      // JESS: Added try-catch, keeping this for now until merging updated code from /backend-architecture
-      try{
+      const body = request.body as { email: string; password: string; userName: string };
+
+      try {
         const result = await AuthService.registerUser(app, body);
         if (!result.ok) {
-          // 1. Log the actual result to your backend terminal
-          console.error("[Register Error] Service failed. Full result:", result);
-          
-          // 2. Extract the real status code and error message if your service provides it.
-          // If not, we leave a generic one for fallback that are used if they are undefined.
-          const errorMessage = result.error || "Registration failed for unknown reason";
-          const statusCode = result.statusCode || 400; 
-          
-          // 3. Send the real error message and status code back to the client for better debugging, if undefined the generic ones will be used.
-          return reply.code(statusCode).send({ error: errorMessage });
+          if (result.error === "email_in_use")    return reply.code(409).send({ error: "email already in use" });
+          if (result.error === "username_in_use") return reply.code(409).send({ error: "username already in use" });
+          return reply.code(500).send({ error: "registration failed" });
         }
         return reply.code(201).send({ user: result.user });
-      }
-      catch (err: any) {
-       // 4. Catch any fatal crashes inside AuthService that you weren't handling
-        console.error("[Register Exception] Unhandled crash:", err.message || err);
-        return reply.code(500).send({ error: "Internal Server Error" });
+      } catch (err) {
+        app.log.error(err);
+        return reply.code(500).send({ error: "internal server error" });
       }
     }
   );
@@ -49,7 +44,7 @@ export async function authRoutes(app: any) {
     "/login",
     {
       config: {
-        rateLimit: { max: 50, timeWindow: "1 minute" },
+        rateLimit: { max: 10, timeWindow: "1 minute" },
       },
       schema: {
         body: {
@@ -57,7 +52,11 @@ export async function authRoutes(app: any) {
           required: ["email", "password"],
           additionalProperties: false,
           properties: {
-            email: { type: "string", minLength: 3 },
+            email: {
+              type: "string",
+              minLength: 6,
+              pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            },
             password: { type: "string", minLength: 6 },
           },
         },
@@ -70,34 +69,7 @@ export async function authRoutes(app: any) {
       if (!result.ok) return reply.code(401).send({ error: "invalid credentials" });
 
       const token = await reply.jwtSign(
-        { sub: result.userId, roles: result.roles },
-        { expiresIn: "15m" }
-      );
-
-      setRefreshCookie(reply, result.refreshRaw);
-      return reply.send({ token });
-    }
-  );
-
-  app.post(
-    "/refresh",
-    {
-      config: {
-        rateLimit: { max: 60, timeWindow: "1 minute" },
-      },
-    },
-    async (request: any, reply: any) => {
-      const raw = getRefreshCookie(request);
-      if (!raw) return reply.code(401).send({ error: "missing_refresh_token" });
-
-      const result = await AuthService.rotateRefreshToken(app, raw);
-      if (!result.ok) {
-        clearRefreshCookie(reply);
-        return reply.code(401).send({ error: "invalid_refresh_token" });
-      }
-
-      const token = await reply.jwtSign(
-        { sub: result.userId, roles: result.roles },
+        { sub: result.userId },
         { expiresIn: "15m" }
       );
 
@@ -110,7 +82,7 @@ export async function authRoutes(app: any) {
     "/logout",
     {
       config: {
-        rateLimit: { max: 60, timeWindow: "1 minute" },
+        rateLimit: { max: 10, timeWindow: "1 minute" },
       },
     },
     async (request: any, reply: any) => {
@@ -120,25 +92,4 @@ export async function authRoutes(app: any) {
       return reply.send({ ok: true });
     }
   );
-
-  app.post(
-    "/logout-all",
-    {
-      preHandler: [app.auth],
-      config: {
-        rateLimit: { max: 20, timeWindow: "1 minute" },
-      },
-    },
-    async (request: any, reply: any) => {
-      const payload = request.user as { sub?: string };
-      if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
-
-      await AuthService.logoutAllRefreshTokens(app, payload.sub);
-      clearRefreshCookie(reply);
-      return reply.send({ ok: true });
-    }
-  );
-
-
-  
 }

@@ -4,7 +4,7 @@ COMPOSE = docker compose -f docker-compose.yml
 # Basics
 all: up
 
-up:
+up: dirs
 	$(COMPOSE) up -d --build
 
 down:

@@ -2,14 +2,11 @@ import Fastify from "fastify";
 import { prismaPlugin } from "./plugins/prisma";
 import { authPlugin } from "./plugins/auth";
 import { rateLimitPlugin } from "./plugins/rate_limit";
-import rolesPlugin from "./plugins/roles";
-
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
-import { securityRoutes } from "./routes/security";
-import { adminRoutes } from "./routes/admin";
-import { setupSocket } from "./realtime";
+import { setupSocket } from "./socket/socket";
+import { gameManager } from "./game";
 
 const app = Fastify({ logger: true, trustProxy: true });
 
@@ -25,21 +22,21 @@ app.get("/api/db/ping", async () => {
   return { ok: true, r };
 });
 
+app.get("/rooms", async () => {
+  return gameManager.getAllRooms;
+});
+
 const port = Number(process.env.PORT || "3000");
 
 const start = async () => {
   await app.register(prismaPlugin);
   await app.register(authPlugin);
   await app.register(rateLimitPlugin);
-  await app.register(rolesPlugin);
 
-  await app.register(securityRoutes, { prefix: "/api/auth" });
   await app.register(authRoutes, { prefix: "/api/auth" });
 
   await app.register(userRoutes, { prefix: "/api/users" });
   await app.register(profileRoutes, { prefix: "/api/profiles" });
-
-  await app.register(adminRoutes, { prefix: "/api" });
 
   await app.listen({ port, host: "0.0.0.0" });
   setupSocket(app);
