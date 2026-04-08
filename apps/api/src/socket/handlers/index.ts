@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/08 16:57:48 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 17:59:46 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 import { FastifyInstance } from "fastify";
 import { Socket } from "socket.io";
 import { gameManager, utils } from "../../game";
+
 
 export function registerSocketHandlers(
   app: FastifyInstance,
@@ -135,7 +136,8 @@ socket.on("send_msg", ({ msg }) => {
     return;
   }
   if (res.roomId) {
-    socket.nsp.to(res.roomId).emit("chat_msg", { msg, senderId: socket.id });
+    console.log("Broadcasting message to room:", res.roomId);
+    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: socket.id });
   }
 });
 

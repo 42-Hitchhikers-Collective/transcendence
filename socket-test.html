@@ -19,6 +19,10 @@
 <button onclick="startGame()">Start Game</button>
 <br/>
 <button onclick="debug()">Debug</button>
+<br/>
+<button onclick="sendMsg()">Send</button>
+<input id="msgInput" placeholder="Send a message in the room">
+<br/>
 
 <script>
 const socket = io("http://localhost:3000", {
@@ -45,6 +49,10 @@ socket.on("error", (data) => {
   console.log("Error:", data);
 });
 
+socket.on("chat_message", (data) => {
+  console.log(`${data.senderId}: ${data.msg}`);
+});
+
 function createRoom() {
   const roomName = document.getElementById("roomInput").value;
   socket.emit("create_room", { roomName });
@@ -65,6 +73,11 @@ function debug() {
 function joinRoom() {
   const roomName = document.getElementById("roomInput").value;
   socket.emit("join_room", { roomName});
+}
+
+function sendMsg() {
+  const msg = document.getElementById("msgInput").value;
+  socket.emit("send_msg", { msg });
 }
 </script>
 

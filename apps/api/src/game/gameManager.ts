@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/08 16:55:43 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 17:59:30 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,7 +136,6 @@ export class GameManager {
 
   // ---> Msg Events ---
   sendMessage(playerId: string, msg: string): RoomIdResult {
-    console.log("Sending message");
     const roomId = this.getPlayerRoomId(playerId);
     if (!roomId)
       return {success: false, error: "Player is not in room"};
@@ -223,7 +222,11 @@ export class GameManager {
   getMaxPlayersPerRoom() {
     return MAX_PLAYERS_PER_ROOM;
   }
-  
+
+  // Returns an array of all Room objects
+  getAllRooms(): Room[] {
+  return Array.from(this.roomsById.values());
+}
 
 
 // --- DEBUG ---
