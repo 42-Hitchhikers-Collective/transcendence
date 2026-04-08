@@ -17,11 +17,13 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
-      alias: {
-        // This tells Vite: whenever you see "@", look in the "src" folder
-        "@": path.resolve(__dirname, "./src"),
-         "src": path.resolve(__dirname, "./src"),
-      },
+      alias: [
+         // This tells Vite: whenever you see "@", look in the "src" folder
+        // "@": path.resolve(__dirname, "./src"),
+        //  "src": path.resolve(__dirname, "./src"),
+        { find: /^@\/(.*)/, replacement: path.resolve(__dirname, "src") + "/$1" },
+        { find: "src", replacement: path.resolve(__dirname, "src") },
+      ],
     },
   };
 });
