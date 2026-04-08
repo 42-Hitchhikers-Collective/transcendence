@@ -1,4 +1,3 @@
-import { setRefreshCookie, clearRefreshCookie, getRefreshCookie } from "../auth/cookies";
 import * as AuthService from "../services/auth.service";
 
 export async function authRoutes(app: any) {
@@ -68,12 +67,7 @@ export async function authRoutes(app: any) {
       const result = await AuthService.loginUser(app, body);
       if (!result.ok) return reply.code(401).send({ error: "invalid credentials" });
 
-      const token = await reply.jwtSign(
-        { sub: result.userId },
-        { expiresIn: "15m" }
-      );
-
-      setRefreshCookie(reply, result.refreshRaw);
+      const token = await reply.jwtSign({ sub: result.userId });
       return reply.send({ token });
     }
   );
@@ -85,10 +79,7 @@ export async function authRoutes(app: any) {
         rateLimit: { max: 10, timeWindow: "1 minute" },
       },
     },
-    async (request: any, reply: any) => {
-      const raw = getRefreshCookie(request);
-      await AuthService.logoutRefreshToken(app, raw);
-      clearRefreshCookie(reply);
+    async (_request: any, reply: any) => {
       return reply.send({ ok: true });
     }
   );
