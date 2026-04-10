@@ -1,4 +1,5 @@
 .env
+.env.*
 nginx/certs
 node_modules/
 cookies.txt
@@ -7,4 +8,11 @@ tests/package-lock.json
 tests/package.json
 .socketio-test
 data/postgres/
+apps/api/prisma/migrations
+transcendence.pdf
+dist/
+build/
+*.log
 .DS_Store
+.vscode
+.idea

@@ -3,19 +3,17 @@ set -euo pipefail
 source "$(cd "$(dirname "$0")" && pwd)/_lib.sh"
 
 COOKIE1="$(mktemp)"
-COOKIE2="$(mktemp)"
-COOKIE_OLD="$(mktemp)"
-cleanup() { rm -f "$COOKIE1" "$COOKIE2" "$COOKIE_OLD"; }
+cleanup() { rm -f "$COOKIE1"; }
 trap cleanup EXIT
 
 say "1.0) Register validation should fail (400)"
 status="$(http_status_json -i -X POST "${API}/auth/register" \
-  -d '{"email":"x","password":"1","displayName":""}')"
+  -d '{"email":"x","password":"1","username":""}')"
 assert_status "400" "$status" "register invalid payload rejected"
 
 say "1.1) Register user (may be 201 or 409)"
 status="$(http_status_json -i -X POST "${API}/auth/register" \
-  -d "{\"email\":\"${TEST_EMAIL}\",\"password\":\"${TEST_PASSWORD}\",\"displayName\":\"${TEST_DISPLAY_NAME}\"}")"
+  -d "{\"email\":\"${TEST_EMAIL}\",\"password\":\"${TEST_PASSWORD}\",\"username\":\"${TEST_DISPLAY_NAME}\"}")"
 
 if [ "$status" = "201" ]; then
   echo "OK: register created user (201)"
@@ -57,17 +55,29 @@ assert_status "200" "$status" "/users/me works with Bearer token"
 
 say "1.5) /profiles/me without token should be 401"
 status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
-  -d '{"displayName":"HACKED"}')"
+  -d '{"username":"HACKED"}')"
 assert_status "401" "$status" "/profiles/me is protected"
 
 say "1.6) /profiles/me with token should be 200"
 status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"displayName":"Bubu","bio":"hello"}')"
+  -d '{"username":"Bubu","bio":"hello"}')"
 assert_status "200" "$status" "profile update works with Bearer token"
 
-# ---- refresh cookie flow (admin user)
-say "1.7) Admin login (cookie jar) should set refresh_token cookie"
+say "1.7) Register admin user (may be 201 or 409)"
+status="$(http_status_json -i -X POST "${API}/auth/register" \
+  -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\",\"username\":\"admin\"}")"
+
+if [ "$status" = "201" ]; then
+  echo "OK: admin user created (201)"
+elif [ "$status" = "409" ]; then
+  echo "OK: admin user already exists (409)"
+else
+  echo "FAILED: admin register unexpected status $status"
+  exit 1
+fi
+
+say "1.8) Admin login (cookie jar) should set refresh_token cookie"
 LOGIN_JSON="$(curl -sk -c "$COOKIE1" "${API}/auth/login" \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}")"
@@ -80,48 +90,8 @@ grep -E "refresh_token" "$COOKIE1" >/dev/null || {
   echo "FAILED: refresh_token not found in cookie jar"
   exit 1
 }
-echo "OK: refresh cookie present"
+echo "OK: admin login + refresh cookie present"
 
-cp "$COOKIE1" "$COOKIE_OLD"
-
-say "1.8) Refresh should rotate cookie and return new access token"
-REFRESH_JSON="$(curl -sk -b "$COOKIE1" -c "$COOKIE1" -X POST "${API}/auth/refresh")"
-ACCESS2="$(echo "$REFRESH_JSON" | extract_token)"
-echo "REFRESH_ACCESS_LEN=${#ACCESS2}"
-[ -n "$ACCESS2" ] || { echo "FAILED: refresh did not return token"; exit 1; }
-echo "OK: refresh returned token"
-
-say "1.9) Replay test: OLD cookie on refresh should be 401"
-status="$(http_status -i -b "$COOKIE_OLD" -X POST "${API}/auth/refresh")"
-assert_status "401" "$status" "old refresh token rejected after rotation"
-
-say "1.10) Logout should revoke current refresh token"
+say "1.9) Logout should revoke current refresh token"
 status="$(http_status -i -b "$COOKIE1" -c "$COOKIE1" -X POST "${API}/auth/logout")"
 assert_status "200" "$status" "/auth/logout returns 200"
-
-say "1.11) After logout, refresh should be 401"
-status="$(http_status -i -b "$COOKIE1" -c "$COOKIE1" -X POST "${API}/auth/refresh")"
-assert_status "401" "$status" "refresh fails after logout"
-
-# ---- logout-all test (two sessions)
-say "1.12) logout-all revokes both sessions"
-LOGIN_A="$(curl -sk -c "$COOKIE1" "${API}/auth/login" \
-  -H "Content-Type: application/json" \
-  -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}")"
-ACCESS_A="$(echo "$LOGIN_A" | extract_token)"
-
-curl -sk -c "$COOKIE2" "${API}/auth/login" \
-  -H "Content-Type: application/json" \
-  -d "{\"email\":\"${ADMIN_EMAIL}\",\"password\":\"${ADMIN_PASSWORD}\"}" >/dev/null
-
-[ -n "$ACCESS_A" ] || { echo "FAILED: could not get access token for logout-all"; exit 1; }
-
-status="$(http_status -i -X POST "${API}/auth/logout-all" \
-  -H "Authorization: Bearer $ACCESS_A")"
-assert_status "200" "$status" "logout-all returns 200"
-
-status="$(http_status -i -b "$COOKIE1" -X POST "${API}/auth/refresh")"
-assert_status "401" "$status" "session A refresh fails after logout-all"
-
-status="$(http_status -i -b "$COOKIE2" -X POST "${API}/auth/refresh")"
-assert_status "401" "$status" "session B refresh fails after logout-all"

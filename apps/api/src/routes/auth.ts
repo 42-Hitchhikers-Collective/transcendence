@@ -8,23 +8,35 @@ export async function authRoutes(app: any) {
       schema: {
         body: {
           type: "object",
-          required: ["email", "password", "displayName"],
+          required: ["email", "password", "username"],
           additionalProperties: false,
           properties: {
-            email: { type: "string", minLength: 3 },
+            email: {
+              type: "string",
+              minLength: 6,
+              pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            },
             password: { type: "string", minLength: 6 },
-            displayName: { type: "string", minLength: 1 },
+            username: { type: "string", minLength: 1 },
           },
         },
       },
     },
     async (request: any, reply: any) => {
-      const body = request.body as { email: string; password: string; displayName: string };
+      const body = request.body as { email: string; password: string; username: string };
 
-      const result = await AuthService.registerUser(app, body);
-      if (!result.ok) return reply.code(409).send({ error: "email already in use" });
-
-      return reply.code(201).send({ user: result.user });
+      try {
+        const result = await AuthService.registerUser(app, body);
+        if (!result.ok) {
+          if (result.error === "email_in_use")    return reply.code(409).send({ error: "email already in use" });
+          if (result.error === "username_in_use") return reply.code(409).send({ error: "username already in use" });
+          return reply.code(500).send({ error: "registration failed" });
+        }
+        return reply.code(201).send({ user: result.user });
+      } catch (err) {
+        app.log.error(err);
+        return reply.code(500).send({ error: "internal server error" });
+      }
     }
   );
 
@@ -32,7 +44,7 @@ export async function authRoutes(app: any) {
     "/login",
     {
       config: {
-        rateLimit: { max: 50, timeWindow: "1 minute" },
+        rateLimit: { max: 10, timeWindow: "1 minute" },
       },
       schema: {
         body: {
@@ -40,7 +52,11 @@ export async function authRoutes(app: any) {
           required: ["email", "password"],
           additionalProperties: false,
           properties: {
-            email: { type: "string", minLength: 3 },
+            email: {
+              type: "string",
+              minLength: 6,
+              pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            },
             password: { type: "string", minLength: 6 },
           },
         },
@@ -53,34 +69,7 @@ export async function authRoutes(app: any) {
       if (!result.ok) return reply.code(401).send({ error: "invalid credentials" });
 
       const token = await reply.jwtSign(
-        { sub: result.userId, roles: result.roles },
-        { expiresIn: "15m" }
-      );
-
-      setRefreshCookie(reply, result.refreshRaw);
-      return reply.send({ token });
-    }
-  );
-
-  app.post(
-    "/refresh",
-    {
-      config: {
-        rateLimit: { max: 60, timeWindow: "1 minute" },
-      },
-    },
-    async (request: any, reply: any) => {
-      const raw = getRefreshCookie(request);
-      if (!raw) return reply.code(401).send({ error: "missing_refresh_token" });
-
-      const result = await AuthService.rotateRefreshToken(app, raw);
-      if (!result.ok) {
-        clearRefreshCookie(reply);
-        return reply.code(401).send({ error: "invalid_refresh_token" });
-      }
-
-      const token = await reply.jwtSign(
-        { sub: result.userId, roles: result.roles },
+        { sub: result.userId },
         { expiresIn: "15m" }
       );
 
@@ -93,30 +82,12 @@ export async function authRoutes(app: any) {
     "/logout",
     {
       config: {
-        rateLimit: { max: 60, timeWindow: "1 minute" },
+        rateLimit: { max: 10, timeWindow: "1 minute" },
       },
     },
     async (request: any, reply: any) => {
       const raw = getRefreshCookie(request);
       await AuthService.logoutRefreshToken(app, raw);
-      clearRefreshCookie(reply);
-      return reply.send({ ok: true });
-    }
-  );
-
-  app.post(
-    "/logout-all",
-    {
-      preHandler: [app.auth],
-      config: {
-        rateLimit: { max: 20, timeWindow: "1 minute" },
-      },
-    },
-    async (request: any, reply: any) => {
-      const payload = request.user as { sub?: string };
-      if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
-
-      await AuthService.logoutAllRefreshTokens(app, payload.sub);
       clearRefreshCookie(reply);
       return reply.send({ ok: true });
     }

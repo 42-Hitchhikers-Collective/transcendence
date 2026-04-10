@@ -12,21 +12,45 @@ TODO: This might perhaps need to go into features folder, but will better check 
 */
 
 import { useState } from "react";
-import type { FieldValues } from "../Types";
+import type { FieldValues } from "../types";
 
 export type EntryMode = "login" | "signup";
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // FielValues are userName and password (we do not need email)
-  const handleLogin = async (data : FieldValues) => {
+  // FielValues are username and password (we do not need email)
+  const handleLogin = async (data: FieldValues) => {
     setIsLoading(true);
     setError(null);
+    console.log("Requesting Login details:", data);
     try {
-      // TODO: login logic
-      console.log("Requesting Login details:", data.username, data.password);
+      const body = {
+        email: data.email ?? data.username,
+        password: data.password,
+      };
+
+      const res = await fetch(`/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        console.log(
+          `Backend responded with error: ${err?.error} \n message: ${err?.message}`,
+        );
+        setError("Something is wrong \n check console for more details");
+        return;
+      }
+
+      const json = await res.json();
+      // json.token available; app may store it or call refresh as needed
+      return json;
     } catch {
+      console.log(``);
       setError("Login failed");
     } finally {
       setIsLoading(false);
@@ -36,9 +60,29 @@ export function useAuth() {
   const handleSignup = async (data: FieldValues) => {
     setIsLoading(true);
     setError(null);
+    console.log("Requesting Signup details:", data);
     try {
-      // TODO: signup logic
-      console.log("Requesting Signup details:", data);
+      const body = {
+        email: data.email,
+        password: data.password,
+        username: data.username,
+      };
+
+      const res = await fetch(`/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        console.log(
+          `Backend responded with error: ${err?.error} \n message: ${err?.message}`,
+        );
+        setError(err.message);
+        return;
+      }
     } catch {
       setError("Signup failed");
     } finally {

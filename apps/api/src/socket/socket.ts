@@ -1,15 +1,16 @@
 import { Server as SocketIOServer } from "socket.io";
-import { SOCKET_EVENTS } from "./events";
-import { userRoom } from "./rooms";
+import { FastifyInstance } from "fastify";
+import { registerSocketHandlers } from "./handlers";
 
 type JwtPayload = { sub?: string };
 
-export function setupSocket(app: any) {
+export function setupSocket(app: FastifyInstance) {
   const io = new SocketIOServer(app.server, {
     path: "/socket.io",
     cors: { origin: true },
   });
 
+  // --- Auth middleware: reject connections without a valid JWT ---
   io.use((socket, next) => {
     const token =
       socket.handshake.auth?.token ||
@@ -17,9 +18,9 @@ export function setupSocket(app: any) {
 
     if (!token) return next(new Error("unauthorized"));
 
-    const jwtApi = app.jwt;
+    const jwtApi = (app as any).jwt;
     if (!jwtApi || typeof jwtApi.verify !== "function") {
-      app.log.error("JWT not available on app (authPlugin missing?)");
+      app.log.error("JWT plugin not available on app");
       return next(new Error("unauthorized"));
     }
 
@@ -33,7 +34,7 @@ export function setupSocket(app: any) {
     if (!payload.sub) return next(new Error("unauthorized"));
 
     (socket as any).userId = payload.sub;
-    socket.join(userRoom(payload.sub));
+    socket.join(`user:${payload.sub}`);
 
     return next();
   });
@@ -43,21 +44,24 @@ export function setupSocket(app: any) {
 
     app.log.info({ socketId: socket.id, userId }, "socket connected");
 
-    socket.emit(SOCKET_EVENTS.HELLO, { message: "Hello from Socket.IO" });
-    io.emit(SOCKET_EVENTS.PRESENCE_ONLINE, { userId });
+    // Notify everyone a new client joined
+    io.emit("newClient", socket.id);
 
-    socket.on(SOCKET_EVENTS.PING, () => socket.emit(SOCKET_EVENTS.PONG));
+    // Presence
+    io.emit("presence:online", { userId });
 
-    socket.on(SOCKET_EVENTS.NOTIFY_SELF, () => {
-      io.to(userRoom(userId)).emit(SOCKET_EVENTS.NOTIFY, {
-        userId,
-        message: "private notification",
-      });
-    });
+    // Basic ping/pong health check
+    socket.emit("hello", { message: "Hello from Socket.IO" });
+    socket.on("ping", () => socket.emit("pong"));
 
     socket.on("disconnect", () => {
-      io.emit(SOCKET_EVENTS.PRESENCE_OFFLINE, { userId });
+      io.emit("presence:offline", { userId });
       app.log.info({ socketId: socket.id, userId }, "socket disconnected");
     });
+
+    // Game room handlers (create_room, join_room, leave_room, start_game, play_card, draw_card)
+    registerSocketHandlers(app, socket);
   });
+
+  return io;
 }

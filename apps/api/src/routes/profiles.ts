@@ -8,7 +8,7 @@ export async function profileRoutes(app: any) {
           type: "object",
           additionalProperties: false,
           properties: {
-            displayName: { type: "string", minLength: 1 },
+            username: { type: "string", minLength: 1 },
             avatarUrl: { type: "string", minLength: 1 },
             bio: { type: "string" },
           },
@@ -19,18 +19,18 @@ export async function profileRoutes(app: any) {
       const payload = request.user as { sub?: string };
       if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
 
-      const body = request.body as { displayName?: string; avatarUrl?: string; bio?: string };
+      const body = request.body as { username?: string; avatarUrl?: string; bio?: string };
 
       const profile = await app.prisma.profile.upsert({
         where: { userId: payload.sub },
         update: body,
         create: {
           userId: payload.sub,
-          displayName: body.displayName || "User",
+          username: body.username || "User",
           avatarUrl: body.avatarUrl,
           bio: body.bio,
         },
-        select: { displayName: true, avatarUrl: true, bio: true },
+        select: { username: true, avatarUrl: true, bio: true },
       });
 
       return reply.send({ profile });

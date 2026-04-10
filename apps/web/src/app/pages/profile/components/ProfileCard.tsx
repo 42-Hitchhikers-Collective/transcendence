@@ -6,7 +6,6 @@ import {
   ChartBarSquareIcon,
 } from "@heroicons/react/24/solid";
 
-import { cn } from "@/shared/lib/utils";
 
 function StatusCards({
   gamesPlayed,
