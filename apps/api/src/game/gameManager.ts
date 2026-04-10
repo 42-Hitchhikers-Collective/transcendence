@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/08 17:59:30 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/10 13:41:41 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ export class GameManager {
   }
 
   // Add player to room. removes player from old room
-  joinRoom(name: string, playerId: string): RoomResult {
+  joinRoom(name: string, playerId: string, socketId: string): RoomResult {
     const room = this.getRoomByName(name);
     if (!room)
       return { success: false, error: "Room not found" };
@@ -53,7 +53,7 @@ export class GameManager {
     if (room.state !== "waiting")
       return { success: false, error: "Game already begun" };
     this.leaveRoom(playerId);
-    room.players.push({ id: playerId });
+    room.players.push({ playerId, socketId }); // socketId will be set in the Socket Handler when we have access to the socket
     this.addToPlayerRoom(playerId, roomId); // add to playerRooms
     return { success: true, room: room };;
   }
@@ -142,6 +142,8 @@ export class GameManager {
     const room = this.getRoomById(roomId);
     if (!room)
       return {success: false, error: "Room not found"};
+    if (msg.length === 0 || msg.length > 200)
+      return {success: false, error: "Message must be between 1 and 200 characters"};
     return {success: true, roomId: roomId};
   }
 
@@ -180,7 +182,7 @@ export class GameManager {
   
   // Removes player from it's room player[] array
   private removePlayerFromPlayersArray(players: Player[], playerId: string): boolean {
-    const index = players.findIndex(p => p.id === playerId);
+    const index = players.findIndex(p => p.playerId === playerId);
     if (index === -1) return false;
     players.splice(index, 1);
     return true;
@@ -236,7 +238,7 @@ export class GameManager {
     for (const [roomId, room] of this.roomsById) {
       const name = room.name ? `${room.name}` : "";
       console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
-      console.log("Players:", room.players.map(p => p.id));
+      console.log("Players:", room.players.map(p => p.playerId).join(", "));
     }
 
     console.log("Player room list:");
