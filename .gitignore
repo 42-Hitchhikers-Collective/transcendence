@@ -1,23 +1,18 @@
 .env
+.env.*
 nginx/certs
-
-# dependencies
 node_modules/
-
-# build output
+cookies.txt
+tests/node_modules
+tests/package-lock.json
+tests/package.json
+.socketio-test
+data/postgres/
+apps/api/prisma/migrations
+transcendence.pdf
 dist/
 build/
-
-# environment variables
-.env
-.env.*
-
-# logs
 *.log
-
-# OS
 .DS_Store
-
-# editor
 .vscode
 .idea

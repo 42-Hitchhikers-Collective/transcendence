@@ -1,14 +1,353 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+  DELETED
+}
+
+enum LobbyStatus {
+  OPEN
+  IN_GAME
+  CLOSED
+}
+
+enum GameStatus {
+  RUNNING
+  FINISHED
+  ABORTED
+}
+
+// ADVANCED
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum ConversationType {
+  DM
+  LOBBY
+  GAME
+}
+
+enum NotificationType {
+  FRIEND_REQUEST
+  INVITE
+  GAME_RESULT
+  SYSTEM
+}
+
+// ============================================================
+// BASIC — Core models required for the project MVP
+// ============================================================
+
+// --- Core ---
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id              String     @id @default(uuid())
+  email           String     @unique
+  passwordHash    String?
+  status          UserStatus @default(ACTIVE)
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile?
+
+  // Auth
+  refreshTokens RefreshToken[]
+
+  // Game
+  hostedLobbies Lobby[]       @relation("HostedLobbies")
+  lobbyMembers  LobbyMember[]
+  gamePlayers   GamePlayer[]
+
+  // ADVANCED: Social
+  friendRequestsSent     FriendRequest[] @relation("FriendRequestsSent")
+  friendRequestsReceived FriendRequest[] @relation("FriendRequestsReceived")
+  friendshipsA           Friendship[]    @relation("FriendshipA")
+  friendshipsB           Friendship[]    @relation("FriendshipB")
+  blocksMade             Block[]         @relation("BlocksMade")
+  blocksReceived         Block[]         @relation("BlocksReceived")
+
+  // ADVANCED: Invites / Chat / Notifications
+  invitesSent         Invite[]             @relation("InvitesSent")
+  invitesRecv         Invite[]             @relation("InvitesRecv")
+  conversationMembers ConversationMember[]
+  messages            Message[]
+  notifications       Notification[]
+
+  // EXPERT: OAuth / Files
+  oauthAccounts OAuthAccount[]
+  authSessions  AuthSession[]
+  files         File[]
+}
+
+model Profile {
+  userId    String  @id
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName  String  @unique
+  avatarUrl String?
+  bio       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- Auth / Security Flows ---
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// --- Lobby & Game ---
+// NOTE (UNO): Game.state stores the full UNO game state as JSON:
+//   { drawPile: Card[], discardPile: Card[], currentColor: string, direction: 1|-1 }
+// NOTE (UNO): GamePlayer.hand stores the player's current hand as JSON: Card[]
+// NOTE (UNO): GamePlayer.score = sum of card values left in hand when someone wins (standard UNO scoring)
+
+model Lobby {
+  id         String      @id @default(uuid())
+  hostUserId String
+  host       User        @relation("HostedLobbies", fields: [hostUserId], references: [id], onDelete: Cascade)
+  status     LobbyStatus @default(OPEN)
+  maxPlayers Int         @default(4)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  members LobbyMember[]
+  games   Game[]
+
+  // ADVANCED
+  invites Invite[]
+
+  @@index([hostUserId])
+}
+
+model LobbyMember {
+  lobbyId  String
+  userId   String
+  ready    Boolean  @default(false)
+  joinedAt DateTime @default(now())
+
+  lobby Lobby @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([lobbyId, userId])
+  @@index([userId])
+}
+
+model Game {
+  id        String     @id @default(uuid())
+  lobbyId   String?
+  lobby     Lobby?     @relation(fields: [lobbyId], references: [id], onDelete: SetNull)
+  status    GameStatus @default(RUNNING)
+  state     Json?      // UNO game state (draw pile, discard pile, current color, direction)
+  createdAt DateTime   @default(now())
+  endedAt   DateTime?
+
+  players GamePlayer[]
+
+  // ADVANCED: Chat
+  conversation Conversation?
+}
+
+model GamePlayer {
+  gameId     String
+  userId     String
+  hand       Json?    // UNO: array of cards in hand
+  score      Int?     // UNO: card-value sum (penalty points left when game ends)
+  placement  Int?     // finish order (1st, 2nd, ...)
+  hasCalledUno Boolean @default(false)
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, userId])
+  @@index([userId])
+}
+
+// ============================================================
+// ADVANCED
+// ============================================================
+
+// --- Social ---
+
+model FriendRequest {
+  id         String   @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  createdAt  DateTime @default(now())
+
+  fromUser User @relation("FriendRequestsSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("FriendRequestsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+
+model Friendship {
+  userAId   String
+  userBId   String
+  createdAt DateTime @default(now())
+
+  userA User @relation("FriendshipA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("FriendshipB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@id([userAId, userBId])
+  @@index([userBId])
+}
+
+model Block {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker User @relation("BlocksMade", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+// --- Invites ---
+
+model Invite {
+  id         String       @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  lobbyId    String?
+  status     InviteStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+
+  fromUser User   @relation("InvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User   @relation("InvitesRecv", fields: [toUserId], references: [id], onDelete: Cascade)
+  lobby    Lobby? @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([lobbyId])
+}
+
+// --- Chat ---
+
+model Conversation {
+  id     String           @id @default(uuid())
+  type   ConversationType
+  gameId String?          @unique
+
+  createdAt DateTime @default(now())
+
+  game     Game?               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  members  ConversationMember[]
+  messages Message[]
+}
+
+model ConversationMember {
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+// --- Notifications ---
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([readAt])
+}
+
+// ============================================================
+// EXPERT — Post-project extensions
+// ============================================================
+
+// --- OAuth (third-party login: Google, 42, GitHub…) ---
+
+model OAuthAccount {
+  id                String @id @default(uuid())
+  userId            String
+  provider          String
+  providerAccountId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// --- Auth Sessions (device/session management) ---
+
+model AuthSession {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// --- File Storage (avatars, attachments…) ---
+
+model File {
+  id        String   @id @default(uuid())
+  ownerId   String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
 }
