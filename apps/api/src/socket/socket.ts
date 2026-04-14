@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   socket.ts                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:42 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/19 16:30:59 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/14 12:06:27 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 import { Server as SocketIOServer } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { registerSocketHandlers } from "./handlers";
+import { authMiddleware } from "./middleware/auth";
+
 
 export function setupSocket(app: FastifyInstance) {
   const io = new SocketIOServer(app.server, {
@@ -21,6 +23,8 @@ export function setupSocket(app: FastifyInstance) {
     cors: { origin: true },
   });
 
+  io.use(authMiddleware);
+  
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
     io.emit("newClient", socket.id);

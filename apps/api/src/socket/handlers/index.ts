@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/10 15:35:42 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/14 12:59:05 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ socket.on("send_msg", ({ msg }) => {
     return;
   }
   if (res.roomId) {
-    console.log("Broadcasting message to room:", res.roomId);
+    // console.log("Broadcasting message to room:", res.roomId);
     socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: playerId });
   }
 });

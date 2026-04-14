@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/10 15:34:15 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/14 13:09:43 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ export function registerRoomHandlers(
       }
       gameManager.joinRoom(roomName, playerId, socketId);
       socket.join(newRoom.id);
-      socket.emit("room_created", { roomId: newRoom.id });
+      socket.emit("room_created", { roomName: newRoom.name });
     }
   });
 
@@ -56,7 +56,7 @@ export function registerRoomHandlers(
     }
     const roomId = res.room.id;
     socket.join(roomId);
-    socket.emit("room_joined", { roomId });
+    socket.emit("room_joined", { roomName });
     broadcastRoomState(roomId);
   });
 

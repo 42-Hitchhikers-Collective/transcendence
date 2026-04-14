@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/10 13:41:41 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/14 12:16:42 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ export class GameManager {
       console.log("Players:", room.players.map(p => p.playerId).join(", "));
     }
 
-    console.log("Player room list:");
+    console.log("Player list:");
     for (const [playerId, roomId] of this.playerRooms) {
       console.log(`${playerId} → ${roomId}`);
     }
