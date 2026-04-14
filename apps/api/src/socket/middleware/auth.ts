@@ -5,39 +5,47 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/14 12:02:23 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/14 13:14:50 by ilazar           ###   ########.fr       */
+/*   Created: 2026/04/14 15:08:01 by ilazar            #+#    #+#             */
+/*   Updated: 2026/04/14 15:08:02 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { Socket } from "socket.io";
 
+
+import { Socket } from "socket.io";
+import { FastifyInstance } from "fastify";
+
+type JwtPayload = { sub?: string };
 type Next = (err?: Error) => void;
 
-export function authMiddleware(socket: Socket, next: Next) {
-  // TODO: replace with real JWT verification (Welf)
-  
-  const token = socket.handshake.auth?.token;
+export function createAuthMiddleware(app: FastifyInstance) {
+  return (socket: Socket, next: Next) => {
+    const token =
+      socket.handshake.auth?.token ||
+      (socket.handshake.headers.authorization || "").replace(/^Bearer\s+/i, "");
 
-  // Temporary behavior (no JWT yet)
-  if (!token) {
-    // guest mode for now
-    socket.data.user = null;
+    if (!token) return next(new Error("unauthorized"));
+
+    const jwtApi = (app as any).jwt;
+    if (!jwtApi || typeof jwtApi.verify !== "function") {
+      app.log.error("JWT plugin not available on app");
+      return next(new Error("unauthorized"));
+    }
+
+    let payload: JwtPayload;
+    try {
+      payload = jwtApi.verify(token) as JwtPayload;
+    } catch {
+      return next(new Error("unauthorized"));
+    }
+
+    if (!payload.sub) return next(new Error("unauthorized"));
+
+    (socket as any).userId = payload.sub;
+    socket.join(`user:${payload.sub}`);
+
     return next();
-  }
-
-  // Fake user for now
-  socket.data.user = {
-    userId: token, // temporary
-    // later will be replaced:
-    // const payload = verifyJWT(token)
-    // userId: payload.userId
-    
-    username: "guest",
   };
-
-  next();
-
-  console.log("Auth:", socket.data.user);
 }
+
 
