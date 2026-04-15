@@ -6,15 +6,16 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/10 14:01:57 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/15 13:48:37 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export const MAX_PLAYERS_PER_ROOM = 4;
 
 export type Player = {
-  playerId: string;      // permanent identity used for game logic
+  playerId: string;      // permanent identity (userId) used for game logic
   socketId: string;      // current connection used for networking
+  userName: string;      // display name for UI/chat
 };
 
 export type GameState = "waiting" | "playing" | "finished";

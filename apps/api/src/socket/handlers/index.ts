@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/14 12:59:05 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/15 13:52:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ export function registerSocketHandlers(
 
 // ---> Msg Events ---
 socket.on("send_msg", ({ msg }) => {
-  const { playerId } = getIdentity(socket);
+  const { playerId, userName } = getIdentity(socket);
   const res = gameManager.sendMessage(playerId, msg);
   if (!res.success) {
     socket.emit("error", { message: res.error });
@@ -65,7 +65,7 @@ socket.on("send_msg", ({ msg }) => {
   }
   if (res.roomId) {
     // console.log("Broadcasting message to room:", res.roomId);
-    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: playerId });
+    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
   }
 });
 

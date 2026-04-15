@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/14 12:16:42 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/15 13:48:33 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ export class GameManager {
   }
 
   // Add player to room. removes player from old room
-  joinRoom(name: string, playerId: string, socketId: string): RoomResult {
+  joinRoom(name: string, playerId: string, socketId: string, userName: string): RoomResult {
     const room = this.getRoomByName(name);
     if (!room)
       return { success: false, error: "Room not found" };
@@ -53,7 +53,7 @@ export class GameManager {
     if (room.state !== "waiting")
       return { success: false, error: "Game already begun" };
     this.leaveRoom(playerId);
-    room.players.push({ playerId, socketId }); // socketId will be set in the Socket Handler when we have access to the socket
+    room.players.push({ playerId, socketId, userName });
     this.addToPlayerRoom(playerId, roomId); // add to playerRooms
     return { success: true, room: room };;
   }

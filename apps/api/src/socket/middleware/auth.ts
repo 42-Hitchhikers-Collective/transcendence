@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 15:08:01 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/14 15:08:02 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/15 13:31:28 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ type JwtPayload = { sub?: string };
 type Next = (err?: Error) => void;
 
 export function createAuthMiddleware(app: FastifyInstance) {
-  return (socket: Socket, next: Next) => {
+  return async (socket: Socket, next: Next) => {
     const token =
       socket.handshake.auth?.token ||
       (socket.handshake.headers.authorization || "").replace(/^Bearer\s+/i, "");
@@ -41,10 +41,24 @@ export function createAuthMiddleware(app: FastifyInstance) {
 
     if (!payload.sub) return next(new Error("unauthorized"));
 
-    (socket as any).userId = payload.sub;
-    socket.join(`user:${payload.sub}`);
+    // Fetch user profile to get username
+    try {
+      const profile = await app.prisma.profile.findUnique({
+        where: { userId: payload.sub },
+        select: { userName: true },
+      });
 
-    return next();
+      if (!profile) return next(new Error("unauthorized"));
+
+      (socket as any).userId = payload.sub;
+      (socket as any).userName = profile.userName;
+      socket.join(`user:${payload.sub}`);
+
+      return next();
+    } catch (err) {
+      app.log.error(err);
+      return next(new Error("unauthorized"));
+    }
   };
 }
 
