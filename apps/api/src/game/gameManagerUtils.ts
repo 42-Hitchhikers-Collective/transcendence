@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameManagerUtils.ts                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/19 15:48:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/08 12:16:24 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,16 @@ import { Room, SanitizedRoom, SanitizedPlayer } from "./types";
 
 
 // Get a "sanitizied" room version that doesn't show cards of other players except the observer
-export function getSanitizedRoom(room: Room, observerId: string): SanitizedRoom {
+export function getSanitizedRoom(room: Room, observerPlayerId: string): SanitizedRoom {
   const sanitizedPlayers: SanitizedPlayer[] = room.players.map(p => { // for each player
-    const isMe = p.id === observerId;
+    const isMe = p.playerId === observerPlayerId;
     
     return {
-      id: p.id,
+      id: p.playerId,
       // Everyone sees the count
-      cardCount: room.game?.playerHands.get(p.id) || 0,
+      cardCount: room.game?.playerHands.get(p.playerId) || 0,
       // ONLY the observer sees their own actual cards
-      cards: isMe ? room.game?.getHand(p.id) : undefined
+      cards: isMe ? room.game?.getHand(p.playerId) : undefined
     };
   });
 
@@ -40,7 +40,6 @@ export function getSanitizedRoom(room: Room, observerId: string): SanitizedRoom 
     } : undefined
   };
 }
-
 
 
 

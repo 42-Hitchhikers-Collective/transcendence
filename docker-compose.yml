@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: appdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
       interval: 5s
@@ -54,7 +56,7 @@ services:
       - api
       - web
     ports:
-      - "443:443"
+      - "8443:443" # original 443:443, Docker runs without root privileges cannot bind privileged ports (<1024)
       - "8080:80"   
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -70,10 +72,4 @@ networks:
 volumes:
   api_node_modules:
   web_node_modules:
-  postgres_data:
-    name: postgres_data
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./data/postgres
+  postgres_data: {} # // Changed by Inbar during inbar/welf merge to make it work on school pcs

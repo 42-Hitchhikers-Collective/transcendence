@@ -55,5 +55,8 @@ api:
 migration:
 	$(COMPOSE) exec api npx prisma migrate dev --name init
 
+prune:
+	docker system prune -a --volumes -f   
+
 # Phony
-.PHONY: all up down logs clean re certs dirs db api migration ps
+.PHONY: all up down logs clean re certs dirs db api migration ps prune

@@ -1,3 +1,4 @@
+
 import Fastify from "fastify";
 import { prismaPlugin } from "./plugins/prisma";
 import { authPlugin } from "./plugins/auth";
@@ -7,6 +8,10 @@ import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
 import { setupSocket } from "./socket/socket";
 import { gameManager } from "./game";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 
 const app = Fastify({ logger: true, trustProxy: true });
 
