@@ -15,7 +15,9 @@ cd transcendence
 make certs  
 make up  
 [In case you get permission problems. Run: sudo chown -R $USER:$USER nginx/certs]
-https://localhost (Your browser will warn about the self-signed certificate.)  
+https://localhost (Your browser will warn about the self-signed certificate.)
+https://localhost:8443
+https://localhost:8443/socket-test0.html --> socket test
 
 ## Resources
 
