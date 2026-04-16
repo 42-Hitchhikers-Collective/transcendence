@@ -23,7 +23,7 @@ re: clean up
 
 # Setup
 dirs:
-	mkdir -p data/postgres nginx/certs
+	mkdir -p data/postgres data/avatars nginx/certs
 	
 certs: dirs
 	mkdir -p nginx/certs
@@ -36,8 +36,11 @@ certs: dirs
 db:
 	$(COMPOSE) up -d db
 
-db-init:
-	docker compose exec api sh -lc 'npm run prisma:migrate && npm run db:seed'
+db-seed:
+	$(COMPOSE) exec api npm run db:seed
+
+db-migrate:
+	$(COMPOSE) exec api npx prisma migrate dev
 		
 db-reset:
 	$(COMPOSE) down -v
@@ -59,4 +62,4 @@ prune:
 	docker system prune -a --volumes -f   
 
 # Phony
-.PHONY: all up down logs clean re certs dirs db api migration ps prune
+.PHONY: all up down logs clean re certs dirs db db-seed db-migrate db-reset api migration prune ps
