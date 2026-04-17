@@ -1,4 +1,4 @@
-import { mockProfiles } from "@/features/profile/mockData/mockProfiles";
+import { mockProfiles } from "@/app/auth/mockProfiles";
 import { GameHistoryItem } from "./HistoryListItem";
 
 export function GameHistoryCard({ className }: React.ComponentProps<"div">) {

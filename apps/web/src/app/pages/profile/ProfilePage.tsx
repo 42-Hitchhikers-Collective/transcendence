@@ -1,8 +1,9 @@
 import { ProfileCard } from "./components/ProfileCard";
 import { JoinGameCard } from "./components/gameStarter/StarterCard";
 import { GameHistoryCard } from "./components/playHistory/HistoryList";
-import { mockProfiles } from "@/features/profile/mockData/mockProfiles";
+import { mockProfiles } from "@/app/auth/mockProfiles";
 import background from "@/assets/backgrounds/unocards_gemini.png";
+import { useAuthContext } from "../../auth/AuthContext";
 
 // import AlertEx from "@/shared/shadcn-studio/alert/alert-08";
 // import Uhh from "@/shared/shadcn-space/alert/alert-04";
@@ -27,14 +28,14 @@ function WelcomeCard({ playerData }: { playerData: (typeof mockProfiles)[0] }) {
 }
 
 function ProfilePage() {
-  const playerData = mockProfiles[0];
+  const { user } = useAuthContext();
 
   return (
     <div className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
     style={{ backgroundImage: `url(${background})`,  backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', backgroundBlendMode:'saturation'  }}
     >
       
-      <ProfileCard />
+      <ProfileCard user={user} />
       {/* <WelcomeCard playerData={playerData} /> */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="order-2 lg:order-1">

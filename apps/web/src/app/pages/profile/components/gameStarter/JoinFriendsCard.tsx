@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { mockProfiles } from '@/features/profile/mockData/mockProfiles'
+import { mockProfiles } from '@/app/auth/mockProfiles'
 import { useNavigate } from 'react-router'
 
 /* 

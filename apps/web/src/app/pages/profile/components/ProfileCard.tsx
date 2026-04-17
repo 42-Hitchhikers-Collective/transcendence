@@ -1,10 +1,19 @@
-import { mockProfiles } from "@/features/profile/mockData/mockProfiles";
+import { mockProfiles } from "@/app/auth/mockProfiles";
 import { ProgressBar } from "./ProgressBar";
 import {
   PuzzlePieceIcon,
   UserGroupIcon,
   ChartBarSquareIcon,
 } from "@heroicons/react/24/solid";
+
+type AuthUser = {
+  email?: string;
+  username?: string;
+  profile?: {
+    username?: string;
+    avatarUrl?: string | null;
+  } | null;
+} | null;
 
 
 function StatusCards({
@@ -124,8 +133,10 @@ export function Badge({
   );
 }
 
-export function ProfileCard({ ...props }: React.ComponentProps<"div">) {
+export function ProfileCard({ user, ...props }: { user?: AuthUser } & React.ComponentProps<"div">) {
   const profile = mockProfiles[0];
+  const displayName = user?.profile?.username ?? user?.username ?? profile.username;
+  const avatarUrl = user?.profile?.avatarUrl ?? profile.avatar;
   let wins = profile.stats.wins;
   let losses = profile.stats.losses;
   const winRate = (wins / (wins + losses)) * 100;
@@ -140,8 +151,8 @@ export function ProfileCard({ ...props }: React.ComponentProps<"div">) {
         <div className="flex items-center justify-center">
           <div className="relative transform shadow-2xl w-54 h-54 md:w-48 md:h-48 lg:w-52 lg:h-52 xl:w-64 xl:h-64 2xl:w-72 2xl:h-72 flex items-center justify-center transition-all duration-300">
             <img
-              src={profile.avatar}
-              alt={profile.username}
+              src={avatarUrl}
+              alt={displayName}
               className="w-full h-full object-cover border-4 border-white shadow-sm shadow-slate-900 shadow-inner"
             />
           </div>
@@ -152,7 +163,7 @@ export function ProfileCard({ ...props }: React.ComponentProps<"div">) {
           <div>
             <Badge gamesPlayed={wins + losses} winRate={winRate} />
             <h2 className="my-2 text-left text-2xl md:text-4xl font-extrabold text-gray-900 drop-shadow-md">
-              {profile.username}
+              {displayName}
             </h2>
           </div>
 

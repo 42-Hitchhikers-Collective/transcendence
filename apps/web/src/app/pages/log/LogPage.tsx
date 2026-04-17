@@ -16,7 +16,7 @@ import {
 /* My componente */
 import { useState } from "react";
 /* Hooks */
-import { useAuth } from "./hooks/useAuth";
+import { useLogHandlers } from "./hooks/useLogHandlers";
 /* My components */
 import { Login } from "./components/LogIn";
 import { Signup } from "./components/Signup";
@@ -24,7 +24,7 @@ import background from "@/assets/backgrounds/bg_center.jpg";
 /* Types */
 
 export default function EntryPage() {
-  const { handleLogin, handleSignup, error, isLoading } = useAuth();
+  const { handleLogin, handleSignup, error, isLoading } = useLogHandlers();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const onRequestMode = (target?: "login" | "signup") =>
     setMode((pendMode) =>
@@ -46,7 +46,7 @@ export default function EntryPage() {
               <TabsContent value="login">
                 <Login
                   onRequestMode={onRequestMode}
-                  onLogin={handleLogin}
+                  onLogin={handleLogin} // calls api
                   error={error}
                   isLoading={isLoading}
                 />

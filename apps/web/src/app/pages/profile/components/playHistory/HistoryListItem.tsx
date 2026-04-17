@@ -1,5 +1,5 @@
 import { cn } from "@/shared/lib/utils";
-import type { GameHistory } from "@/features/profile/mockData/mockProfiles";
+import type { GameHistory } from "@/app/auth/mockProfiles";
 import { Players } from "./Players";
 import { HandThumbDownIcon, TrophyIcon } from "@heroicons/react/24/solid";
 

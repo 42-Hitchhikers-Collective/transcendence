@@ -88,7 +88,7 @@ The core logic layer of the application. Each subfolder is a self-contained doma
     ├── api/
     │   └── authApi.ts
     └── hooks/
-        └── useAuth.ts
+        └── useLogHandlers.ts
     ```
 
 - ### **`profile/`**: 
@@ -158,7 +158,7 @@ If it is only used by one feature, it belongs in that feature's folder, not here
 
 - ### **`/Hooks`:**
     Custom React hooks (prefixed with `use`) that are shared across multiple features. Hooks encapsulate stateful logic so components stay focused on rendering. </br> **Examples:**
-    - `useAuth.ts`: exposes login/logout and the current auth state
+    - `useLogHandlers.ts`: exposes login/logout and the current auth state
     - `useGameState.ts`: tracks the active game state (hand, discard pile, status)
     - `useWindowSize.ts`: returns the current viewport dimensions
     
@@ -233,7 +233,7 @@ src/
 │   │   ├── api/
 │   │   │   └── authApi.ts
 │   │   └── hooks/
-│   │       └── useAuth.ts
+│   │       └── useLogHandlers.ts
 │   ├── game/                     #  Phaser game engine, WebSocket connection, game state management
 │   │   ├── main.ts               # Initializes the Phaser game instance
 │   │   ├── hooks /               # React hooks related to game state management
