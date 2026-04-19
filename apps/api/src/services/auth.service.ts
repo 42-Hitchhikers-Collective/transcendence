@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import { newRefreshToken, hashToken, refreshExpiryDate } from "../auth/tokens";
 
 type RegisterInput = { email: string; password: string; username: string };
 type LoginInput = { email: string; password: string };
@@ -36,30 +35,5 @@ export async function loginUser(app: any, input: LoginInput) {
   const ok = await bcrypt.compare(input.password, user.passwordHash);
   if (!ok) return { ok: false as const, error: "invalid_credentials" as const };
 
-  const refreshRaw = newRefreshToken();
-  await app.prisma.refreshToken.create({
-    data: {
-      userId: user.id,
-      tokenHash: hashToken(refreshRaw),
-      expiresAt: refreshExpiryDate(30),
-    },
-  });
-
-  return { ok: true as const, userId: user.id, refreshRaw };
-}
-
-export async function logoutRefreshToken(app: any, raw: string | null) {
-  if (!raw) return;
-
-  await app.prisma.refreshToken.updateMany({
-    where: { tokenHash: hashToken(raw), revokedAt: null },
-    data: { revokedAt: new Date() },
-  });
-}
-
-export async function logoutAllRefreshTokens(app: any, userId: string) {
-  await app.prisma.refreshToken.updateMany({
-    where: { userId, revokedAt: null },
-    data: { revokedAt: new Date() },
-  });
+  return { ok: true as const, userId: user.id };
 }

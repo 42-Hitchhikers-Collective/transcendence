@@ -1,8 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { registerSocketHandlers } from "./handlers";
-
-type JwtPayload = { sub?: string };
+import { createAuthMiddleware } from "./middleware/auth";
 
 export function setupSocket(app: FastifyInstance) {
   const io = new SocketIOServer(app.server, {
@@ -10,35 +9,9 @@ export function setupSocket(app: FastifyInstance) {
     cors: { origin: true },
   });
 
-  // --- Auth middleware: reject connections without a valid JWT ---
-  io.use((socket, next) => {
-    const token =
-      socket.handshake.auth?.token ||
-      (socket.handshake.headers.authorization || "").replace(/^Bearer\s+/i, "");
-
-    if (!token) return next(new Error("unauthorized"));
-
-    const jwtApi = (app as any).jwt;
-    if (!jwtApi || typeof jwtApi.verify !== "function") {
-      app.log.error("JWT plugin not available on app");
-      return next(new Error("unauthorized"));
-    }
-
-    let payload: JwtPayload;
-    try {
-      payload = jwtApi.verify(token) as JwtPayload;
-    } catch {
-      return next(new Error("unauthorized"));
-    }
-
-    if (!payload.sub) return next(new Error("unauthorized"));
-
-    (socket as any).userId = payload.sub;
-    socket.join(`user:${payload.sub}`);
-
-    return next();
-  });
-
+  // --- Use JWT auth middleware ---
+  io.use(createAuthMiddleware(app));
+  
   io.on("connection", (socket) => {
     const userId = (socket as any).userId as string;
 

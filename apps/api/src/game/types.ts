@@ -3,17 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   types.ts                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/19 15:40:28 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/15 13:48:37 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export const MAX_PLAYERS_PER_ROOM = 4;
 
 export type Player = {
-  id: string;
+  playerId: string;      // permanent identity (userId) used for game logic
+  socketId: string;      // current connection used for networking
+  userName: string;      // display name for UI/chat
 };
 
 export type GameState = "waiting" | "playing" | "finished";
@@ -34,6 +36,7 @@ export interface GameInstance {
 
 export type Room = {
   id: string;
+  name: string;
   players: Player[];
   state: GameState;
   game?: GameInstance;
@@ -66,3 +69,8 @@ export type RoomResult =
 export type RoomIdResult = 
   | { success: true; roomId: string }
   | { success: false; error: string | undefined};
+
+
+// export type Result =
+//   | { success: true }
+//   | { success: false; error: string | undefined };
