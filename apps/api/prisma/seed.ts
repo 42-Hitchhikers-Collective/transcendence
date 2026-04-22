@@ -62,6 +62,12 @@ const GAMES = [
 ];
 
 async function main() {
+  const gameCount = await prisma.game.count();
+  if (gameCount > 0) {
+    console.log("Database already seeded, skipping.");
+    return;
+  }
+
   // --- Users ---
   const userIds: Record<string, string> = {};
 
