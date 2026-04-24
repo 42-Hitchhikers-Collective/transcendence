@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/15 13:48:33 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/24 14:54:00 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ import { MAX_PLAYERS_PER_ROOM } from "./types";
 export class GameManager {
   
   private roomsById: Map<string, Room> = new Map();         // roomId → Room
-  private playerRooms: Map<string, string> = new Map(); // playerId → roomId
-  private roomsByName: Map<string, Room> = new Map(); // roomName → Room (to allow join by name)
+  private playerRooms: Map<string, string> = new Map();     // playerId → roomId
+  private roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
   
   // --- Room Events ---
 
@@ -201,14 +201,15 @@ export class GameManager {
     } while (this.roomsById.has(roomId));
     return roomId;
   }
+    
+  
+  //--- Getters ---
+
   
   //lookup in playerRoom map after a player. returns roomId. Null if not in a room
-  private getPlayerRoomId(playerId: string): string | null {
+  getPlayerRoomId(playerId: string): string | null {
     return this.playerRooms.get(playerId) ?? null;
   }
-  
-
-//--- Getters ---
 
   getRoomById(roomId: string): Room | null  {
     const room = this.roomsById.get(roomId);

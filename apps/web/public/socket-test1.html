@@ -61,7 +61,7 @@ let socket;
 
 function connectSocket() {
   const jwtToken = document.getElementById("jwtInput").value;
-  socket = io("http://localhost:3000", {
+  socket = io("http://localhost:8443", {
     path: "/socket.io",
     auth: {
       token: jwtToken
