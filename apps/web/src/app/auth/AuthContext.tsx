@@ -49,11 +49,12 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, username: string) => Promise<void>;
-  logout: () => Promise<void>;0
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const TOKEN_KEY = "auth_token"; // Key for storing token in localStorage -> TODO: change in a more secure storage (HttpOnly cookie or in-memory with refresh token)
+// storage key name for the token; in a real app -> TODO : consider more secure storage than localStorage (e.g. HttpOnly cookies or in-memory with refresh tokens)
+const TOKEN_KEY = "auth_token"; 
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() =>
@@ -160,6 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Hook that checks the authentication state
 export function useAuthContext() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useLogHandlersContext must be used inside AuthProvider");

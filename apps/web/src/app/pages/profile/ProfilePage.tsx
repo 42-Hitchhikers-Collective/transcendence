@@ -28,14 +28,14 @@ function WelcomeCard({ playerData }: { playerData: (typeof mockProfiles)[0] }) {
 }
 
 function ProfilePage() {
-  const { user } = useAuthContext();
+  const { user, logout } = useAuthContext(); // pulls the auth state
 
   return (
     <div className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
     style={{ backgroundImage: `url(${background})`,  backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', backgroundBlendMode:'saturation'  }}
     >
       
-      <ProfileCard user={user} />
+      <ProfileCard user={user} onLogout={logout} />
       {/* <WelcomeCard playerData={playerData} /> */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="order-2 lg:order-1">

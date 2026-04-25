@@ -92,9 +92,11 @@ function StatusCards({
 export function Badge({
   gamesPlayed,
   winRate,
+  onLogout,
 }: {
   gamesPlayed: number;
   winRate: number;
+  onLogout?: () => void;
 }) {
   const inRange = (value: number, min: number, max: number) =>
     value >= min && value < max;
@@ -125,15 +127,26 @@ export function Badge({
   };
 
   return (
-    <div className="flex items-start justify-start gap-4">
+    <div className="flex items-start justify-between gap-4">
       <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
         {experienceLevel()}
       </span>
+      <button
+        type="button"
+        onClick={onLogout}
+        className="rounded-full border border-gray-100 bg-red-300 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-600"
+      >
+        Logout
+      </button>
     </div>
   );
 }
 
-export function ProfileCard({ user, ...props }: { user?: AuthUser } & React.ComponentProps<"div">) {
+export function ProfileCard({
+  user,
+  onLogout,
+  ...props
+}: { user?: AuthUser; onLogout?: () => void } & React.ComponentProps<"div">) {
   const profile = mockProfiles[0];
   const displayName = user?.profile?.username ?? user?.username ?? profile.username;
   const avatarUrl = user?.profile?.avatarUrl ?? profile.avatar;
@@ -155,13 +168,25 @@ export function ProfileCard({ user, ...props }: { user?: AuthUser } & React.Comp
               alt={displayName}
               className="w-full h-full object-cover border-4 border-white shadow-sm shadow-slate-900 shadow-inner"
             />
+            {/* AVATAR EDIT BUTTON COMPONENT */}
+            <button
+              type="button"
+              className="absolute bottom-3 right-3 rounded-full border border-white/80 bg-black/60 px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-white shadow-md backdrop-blur-md md:bottom-4 md:right-4 md:px-3 md:py-1 md:text-[11px]"
+              aria-label="Edit avatar"
+            >
+               <span className="pr-3">✏️</span>Edit
+            </button>
           </div>
         </div>
 
         {/* Right content */}
         <div className="flex flex-col min-h-0 ">
           <div>
-            <Badge gamesPlayed={wins + losses} winRate={winRate} />
+            <Badge
+              gamesPlayed={wins + losses}
+              winRate={winRate}
+              onLogout={onLogout}
+            />
             <h2 className="my-2 text-left text-2xl md:text-4xl font-extrabold text-gray-900 drop-shadow-md">
               {displayName}
             </h2>
