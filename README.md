@@ -35,7 +35,40 @@ Build Tool:     Vite           # Dev server + bundler for React
 Game Framework: Phaser         # 
 
 ## Database Schema
-*TODO*
+
+The schema is defined in `apps/api/prisma/schema.prisma`.  
+We use `prisma db push` instead of migrations — it syncs the schema directly to the DB on every startup, no migration files needed.
+
+**Fresh clone**
+```
+make certs
+make up
+```
+That's it. The DB is created, schema is pushed, and seed data is loaded automatically.
+
+**Changing the schema**
+1. Edit `apps/api/prisma/schema.prisma`
+2. Run `make re` — this wipes the DB and rebuilds with the new schema + fresh seed data
+
+> ⚠️ `make re` deletes all data. For dev this is fine since we reseed automatically.
+
+**Restart without wiping data** (use during evaluation)
+```
+make re
+```
+Brings containers down and back up — DB data is preserved.
+
+**If the DB gets into a broken state**
+```
+make rebuild
+```
+Wipes volumes and starts clean.
+
+**Browsing the DB**
+```
+make prisma-studio
+```
+Opens Prisma Studio at http://localhost:5555
 
 ## Feature List
 Table: Feature | Feature Description | Team Member  
