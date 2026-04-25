@@ -13,11 +13,11 @@ USER2_PASS="socket1234"
 # Register both users (ignore 409 if already exist)
 curl -sk -o /dev/null -X POST "${API}/auth/register" \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"${USER1_EMAIL}\",\"password\":\"${USER1_PASS}\",\"userName\":\"socket_p1\"}"
+  -d "{\"email\":\"${USER1_EMAIL}\",\"password\":\"${USER1_PASS}\",\"username\":\"socket_p1\"}"
 
 curl -sk -o /dev/null -X POST "${API}/auth/register" \
   -H "Content-Type: application/json" \
-  -d "{\"email\":\"${USER2_EMAIL}\",\"password\":\"${USER2_PASS}\",\"userName\":\"socket_p2\"}"
+  -d "{\"email\":\"${USER2_EMAIL}\",\"password\":\"${USER2_PASS}\",\"username\":\"socket_p2\"}"
 
 TOKEN1="$(curl -sk "${API}/auth/login" \
   -H "Content-Type: application/json" \
