@@ -17,6 +17,13 @@ const app = Fastify({ logger: true, trustProxy: true });
 
 app.setErrorHandler((err, req, reply) => {
   req.log.error(err);
+  if ((err as any).code === 'FST_ERR_VALIDATION') {
+    const v = (err as any).validation?.[0];
+    const field = v?.instancePath?.replace('/', '') || 'input';
+    if (field === 'password' && v?.keyword === 'pattern')
+      return reply.code(400).send({ error: 'password must be at least 8 characters and include uppercase, lowercase, and a number' });
+    return reply.code(400).send({ error: `${field}: ${v?.message ?? 'invalid'}` });
+  }
   reply.code((err as any).statusCode || 500).send(err);
 });
 

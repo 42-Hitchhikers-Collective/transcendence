@@ -15,7 +15,7 @@ export async function authRoutes(app: any) {
               minLength: 6,
               pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
             },
-            password: { type: "string", minLength: 6 },
+            password: { type: "string", minLength: 8, pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).+$" },
             username: { type: "string", minLength: 1 },
           },
         },
