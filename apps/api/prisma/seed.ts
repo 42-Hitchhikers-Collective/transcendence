@@ -4,13 +4,13 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 const USERS = [
-  { email: "alice@example.com",   password: "alice1234",   userName: "alice",   avatarUrl: "/avatars/alice.png" },
-  { email: "bob@example.com",     password: "bob1234",     userName: "bob",     avatarUrl: "/avatars/bob.jpg"   },
-  { email: "charlie@example.com", password: "charlie1234", userName: "charlie", avatarUrl: null                 },
-  { email: "diana@example.com",   password: "diana1234",   userName: "diana",   avatarUrl: null                 },
-  { email: "eve@example.com",     password: "eve1234",     userName: "eve",     avatarUrl: "/avatars/eve.jpg"   },
-  { email: "frank@example.com",   password: "frank1234",   userName: "frank",   avatarUrl: "/avatars/frank.jpg" },
-  { email: "grace@example.com",   password: "grace1234",   userName: "grace",   avatarUrl: null                 },
+  { email: "alice@example.com",   password: "alice1234",   username: "alice",   avatarUrl: "/avatars/alice.png" },
+  { email: "bob@example.com",     password: "bob1234",     username: "bob",     avatarUrl: "/avatars/bob.jpg"   },
+  { email: "charlie@example.com", password: "charlie1234", username: "charlie", avatarUrl: null                 },
+  { email: "diana@example.com",   password: "diana1234",   username: "diana",   avatarUrl: null                 },
+  { email: "eve@example.com",     password: "eve1234",     username: "eve",     avatarUrl: "/avatars/eve.jpg"   },
+  { email: "frank@example.com",   password: "frank1234",   username: "frank",   avatarUrl: "/avatars/frank.jpg" },
+  { email: "grace@example.com",   password: "grace1234",   username: "grace",   avatarUrl: null                 },
 ];
 
 // Each game: host, date, and players with their final placement (1 = winner)
@@ -19,44 +19,44 @@ const GAMES = [
     date: new Date("2026-03-11"),
     host: "alice",
     players: [
-      { userName: "alice",   placement: 1 },
-      { userName: "bob",     placement: 2 },
-      { userName: "charlie", placement: 3 },
+      { username: "alice",   placement: 1 },
+      { username: "bob",     placement: 2 },
+      { username: "charlie", placement: 3 },
     ],
   },
   {
     date: new Date("2026-03-10"),
     host: "grace",
     players: [
-      { userName: "grace", placement: 1 },
-      { userName: "alice", placement: 2 },
+      { username: "grace", placement: 1 },
+      { username: "alice", placement: 2 },
     ],
   },
   {
     date: new Date("2026-03-09"),
     host: "alice",
     players: [
-      { userName: "alice",   placement: 1 },
-      { userName: "bob",     placement: 2 },
-      { userName: "charlie", placement: 3 },
+      { username: "alice",   placement: 1 },
+      { username: "bob",     placement: 2 },
+      { username: "charlie", placement: 3 },
     ],
   },
   {
     date: new Date("2026-03-08"),
     host: "alice",
     players: [
-      { userName: "alice", placement: 1 },
-      { userName: "eve",   placement: 2 },
+      { username: "alice", placement: 1 },
+      { username: "eve",   placement: 2 },
     ],
   },
   {
     date: new Date("2026-03-07"),
     host: "frank",
     players: [
-      { userName: "frank",   placement: 1 },
-      { userName: "alice",   placement: 2 },
-      { userName: "grace",   placement: 3 },
-      { userName: "diana",   placement: 4 },
+      { username: "frank",   placement: 1 },
+      { username: "alice",   placement: 2 },
+      { username: "grace",   placement: 3 },
+      { username: "diana",   placement: 4 },
     ],
   },
 ];
@@ -80,13 +80,13 @@ async function main() {
         email: u.email,
         passwordHash,
         profile: {
-          create: { userName: u.userName, avatarUrl: u.avatarUrl },
+          create: { username: u.username, avatarUrl: u.avatarUrl },
         },
       },
       select: { id: true },
     });
-    userIds[u.userName] = user.id;
-    console.log(`Seeded user: ${u.userName}`);
+    userIds[u.username] = user.id;
+    console.log(`Seeded user: ${u.username}`);
   }
 
   // --- Games ---
@@ -100,7 +100,7 @@ async function main() {
         maxPlayers: g.players.length,
         members: {
           create: g.players.map((p) => ({
-            userId: userIds[p.userName],
+            userId: userIds[p.username],
             ready: true,
           })),
         },
@@ -115,14 +115,14 @@ async function main() {
         endedAt: g.date,
         players: {
           create: g.players.map((p) => ({
-            userId: userIds[p.userName],
+            userId: userIds[p.username],
             placement: p.placement,
           })),
         },
       },
     });
 
-    console.log(`Seeded game: ${g.date.toISOString().slice(0, 10)} (${g.players.map((p) => p.userName).join(", ")})`);
+    console.log(`Seeded game: ${g.date.toISOString().slice(0, 10)} (${g.players.map((p) => p.username).join(", ")})`);
   }
 }
 
