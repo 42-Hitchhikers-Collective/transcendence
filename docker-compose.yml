@@ -8,7 +8,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5434:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
       interval: 5s
@@ -34,7 +34,7 @@ services:
     volumes:
       - ./apps/api:/app
       - api_node_modules:/app/node_modules
-    command: sh -lc "npx prisma migrate deploy && npm run dev"
+    command: sh -lc "npx prisma db push --accept-data-loss && npm run db:seed && npm run dev"
     networks: [transcendence]
 
   web:

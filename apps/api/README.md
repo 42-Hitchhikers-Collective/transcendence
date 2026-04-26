@@ -46,6 +46,7 @@ All endpoints are prefixed with `/api`.
 |--------|------|------|-------------|
 | GET | `/` | — | List all users (id, userName, avatarUrl) |
 | GET | `/me` | JWT | Get current user (email, profile) |
+| GET | `/me/history` | JWT | Get last 20 game results for current user |
 
 ### Profiles — `/api/profiles`
 
