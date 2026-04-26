@@ -11,7 +11,7 @@ export class RuleEngine {
 
   private isPlayerTurn(room: Room, playerId: string): boolean {
     console.log("Current Player: ", room.currentPlayer, " Player: ", playerId);
-    return room.currentPlayer === playerId;
+    return room.players[room.turnIndex].id === playerId;
   }
 
   private isCardPlayable(room: Room, card: Card): boolean {

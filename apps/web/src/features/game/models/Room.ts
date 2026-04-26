@@ -22,7 +22,6 @@ export class Room {
     this.n_player = this.players.length;
     const randomIndex = Math.floor(Math.random() * this.players.length);
     console.log("Random Index Generated: ", randomIndex);
-    console.log("Player Lenght: ", this.players.length);
     this.turnIndex = randomIndex;
     this.currentPlayer = this.players[randomIndex].id;
     this.direction = 1;
