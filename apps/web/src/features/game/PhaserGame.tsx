@@ -3,6 +3,7 @@ import Phaser, { Physics } from "phaser";
 import { Boot } from "./scenes/Boot.js";
 import { Preloader } from "./scenes/Preloader.ts";
 import { GameScene } from "./scenes/GameScene.ts";
+import { AlignCenter } from "lucide-react";
 
 export default function PhaserGame() {
   const gameRef = useRef(null);
@@ -10,10 +11,11 @@ export default function PhaserGame() {
   useEffect(() => {
     const config = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      width: 1200,
+      height: 1200,
       parent: gameRef.current,
       scene: [Boot, Preloader, GameScene],
+
     };
 
     const game = new Phaser.Game(config);

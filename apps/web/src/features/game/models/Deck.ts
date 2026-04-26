@@ -32,7 +32,7 @@ export class Deck {
 
     for (let i = 0; i < 4; i++) {
       this.cards.push(new Card(id++, "wild", "color"));
-      this.cards.push(new Card(id++, "wild", "4_plus"));
+      this.cards.push(new Card(id++, "wild", "4plus"));
     }
 
     Phaser.Utils.Array.Shuffle(this.cards);

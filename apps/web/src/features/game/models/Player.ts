@@ -1,16 +1,14 @@
 import { Card } from "./Card"
 
 export class Player {
-  id: number;
+  id: string;
   username: string;
-  hand: Card[]
-  //avatar: let
-  //socket: string
+  hand: Card[] = [];
+  isReady: boolean = false;
+  isHost: boolean = false;
 
-  constructor(id: number, username: string) {
+  constructor(id: string, username: string) {
     this.id = id;
     this.username = username;
-    this.hand = [];
-    
   }
 }

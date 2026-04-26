@@ -28,12 +28,14 @@ export class Preloader extends Scene {
     }
 
     // cartas wild
-    this.load.image("4_plus_wild", "assets/game_assets/cards/wild/4plus.png");
+    this.load.image("4plus_wild", "assets/game_assets/cards/wild/4plus_wild.png");
 
     this.load.image(
       "color_wild",
       "assets/game_assets/cards/wild/wild_card.png",
     );
+
+    this.load.image("background", "assets/game_assets/table/table.jpeg");
 
     // carta trasera
     this.load.image("back", "assets/game_assets/cards/back/card_back.png");

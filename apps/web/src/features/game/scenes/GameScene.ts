@@ -2,147 +2,155 @@ import { Scene } from "phaser";
 import { Game } from "../models/Game";
 import { Card } from "../models/Card";
 import { Player } from "../models/Player";
+import { GameEngine } from "../models/GameEngine";
 
 export class GameScene extends Scene {
-  CurrentGame: Game;
-  players: Player[] = [];
+  CurrentGame!: Game;
   pile!: Phaser.GameObjects.Zone;
+  rules!: GameEngine;
+  player!: Player;
 
   constructor() {
-    super("Game"); // excecutes the construct scene from Phaser
+    super("Game");
+  }
 
-    this.xdel_add_player();
+  init(data: { rivals?: Player[]; user?: Player }) {
+    const rivals = data?.rivals ?? this.xdel_add_player();
+    const user = data?.user ?? new Player("0", "You");
 
-    this.CurrentGame = new Game(1, this.players, this.players[0]);
+    this.add.image(400, 400, "background").setScale(0.5);
+
+    this.rules = new GameEngine();
+    this.CurrentGame = new Game(1, rivals, user);
+
+    this.pile = this.add
+      .zone(500, 550, 100, 150)
+      .setRectangleDropZone(100, 150);
+
+    this.renderHands();
+
+    this.player =
+      this.CurrentGame.room.players[this.CurrentGame.room.turnIndex];
+    const g = this.add.graphics();
+    g.lineStyle(4, 0xffffff);
+    g.strokeRect(325, 275, 100, 150);
   }
 
   create() {
-    // Crear pile
-    let cardSprite;
-    this.pile = this.add
-      .zone(550, 375, 100, 150)
-      .setRectangleDropZone(100, 150);
+    this.input.on("drag", (_, obj: any, x: number, y: number) => {
+      obj.x = x;
+      obj.y = y;
+    });
 
-    const pileGraphics = this.add.graphics();
-    pileGraphics.lineStyle(2, 0xffffff);
-    pileGraphics.strokeRect(500, 300, 50, 75);
+    this.input.on("drop", (_, obj: any, zone: any) => {
+      if (zone !== this.pile) return;
 
-    // eventos globales
-    this.input.on(
-      "drag",
-      (
-        pointer: Phaser.Input.Pointer,
-        gameObject: Phaser.GameObjects.Image,
-        dragX: number,
-        dragY: number,
-      ) => {
-        gameObject.x = dragX;
-        gameObject.y = dragY;
-      },
-    );
+      const card = obj.getData("card") as Card;
 
-    this.input.on(
-      "drop",
-      (
-        pointer: Phaser.Input.Pointer,
-        gameObject: Phaser.GameObjects.Image,
-        dropZone: Phaser.GameObjects.Zone,
-      ) => {
-        const card = gameObject.getData("card") as Card;
+      const success = this.rules.processMove(
+        this.CurrentGame.room,
+        this.player.id,
+        card
+      );
 
-        const topCard =
-          this.CurrentGame.room.discardPile[
-            this.CurrentGame.room.discardPile.length - 1
-          ];
-
-        if (
-          !topCard ||
-          card.color === topCard.color ||
-          card.value === topCard.value
-        ) {
-          console.log("Valid Card:", card.color, card.value);
-
-          this.CurrentGame.room.discardPile.push(card);
-          this.CurrentGame.room.currentColor = card.color;
-
-          cardSprite = this.add
-          .image(550, 330, card.getKey())
-          .setScale(0.3);
-
-          gameObject.destroy();
-          
-
-        } else {
-          console.log("Invalid Card");
-
-          const startX = gameObject.getData("startX");
-          const startY = gameObject.getData("startY");
-
-
-          gameObject.x = startX;
-          gameObject.y = startY;
-        }
-      },
-    );
-
-    let startY = 75;
-
-    for (const user of this.CurrentGame.players) {
-      let startX = 75;
-
-      for (const card of user.hand) {
-        const cardSprite = this.add
-          .image(startX, startY, card.getKey())
-          .setScale(0.3);
-
-        cardSprite.setInteractive();
-        this.input.setDraggable(cardSprite);
-
-        cardSprite.setData("card", card);
-        cardSprite.setData("player", user);
-        console.log("Loaded Card:", card.getKey());
-
-        startX += 70;
+      if (success) {
+        this.add.image(550, 330, card.getKey()).setScale(0.3);
+        obj.destroy();
+        this.player =
+          this.CurrentGame.room.players[this.CurrentGame.room.turnIndex];
+      } else {
+        obj.x = obj.getData("startX");
+        obj.y = obj.getData("startY");
       }
+    });
+  }
 
-      startY += 120;
+  // 🔥 POSICIONES SEGÚN CANTIDAD DE JUGADORES
+  getPlayerPositions(count: number) {
+    const centerX = 500;
+    const centerY = 400;
+
+    if (count === 2) {
+      return [
+        { x: centerX, y: 650 }, // abajo (user)
+        { x: centerX, y: 150 }, // arriba
+      ];
     }
-    // primera carta
+
+    if (count === 3) {
+      return [
+        { x: centerX, y: 650 }, // abajo
+        { x: 200, y: 150 }, // arriba izquierda
+        { x: 800, y: 150 }, // arriba derecha
+      ];
+    }
+
+    if (count === 4) {
+      return [
+        { x: centerX, y: 650 }, // abajo
+        { x: centerX, y: 150 }, // arriba
+        { x: 150, y: centerY }, // izquierda
+        { x: 850, y: centerY }, // derecha
+      ];
+    }
+
+    // fallback → distribución circular
+    return this.getCircularPositions(count);
   }
 
-  spawnCard() {
-    const card = this.CurrentGame.room.drawPile.pop();
-    if (!card) return;
+  // 🔄 OPCIÓN DINÁMICA (para cualquier número)
+  getCircularPositions(count: number) {
+    const centerX = 500;
+    const centerY = 400;
+    const radius = 250;
 
-    console.log("Carta cargada:", card.getKey());
+    const positions = [];
 
-    const cardSprite = this.add.image(500, 400, card.getKey()).setScale(1);
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
 
-    cardSprite.setInteractive();
-    this.input.setDraggable(cardSprite);
+      positions.push({
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius,
+      });
+    }
 
-    const startX = cardSprite.x;
-    const startY = cardSprite.y;
-
-    this.input.once(
-      "dragend",
-      (
-        pointer: Phaser.Input.Pointer,
-        gameObject: Phaser.GameObjects.Image,
-        dropped: boolean,
-      ) => {
-        if (!dropped) {
-          gameObject.x = startX;
-          gameObject.y = startY;
-        }
-      },
-    );
+    return positions;
   }
 
-  xdel_add_player() {
-    let player_a = new Player(1, "Beta");
-    this.players.push(player_a);
-    let player_b = new Player(2, "Gamma");
-    this.players.push(player_b);
+  renderHands() {
+    const players = this.CurrentGame.room.players;
+    const positions = this.getPlayerPositions(players.length);
+
+    players.forEach((player, index) => {
+      const pos = positions[index];
+
+      // centra las cartas respecto al jugador
+      let offsetX = -(player.hand.length * 20);
+
+      for (const card of player.hand) {
+        const x = pos.x + offsetX;
+        const y = pos.y;
+
+        const sprite = this.add.image(x, y, card.getKey()).setScale(0.3);
+
+        sprite.setInteractive();
+        this.input.setDraggable(sprite);
+
+        sprite.setData("card", card);
+        sprite.setData("player", player);
+        sprite.setData("startX", x);
+        sprite.setData("startY", y);
+
+        offsetX += 40;
+      }
+    });
+  }
+
+  xdel_add_player(): Player[] {
+    const player_a = new Player("1", "Beta");
+    const player_b = new Player("2", "Gamma");
+
+    return [player_a, player_b];
   }
 }
