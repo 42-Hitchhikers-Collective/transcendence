@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
         // "@": path.resolve(__dirname, "./src"),
         //  "src": path.resolve(__dirname, "./src"),
         { find: /^@\/(.*)/, replacement: path.resolve(__dirname, "src") + "/$1" },
+        { find: /^@dice\/(.*)/, replacement: path.resolve(__dirname, "@") + "/$1" },
         { find: "src", replacement: path.resolve(__dirname, "src") },
       ],
     },

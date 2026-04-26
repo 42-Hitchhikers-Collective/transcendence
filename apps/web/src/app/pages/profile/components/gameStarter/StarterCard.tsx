@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { CreateGame } from "./JoinFriendsCard";
 import { JoinRandomGame } from "./JoinRandomCard";
+import { CreateLinkRoom } from "./CreateLinkCard";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 
@@ -17,7 +18,7 @@ In play with friends:
 
 export function JoinGameCard() {
   const [activeTab, setActiveTab] = useState<
-    "join-random-game" | "create-game"
+    "join-random-game" | "create-game" | "create-link"
   >("create-game");
 
   const activeButtonStyle = "bg-primary text-primary-foreground";
@@ -51,11 +52,24 @@ export function JoinGameCard() {
             >
               Join a random room
             </Button>
+            <Button
+              type="button"
+              className={
+                activeTab === "create-link"
+                  ? activeButtonStyle
+                  : inactiveButtonStyle
+              }
+              onClick={() => setActiveTab("create-link")}
+            >
+              Create a link room
+            </Button>
           </div>
         </div>
 
         <div className="p-4">
-          {activeTab === "create-game" ? <CreateGame /> : <JoinRandomGame />}
+          {activeTab === "create-game" && <CreateGame />}
+          {activeTab === "join-random-game" && <JoinRandomGame />}
+          {activeTab === "create-link" && <CreateLinkRoom />}
         </div>
       </CardContent>
     </Card>

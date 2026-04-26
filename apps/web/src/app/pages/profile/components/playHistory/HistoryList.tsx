@@ -1,28 +1,24 @@
-import { mockProfiles } from "@/app/auth/mockProfiles";
+import type { GameHistory } from "@/app/auth/mockProfiles";
 import { GameHistoryItem } from "./HistoryListItem";
 
-export function GameHistoryCard({ className }: React.ComponentProps<"div">) {
-  // Using a mock profile for demonstration. In the real application, this data has to be fetched in the global state management layer (e.g. using React Query or Redux) and passed down to this component as a prop.
-  const profile = mockProfiles[0];
-  const gamesPlayed = profile.history.slice(0, 5); // show only 5 most recent gamesPlayed
-  // const gamesPlayed = []; // <-------- if we want to test empty state, uncomment this and comment the line above
+export function GameHistoryCard({
+  games,
+}: React.ComponentProps<"div"> & { games: GameHistory[] }) {
+  const gamesPlayed = games.slice(0, 5); // <--- important to limit
 
   const emptyHistory = () => (
-    <div className="w-full">
-      <div className="py-20 mx-auto max-w-md rounded-xl border border-sky-200 bg-sky-50 p-4 text-sky-900 shadow-sm">
-        <div className="mx-auto w-fit text-center px-10">
-          <p className="text-base text-sky-800 font-medium uppercase tracking-widest  ">
-            No history available
-          </p>
-          <p className="text-xs text-start pb-10">
-            This section here will show you the history of your recent matches,
-            including who you played against, when you played, and whether you
-            won or lost.
-          </p>
-          <p className="font-medium  text-sky-300  ">
-            Well, what are you waiting for?
-          </p>
-        </div>
+    <div className="py-20 mx-auto max-w-md rounded-2xl bg-black p-6 text-white shadow-sm shadow-slate-500/10">
+      <div className="mx-auto w-fit text-center px-10">
+        <p className="text-base font-semibold uppercase tracking-widest text-amber-300/90">
+          No history available
+        </p>
+        <p className="text-xs text-left pt-5 font-semibold text-white/90">
+          This section uploads your match history.
+        </p>
+        <p className="text-xs text-left pb-5 text-white/80">
+          You'll be able to see up to 5 recent played matches here, including
+          who you played against, when you played and whether you won or lost.
+        </p>
       </div>
     </div>
   );
@@ -36,10 +32,6 @@ export function GameHistoryCard({ className }: React.ComponentProps<"div">) {
   );
 
   return (
-    <div>
-      {/* {emptyHistory()} */}
-      {foundHistory()}
-    </div>
-    // <div>{gamesPlayed.length === 0 ? emptyHistory() : foundHistory()}</div>
+    <div>{gamesPlayed.length === 0 ? emptyHistory() : foundHistory()}</div>
   );
 }

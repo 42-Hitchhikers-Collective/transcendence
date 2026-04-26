@@ -6,6 +6,8 @@ Login is active by default view (as it's the most common use case) but the user 
 */
 
 // https://animate-ui.com/docs/components/animate/tabs1
+// https://ui.rechesoares.com/docs/flip-card. // <----- might change the animation with this
+// https://animate-ui.com/docs/components/community/flip-card <------ better this
 
 import {
   Tabs,

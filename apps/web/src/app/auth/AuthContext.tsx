@@ -40,8 +40,13 @@ import {
 type User = {
   id: string;
   email: string;
-  username: string;
-};
+  createdAt?: string;
+  username?: string;
+  profile?: {
+    username?: string;
+    avatarUrl?: string | null;
+  } | null;
+}; /* TODO: put null rendering case */
 
 type AuthContextValue = {
   token: string | null;
