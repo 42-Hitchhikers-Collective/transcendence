@@ -6,11 +6,11 @@ const prisma = new PrismaClient();
 const USERS = [
   { email: "alice@example.com",   password: "alice1234",   username: "alice",   avatarUrl: "/avatars/alice.png" },
   { email: "bob@example.com",     password: "bob1234",     username: "bob",     avatarUrl: "/avatars/bob.jpg"   },
-  { email: "charlie@example.com", password: "charlie1234", username: "charlie", avatarUrl: null                 },
-  { email: "diana@example.com",   password: "diana1234",   username: "diana",   avatarUrl: null                 },
+  { email: "charlie@example.com", password: "charlie1234", username: "charlie", avatarUrl: "/avatars/default.png"                 },
+  { email: "diana@example.com",   password: "diana1234",   username: "diana",   avatarUrl: "/avatars/default.png"                 },
   { email: "eve@example.com",     password: "eve1234",     username: "eve",     avatarUrl: "/avatars/eve.jpg"   },
   { email: "frank@example.com",   password: "frank1234",   username: "frank",   avatarUrl: "/avatars/frank.jpg" },
-  { email: "grace@example.com",   password: "grace1234",   username: "grace",   avatarUrl: null                 },
+  { email: "grace@example.com",   password: "grace1234",   username: "grace",   avatarUrl: "/avatars/default.png"                 },
 ];
 
 // Each game: host, date, and players with their final placement (1 = winner)

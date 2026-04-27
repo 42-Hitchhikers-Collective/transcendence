@@ -16,7 +16,7 @@ export async function registerUser(app: any, input: RegisterInput) {
     data: {
       email: input.email,
       passwordHash,
-      profile: { create: { username: input.username } },
+      profile: { create: { username: input.username, avatarUrl: "/avatars/default.png" } },
     },
     select: { id: true, email: true, createdAt: true },
   });
