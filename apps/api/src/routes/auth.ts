@@ -74,11 +74,6 @@ export async function authRoutes(app: any) {
 
   app.post(
     "/logout",
-    {
-      config: {
-        rateLimit: { max: 10, timeWindow: "1 minute" },
-      },
-    },
     async (_request: any, reply: any) => {
       return reply.send({ ok: true });
     }
