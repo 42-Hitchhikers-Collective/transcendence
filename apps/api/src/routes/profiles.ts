@@ -38,7 +38,7 @@ export async function profileRoutes(app: any) {
         create: {
           userId: payload.sub,
           username: body.username || "User",
-          avatarUrl: body.avatarUrl,
+          avatarUrl: body.avatarUrl ?? "/avatars/default.png",
           bio: body.bio,
         },
         select: { username: true, avatarUrl: true, bio: true },
