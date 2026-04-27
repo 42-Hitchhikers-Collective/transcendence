@@ -10,6 +10,22 @@ export async function userRoutes(app: any) {
     return { users };
   });
 
+  app.get("/:id", { preHandler: [app.auth] }, async (request: any, reply: any) => {
+    const { id } = request.params as { id: string };
+
+    const user = await app.prisma.user.findFirst({
+      where: { profile: { username: id } },
+      select: {
+        id: true,
+        createdAt: true,
+        profile: { select: { username: true, avatarUrl: true, bio: true } },
+      },
+    });
+
+    if (!user) return reply.code(404).send({ error: "user not found" });
+    return { user };
+  });
+
   app.get("/me", { preHandler: [app.auth] }, async (request: any, reply: any) => {
     const payload = request.user as { sub?: string };
     if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
