@@ -17,12 +17,13 @@ import {
 export const title = "Avatar Upload";
 
 type UploadAvatarButtonProps = {
-  updloadedAvatar?: string;
+  avatar?: string;
 };
 
 export const UploadAvatarButton = ({ avatar }: UploadAvatarButtonProps) => {
   const [files, setFiles] = React.useState<File[]>([]);
 
+  console.log("Avatar path:", avatar);
 
   return (
     <div className="relative transform items-center justify-center transition-all duration-300">

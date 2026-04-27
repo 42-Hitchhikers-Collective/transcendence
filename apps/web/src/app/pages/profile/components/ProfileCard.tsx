@@ -11,9 +11,11 @@ type AuthUser = {
   createdAt?: string;
   profile?: {
     username?: string;
-    avatar?: string | null;
+    avatarUrl?: string | null;
+    bio?: string | null;
   } | null;
 } | null;
+
 
 import skipCard from "@/assets/icons/skip_card.webp";
 import { UploadAvatarButton } from "./UploadAvatarButton";
@@ -183,8 +185,11 @@ export function ProfileCard({
   stats: { wins: number; losses: number };
   onLogout?: () => void;
 } & React.ComponentProps<"div">) {
+
+console.log("User data was loaded:", user);
+
   const username = user?.profile?.username ?? user?.username ?? "Player";
-  const avatar = user?.profile?.avatar ?? "";
+  const avatar = user?.profile?.avatarUrl ?? undefined; // if avatar is null or undefined, we pass undefined to the UploadAvatarButton to use the default avatar. If it's a string (even an empty one), we pass it as is.
   const memberSince = user?.createdAt ? new Date(user.createdAt) : null;
   const wins = stats.wins;
   const losses = stats.losses;
