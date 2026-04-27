@@ -61,7 +61,8 @@ let socket;
 
 function connectSocket() {
   const jwtToken = document.getElementById("jwtInput").value;
-  socket = io("http://localhost:3000", {
+  // Use same-origin (scheme/host/port) to avoid CORS + mixed-content issues.
+  socket = io({
     path: "/socket.io",
     auth: {
       token: jwtToken
