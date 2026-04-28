@@ -19,7 +19,9 @@ logs:
 clean:
 	$(COMPOSE) down -v --remove-orphans
 
-re: clean up
+re: down up
+
+rebuild: clean up
 
 # Setup
 dirs:
@@ -40,8 +42,8 @@ db-seed:
 	$(COMPOSE) exec api npm run db:seed
 
 db-migrate:
-	$(COMPOSE) exec api npx prisma migrate dev
-		
+	$(COMPOSE) exec -it api npx prisma migrate dev
+
 db-reset:
 	$(COMPOSE) down -v
 	rm -rf data/postgres/*
@@ -56,10 +58,10 @@ api:
 	$(COMPOSE) up -d --build api
 	
 migration:
-	$(COMPOSE) exec api npx prisma migrate dev --name init
+	$(COMPOSE) exec -it api npx prisma migrate dev --name init
 
 prune:
 	docker system prune -a --volumes -f   
 
 # Phony
-.PHONY: all up down logs clean re certs dirs db db-seed db-migrate db-reset api migration prune ps
+.PHONY: all up down logs clean re rebuild certs dirs db db-seed db-migrate db-reset api migration prune ps

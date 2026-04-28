@@ -7,7 +7,7 @@ export async function authRoutes(app: any) {
       schema: {
         body: {
           type: "object",
-          required: ["email", "password", "userName"],
+          required: ["email", "password", "username"],
           additionalProperties: false,
           properties: {
             email: {
@@ -15,14 +15,14 @@ export async function authRoutes(app: any) {
               minLength: 6,
               pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
             },
-            password: { type: "string", minLength: 6 },
-            userName: { type: "string", minLength: 1 },
+            password: { type: "string", minLength: 8, pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).+$" },
+            username: { type: "string", minLength: 1 },
           },
         },
       },
     },
     async (request: any, reply: any) => {
-      const body = request.body as { email: string; password: string; userName: string };
+      const body = request.body as { email: string; password: string; username: string };
 
       try {
         const result = await AuthService.registerUser(app, body);
@@ -74,11 +74,6 @@ export async function authRoutes(app: any) {
 
   app.post(
     "/logout",
-    {
-      config: {
-        rateLimit: { max: 10, timeWindow: "1 minute" },
-      },
-    },
     async (_request: any, reply: any) => {
       return reply.send({ ok: true });
     }

@@ -15,8 +15,8 @@ Fastify backend for Transcendence. Handles auth, user data, and real-time game v
 ```
 src/
   game/           # Game logic: GameManager, room/player state, types
-  plugins/        # Fastify plugins: auth, prisma, rate limiting
-  routes/         # HTTP route handlers: auth, users, profiles
+  plugins/        # Fastify plugins: auth, prisma, rate limiting, multipart
+  routes/         # HTTP route handlers: auth, users, profiles, friends
   services/       # Business logic: auth service
   socket/
     socket.ts     # Socket.IO setup, JWT middleware, connection lifecycle
@@ -44,14 +44,27 @@ All endpoints are prefixed with `/api`.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/` | — | List all users (id, userName, avatarUrl) |
+| GET | `/` | — | List all users (id, username, avatarUrl) |
 | GET | `/me` | JWT | Get current user (email, profile) |
+| GET | `/me/history` | JWT | Get last 20 game results for current user |
+| GET | `/:username` | JWT | Get public profile by username |
 
 ### Profiles — `/api/profiles`
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| PATCH | `/me` | JWT | Update userName, avatarUrl, bio |
+| PATCH | `/me` | JWT | Update username, avatarUrl, bio |
+| POST | `/me/avatar` | JWT | Upload avatar image (jpeg/png/webp/gif, max 5MB), returns URL |
+
+### Friends — `/api/friends`
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | JWT | List friends with online status |
+| GET | `/requests` | JWT | List incoming pending friend requests |
+| POST | `/request` | JWT | Send a friend request |
+| POST | `/accept` | JWT | Accept a friend request |
+| DELETE | `/:id` | JWT | Remove a friend |
 
 ### Other
 
