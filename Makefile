@@ -61,7 +61,12 @@ migration:
 	$(COMPOSE) exec -it api npx prisma migrate dev --name init
 
 prune:
-	docker system prune -a --volumes -f   
+	docker system prune -a --volumes -f
+
+reinstall:
+	rm -rf apps/api/node_modules apps/web/node_modules
+	npm install --prefix apps/api
+	npm install --prefix apps/web
 
 # Phony
-.PHONY: all up down logs clean re rebuild certs dirs db db-seed db-migrate db-reset api migration prune ps
+.PHONY: all up down logs clean re rebuild certs dirs db db-seed db-migrate db-reset api migration prune ps reinstall
