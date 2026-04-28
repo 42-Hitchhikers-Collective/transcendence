@@ -1,5 +1,6 @@
 import { Scene } from "phaser";
 
+
 export class Preloader extends Scene {
   constructor() {
     super("Preloader");
@@ -15,6 +16,8 @@ export class Preloader extends Scene {
 
   private loadCardAssets() {
     const colors = ["red", "blue", "green", "yellow"];
+    const cardAssets = "../../../public/assets/game_assets/cards/";
+    const tableAssets = "../../../public/assets/game_assets/table/";
 
     const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "skip", "reverse", "2plus"];
 
@@ -23,21 +26,22 @@ export class Preloader extends Scene {
       for (const value of values) {
         const key = `${value}_${color}`;
 
-        this.load.image(key, `assets/game_assets/cards/${color}/${key}.png`);
+        this.load.image(key, `${cardAssets}${color}/${key}.png`);
+
       }
     }
 
     // cartas wild
-    this.load.image("4plus_wild", "assets/game_assets/cards/wild/4plus_wild.png");
+    this.load.image("4plus_wild", `${cardAssets}wild/4plus_wild.png`);
 
     this.load.image(
       "color_wild",
-      "assets/game_assets/cards/wild/wild_card.png",
+      `${cardAssets}wild/wild_card.png`,
     );
 
-    this.load.image("background", "assets/game_assets/table/table.jpeg");
+    this.load.image("background", `${tableAssets}table.jpeg`);
 
     // carta trasera
-    this.load.image("back", "assets/game_assets/cards/back/card_back.png");
+    this.load.image("back", `${cardAssets}back/card_back.png`);
   }
 }

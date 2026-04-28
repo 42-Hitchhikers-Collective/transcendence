@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import GameCanvas from "../../../features/game/App";
+import GameCanvas from "../../../gameCanvas/App";
+// apps/web/src/gameCanvas/App.tsx
 import { useMemo, useState } from "react";
 
 type Player = {

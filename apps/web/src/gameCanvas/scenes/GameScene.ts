@@ -3,7 +3,6 @@ import { Game } from "../models/Game";
 import { Card } from "../models/Card";
 import { Player } from "../models/Player";
 import { GameEngine } from "../models/GameEngine";
-import { Sleeping } from "matter";
 
 export class GameScene extends Scene {
   private currentGame!: Game;
