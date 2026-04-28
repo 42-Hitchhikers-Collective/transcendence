@@ -60,11 +60,14 @@ All endpoints are prefixed with `/api`.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/` | JWT | List friends with online status |
-| GET | `/requests` | JWT | List incoming pending friend requests |
-| POST | `/request` | JWT | Send a friend request |
-| POST | `/accept` | JWT | Accept a friend request |
-| DELETE | `/:id` | JWT | Remove a friend |
+| GET | `/` | JWT | Get friends list (id, username, avatarUrl, since) |
+| GET | `/requests` | JWT | Get incoming pending friend requests |
+| POST | `/requests` | JWT | Send a friend request `{ targetId }` |
+| PATCH | `/requests/:id/accept` | JWT | Accept a friend request → creates Friendship |
+| PATCH | `/requests/:id/decline` | JWT | Decline a friend request |
+| DELETE | `/:friendId` | JWT | Remove a friend |
+
+> Online status (`isOnline`) will be added to `GET /` once the socket presence module is wired up.
 
 ### Other
 
