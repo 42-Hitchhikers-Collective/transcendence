@@ -1,4 +1,6 @@
 import { Link } from "react-router";
+import GameCanvas from "../../../gameCanvas/App";
+// apps/web/src/gameCanvas/App.tsx
 import { useMemo, useState } from "react";
 
 type Player = {
@@ -122,8 +124,8 @@ function GamePage() {
               </div>
             </div>
           </section>
-
-          <section className="flex h-full min-h-[420px] flex-col justify-center rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 shadow-2xl">
+ <GameCanvas />
+          {/* <section className="flex h-full min-h-[420px] flex-col justify-center rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-8 shadow-2xl">
             <div className="rounded-2xl border border-white/30 bg-white/15 p-6 text-center text-white shadow-lg">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
                 Phaser Canvas
@@ -133,7 +135,7 @@ function GamePage() {
                 {allReady ? "🎉 GAME CAN NOW START, GAME LOADS 🎉" : "⏰ WAITING FOR ALL PLAYERS TO CLICK READY... ⏰"}
               </p>
             </div>
-          </section>
+          </section> */}
         </div>
       </div>
     </div>

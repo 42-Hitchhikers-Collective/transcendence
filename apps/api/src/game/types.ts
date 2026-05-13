@@ -6,11 +6,12 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/15 13:48:37 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/24 15:03:47 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export const MAX_PLAYERS_PER_ROOM = 4;
+export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
 
 export type Player = {
   playerId: string;      // permanent identity (userId) used for game logic

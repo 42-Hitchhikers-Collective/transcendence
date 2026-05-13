@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/15 13:52:36 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/24 15:02:35 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ import { gameManager, utils } from "../../game";
 import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
+import { registerConnectionHandlers } from "./connection.handlers";
 
 
 export function registerSocketHandlers(
@@ -35,24 +36,10 @@ export function registerSocketHandlers(
   gameManager.debugState();
 }
 
-  // Register room-related event handlers
+  // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  
-  // Register game-related event handlers
   registerGameHandlers(socket, broadcastRoomState);
-
-
-  // Disconnect and leave room if in any
-  socket.on("disconnect", () => {
-  const { playerId } = getIdentity(socket);
-  const res = gameManager.leaveRoom(playerId);
-  if (res.success) {
-    socket.leave(res.roomId);
-    broadcastRoomState(res.roomId);
-  }
-  app.log.info(`socket disconnected: ${playerId}`);
-});
-  
+  registerConnectionHandlers(app, socket, broadcastRoomState);
 
 
 // ---> Msg Events ---

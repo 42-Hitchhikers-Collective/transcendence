@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 15:08:01 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/15 13:31:28 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/04/27 14:00:09 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,3 +63,24 @@ export function createAuthMiddleware(app: FastifyInstance) {
 }
 
 
+
+// Accept any token just for testing
+// export function createAuthMiddleware(app: FastifyInstance) {
+//   return async (socket: Socket, next: Next) => {
+//     const token =
+//       socket.handshake.auth?.token ||
+//       (socket.handshake.headers.authorization || "").replace(/^Bearer\s+/i, "");
+
+//     if (!token) return next(new Error("unauthorized"));
+
+//     // Mock payload for testing purposes
+//     const mockUserId = "mock-user-id";
+//     const mockUserName = "test-user";
+
+//     (socket as any).userId = mockUserId;
+//     (socket as any).userName = mockUserName;
+//     socket.join(`user:${mockUserId}`);
+
+//     return next();
+//   };
+// }
