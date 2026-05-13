@@ -1,10 +1,11 @@
-import { ProfileCard } from "./components/ProfileCard";
-import { JoinGameCard } from "./components/gameStarter/StarterCard";
+import { ProfileCard } from "./components/profileCard/ProfileCard";
+import { JoinGameCard } from "./components/gameSetup/SetupCard";
 import { GameHistoryCard } from "./components/playHistory/HistoryList";
 import { useEffect, useMemo, useState } from "react";
 import type { GameHistory } from "@/app/auth/mockProfiles";
 import background from "@/assets/backgrounds/unocards_gemini.png";
 import { useAuthContext } from "../../auth/AuthContext";
+import { CreateLinkRoom } from "./components/gameSetup/CreateLinkCard";
 
 // import AlertEx from "@/shared/shadcn-studio/alert/alert-08";
 // import Uhh from "@/shared/shadcn-space/alert/alert-04";

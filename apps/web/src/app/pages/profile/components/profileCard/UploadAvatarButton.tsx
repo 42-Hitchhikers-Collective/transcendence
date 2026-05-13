@@ -1,6 +1,6 @@
 "use client";
 
-import defaultAvatar from "../../../../assets/default_images/default-avatar.png";
+import defaultAvatar from "../../../../../assets/default_images/default-avatar.png";
 
 import { Camera } from "lucide-react";
 import * as React from "react";

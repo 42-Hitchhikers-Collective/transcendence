@@ -1,6 +1,6 @@
 import { cn } from "@/shared/lib/utils";
 import type { GameHistory } from "@/app/auth/mockProfiles";
-import { Players } from "./Players";
+import { Players } from "./HistoryListPlayers";
 import { HandThumbDownIcon, TrophyIcon } from "@heroicons/react/24/solid";
 
 type GameHistoryItemProps = {
