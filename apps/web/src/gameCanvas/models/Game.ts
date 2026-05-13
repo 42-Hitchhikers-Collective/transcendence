@@ -1,6 +1,7 @@
 
 import { Player } from "./Player";
-import { Room } from "./Room"
+import { Table } from "./Table"
+import { GameEngine } from "./GameEngine";
 
 
 export class Game {
@@ -10,29 +11,26 @@ export class Game {
     timestamp_end: number;
     finalState: boolean;
     userleft: boolean;
-    room: Room;
+    players: Player [];
+    table: Table;
+    rules: GameEngine;
 
-    constructor (gameId: number, players: Player[], my_player: Player)
+    constructor (users: Map<string, string>[], my_player: Player)
     {
-        this.gameId = gameId;
+        this.gameId = 0;
         this.winner = null;
         this.timestamp_start = 0;
         this.timestamp_end = 0; //current time
         this.finalState = false; // not finished
         this.userleft = false;  // we interrupt the game if is true
-        this.room = new Room(gameId, players, my_player);
+
+        // Create a Player array with the Map<playerId, username>
+        this.players = this.create_players(users);
+
+        this.table = new Table(this.gameId, this.players, my_player);
     }
 
-        
-    // constructor (players: Player[], room: Room)
-    // {
-    //     this.gameId = gameId;
-    //     this.players = players;
-    //     this.winner = null;
-    //     this.timestamp_start = 0;
-    //     this.timestamp_end = 0; //current time
-    //     this.finalState = false; // not finished
-    //     this.userleft = false;  // we interrupt the game if is true
-    //     this.room = new Room(players);
-    // }
+    private create_players(users: Map<string, string>[])
+    {}
 }
+

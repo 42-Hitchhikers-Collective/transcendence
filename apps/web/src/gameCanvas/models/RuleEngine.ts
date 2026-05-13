@@ -1,28 +1,26 @@
-import { CardTitle } from "@/shared/components/ui/card";
 import { Card } from "./Card"
-import { Room } from "./Room"
+import { Table } from "./Table"
 
 export class RuleEngine {
-  validateMove(room: Room, playerId: string, card: Card): boolean {
-    if (!this.isPlayerTurn(room, playerId)) return false;
-    if (!this.isCardPlayable(room, card)) return false;
+  validateMove(table: Table, playerId: string, card: Card): boolean {
+    if (!this.isPlayerTurn(table, playerId)) return false;
+    if (!this.isCardPlayable(table, card)) return false;
     return true;
   }
 
-  private isPlayerTurn(room: Room, playerId: string): boolean {
-    console.log("Current Player: ", room.currentPlayer, " Player: ", playerId);
-    return room.players[room.turnIndex].id === playerId;
+  private isPlayerTurn(table: Table, playerId: string): boolean {
+    console.log("Current Player: ", table.players[table.turnIndex], " Player: ", playerId);
+    return table.players[table.turnIndex].id === playerId;
   }
 
-  private isCardPlayable(room: Room, card: Card): boolean {
-    console.log("Dale vieja");
-    const top = room.discardPile.at(-1);
+  private isCardPlayable(table: Table, card: Card): boolean {
+    const top = table.discardPile.at(-1);
     console.log("Top Card: ", top?.color, " Player: ", card.color);
     if (!top)
       return true;
 
     return (
-      card.color === room.currentColor ||
+      card.color === table.currentColor ||
       card.value === top?.value ||
       card.color === "wild"
     );
@@ -30,40 +28,40 @@ export class RuleEngine {
 }
 
 export class CardEffectResolver {
-  applyEffect(room: Room, card: Card) {
+  applyEffect(table: Table, card: Card) {
     switch (card.value) {
       case "reverse":
-        this.reverse(room);
+        this.reverse(table);
         break;
       case "skip":
-        this.skip(room);
+        this.skip(table);
         break;
       case "2plus":
-        this.drawCards(room, 2);
+        table.plus += 2;
         break;
       case "4plus":
-        this.drawCards(room, 4);
+        table.plus += 4;
         break;
     }
   }
 
-  private reverse(room: Room) {
-    room.direction *= -1;
+  private reverse(table: Table) {
+    table.direction *= -1;
   }
 
-  private skip(room: Room) {
-    room.turnIndex += room.direction;
+  private skip(table: Table) {
+    table.turnIndex += table.direction;
   }
 
-  private drawCards(room: Room, amount: number) {
-  const next = this.getNextPlayer(room);
+  private drawCards(table: Table, amount: number) {
+  const next = this.getNextPlayer(table);
 
   for (let i = 0; i < amount; i++) {
-    let card = room.drawPile.pop();
+    let card = table.drawPile.pop();
 
     if (!card) {
-      room.shuffleDiscardPile();
-      card = room.drawPile.pop();
+      table.shuffleDiscardPile();
+      card = table.drawPile.pop();
     }
 
     if (card) {
@@ -72,10 +70,10 @@ export class CardEffectResolver {
   }
 }
 
-  private getNextPlayer(room: Room) {
-    const next = (room.turnIndex + room.direction + room.n_player) % room.n_player;
+  private getNextPlayer(table: Table) {
+    const next = (table.turnIndex + table.direction + table.n_player) % table.n_player;
     console.log("getNextPlayer: ", next);
-    const player = room.players[next];
+    const player = table.players[next];
     console.log("getNextPlayer ID: ", player.id);
     return player;
 } 
@@ -83,14 +81,14 @@ export class CardEffectResolver {
 }
 
 export class TurnManager {
-  advanceTurn(room: Room) {
-    room.turnIndex =
-      (room.turnIndex + room.direction + room.players.length) %
-      room.players.length;
-    console.log("Current Turn Index: ", room.turnIndex);
+  advanceTurn(table: Table) {
+    table.turnIndex =
+      (table.turnIndex + table.direction + table.players.length) %
+      table.players.length;
+    console.log("Current Turn Index: ", table.turnIndex);
   }
 
-  getCurrentPlayer(room: Room) {
-    return room.players[room.turnIndex];
+  getCurrentPlayer(table: Table) {
+    return table.players[table.turnIndex];
   }
 }

@@ -2,14 +2,14 @@ import { Card } from "./Card";
 import { Deck } from "./Deck";
 import { Player } from "./Player";
 
-export class Room {
+export class Table {
   gameID: number;
   players: Player[];
   user: Player;
   n_player: number;
   turnIndex: number;
-  currentPlayer: string;
   direction: 1 | -1;
+  plus: number;
   drawPile: Card[];
   discardPile: Card[];
   currentColor: null | "red" | "blue" | "green" | "yellow" | "wild";
@@ -19,11 +19,12 @@ export class Room {
     this.players = [...rivals, user];
     this.user = user;
 
+    this.plus = 0;
+
     this.n_player = this.players.length;
     const randomIndex = Math.floor(Math.random() * this.players.length);
     console.log("Random Index Generated: ", randomIndex);
     this.turnIndex = randomIndex;
-    this.currentPlayer = this.players[randomIndex].id;
     this.direction = 1;
 
     const deck = new Deck();

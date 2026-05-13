@@ -1,252 +1,231 @@
 import { Scene } from "phaser";
-import { Game } from "../models/Game";
-import { Card } from "../models/Card";
+// import { socket } from "../../socket/socket";
+
+import { Table } from "../models/Table";
 import { Player } from "../models/Player";
-import { GameEngine } from "../models/GameEngine";
+import { Card } from "../models/Card";
+
+type Position = { x: number; y: number };
 
 export class GameScene extends Scene {
-  private currentGame!: Game;
-  private rules!: GameEngine;
+  private table!: Table;
+  private myPlayerId!: string;
+
   private pile!: Phaser.GameObjects.Zone;
-  private gameContainer!: Phaser.GameObjects.Container;
+  private boardContainer!: Phaser.GameObjects.Container;
+
+  private playerContainers = new Map<
+    string,
+    Phaser.GameObjects.Container
+  >();
 
   constructor() {
     super("Game");
   }
 
-  init(data: { rivals?: Player[]; user?: Player }) {
-    this.createGame(data);
-    this.createBoard();
-    this.setupPlayers();
-    this.renderHands();
+  // =========================
+  // INIT
+  // =========================
+
+  init(data: { table: Table; myPlayerId: string }) {
+    this.table = data.table;
+    this.myPlayerId = data.myPlayerId;
   }
 
   create() {
+    this.createBoard();
     this.setupInput();
+    this.setupSockets();
+
+    this.render(this.table);
+
+    this.events.once("shutdown", () => {
+      socket.off("room_state");
+    });
   }
 
-  // GAME SETUP
+  // =========================
+  // SOCKETS
+  // =========================
 
-  private createGame(data: { rivals?: Player[]; user?: Player }) {
-    const rivals = data?.rivals ?? this.createPlayers(2);
-    const user = data?.user ?? new Player("0", "You");
+  private setupSockets() {
+    socket.on("room_state", (table: Table) => {
+      this.table = table;
+      this.render(table);
+    });
 
-    this.rules = new GameEngine();
-    this.currentGame = new Game(1, rivals, user);
+    socket.on("error", (err: { message: string }) => {
+      console.error(err.message);
+    });
   }
 
-  private setupPlayers() {
-    this.syncCurrentPlayer();
-    console.log(
-      "Current user = ",
-      this.currentGame.room.user.id,
-      this.currentGame.room.user.username,
-    );
-  }
-
-  private syncCurrentPlayer() {
-    this.currentGame.room.user = this.currentGame.room.players[this.currentGame.room.turnIndex];
-  }
-
+  // =========================
   // BOARD
-  private createBoard() {
-    this.add.image(400, 400, "background").setScale(0.5);
+  // =========================
 
-    this.gameContainer = this.add.container(0, 0);
+  private createBoard() {
+    this.add
+      .image(500, 400, "background")
+      .setScale(0.5);
+
+    this.boardContainer = this.add.container(0, 0);
 
     this.pile = this.add
-      .zone(300, 300, 100, 150)
-      .setRectangleDropZone(300, 300);
+      .zone(500, 350, 120, 160)
+      .setRectangleDropZone(120, 160);
 
-    this.drawZone(this.pile);
-  }
-
-  private drawZone(zone: Phaser.GameObjects.Zone) {
     const g = this.add.graphics();
     g.lineStyle(4, 0xffffff);
-    g.strokeRectShape(zone.getBounds());
-    return g;
+    g.strokeRectShape(this.pile.getBounds());
   }
 
+  // =========================
   // RENDER
+  // =========================
 
-  private renderHands() {
-    const players = this.currentGame.room.players;
-    const positions = this.getPlayerPositions(players.length);
+  private render(table: Table) {
+    this.clearPlayers();
 
-    players.forEach((player, index) => {
-      const pos = positions[index];
-
-      this.renderPlayerInfo(player, pos);
-      this.renderPlayerCards(player, pos);
-    });
-  }
-
-  private renderPlayerInfo(player: Player, pos: { x: number; y: number }) {
-    this.gameContainer.add(
-      this.add.text(pos.x - 40, pos.y - 120, player.username, {
-        fontSize: "24px",
-        color: "#ab4242",
-        fontFamily: "Arial",
-      }),
+    const positions = this.getPlayerPositions(
+      table.players.length
     );
 
-    this.add.text(pos.x - 20, pos.y - 100, player.id, {
-      fontSize: "24px",
-      color: "#ab4242",
-      fontFamily: "Arial",
+    table.players.forEach((player, i) => {
+      this.renderPlayer(player, positions[i]);
     });
   }
 
-  private renderPlayerCards(player: Player, pos: { x: number; y: number }) {
+  private renderPlayer(player: Player, pos: Position) {
+    const container = this.add.container(0, 0);
+
+    this.playerContainers.set(player.id, container);
+    this.boardContainer.add(container);
+
+    const title = this.add.text(
+      pos.x - 40,
+      pos.y - 120,
+      player.username,
+      {
+        fontSize: "24px",
+        color: "#fff",
+      }
+    );
+
+    container.add(title);
+
     let offsetX = -(player.hand.length * 20);
 
     for (const card of player.hand) {
-      const x = pos.x + offsetX;
-      const y = pos.y;
+      const isMe = player.id === this.myPlayerId;
 
-      const sprite = this.createCardSprite(card, x, y, player);
-      this.gameContainer.add(sprite);
+      const sprite = this.add.image(
+        pos.x + offsetX,
+        pos.y,
+        isMe ? card.getKey() : "back"
+      );
+
+      sprite.setScale(0.3);
+      sprite.setData("cardId", card.id);
+
+      if (isMe) {
+        sprite.setInteractive();
+        this.input.setDraggable(sprite);
+      }
+
+      container.add(sprite);
 
       offsetX += 40;
     }
   }
 
-  private createCardSprite(card: Card, x: number, y: number, player: Player) {
-    let sprite;
-    if (player == this.currentGame.room.user) {
-      sprite = this.add.image(x, y, card.getKey()).setScale(0.3);
-      sprite.setInteractive();
-      this.input.setDraggable(sprite);
-    } else {
-      sprite = this.add.image(x, y, "back").setScale(0.3);
-    }
-
-    sprite.setData("card", card);
-    sprite.setData("player", player);
-    sprite.setData("startX", x);
-    sprite.setData("startY", y);
-
-    return sprite;
-  }
-
-  //INPUT
+  // =========================
+  // INPUT
+  // =========================
 
   private setupInput() {
     this.input.on("drag", this.onDrag, this);
     this.input.on("drop", this.onDrop, this);
+    this.input.on("dragend", this.onDragEnd, this);
   }
 
-  private onDrag(_: any, obj: any, x: number, y: number) {
+  private onDrag(
+    _: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.Image,
+    x: number,
+    y: number
+  ) {
     obj.x = x;
     obj.y = y;
   }
 
-  private onDrop(_: any, obj: any, zone: any) {
-    if (zone !== this.pile) return;
+  private onDrop(
+    _: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.Image,
+    zone: Phaser.GameObjects.Zone
+  ) {
+    if (zone !== this.pile) {
+      this.resetCard(obj);
+      return;
+    }
 
-    const card = obj.getData("card") as Card;
+    const cardId = obj.getData("cardId");
 
-    const success = this.rules.processMove(
-      this.currentGame.room,
-      this.currentGame.room.user.id,
-      card,
-    );
+    // 👉 SOLO SOCKET DIRECTO
+    socket.emit("play_card", { cardId });
 
-    if (success) {
-      this.handleSuccessfulMove(obj, card);
-      this.rerender();
-      this.currentGame.room.user =
-        this.currentGame.room.players[this.currentGame.room.turnIndex];
-    } else {
-      this.resetCardPosition(obj);
+    obj.disableInteractive();
+  }
+
+  private onDragEnd(
+    _: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.Image,
+    dropped: boolean
+  ) {
+    if (!dropped) {
+      this.resetCard(obj);
     }
   }
 
-  private handleSuccessfulMove(obj: any, card: Card) {
-    this.add.image(550, 330, card.getKey()).setScale(0.3);
-    obj.destroy();
+  private resetCard(obj: Phaser.GameObjects.Image) {
+    this.tweens.add({
+      targets: obj,
+      x: obj.input?.dragStartX,
+      y: obj.input?.dragStartY,
+      duration: 150,
+    });
+  }
 
-    this.syncCurrentPlayer();
+  // =========================
+  // CLEANUP
+  // =========================
 
-    console.log(
-      "User next = ",
-      this.currentGame.room.user.id,
-      this.currentGame.room.user.username,
+  private clearPlayers() {
+    this.playerContainers.forEach(c =>
+      c.destroy(true)
     );
+    this.playerContainers.clear();
   }
 
-  private resetCardPosition(obj: any) {
-    obj.x = obj.getData("startX");
-    obj.y = obj.getData("startY");
-  }
+  // =========================
+  // POSITIONS
+  // =========================
 
-  //LAYOUT
+  private getPlayerPositions(count: number): Position[] {
+    const cx = 500;
+    const cy = 400;
+    const r = 250;
 
-  private getPlayerPositions(count: number) {
-    const centerX = 500;
-    const centerY = 400;
-
-    const layouts: Record<number, () => { x: number; y: number }[]> = {
-      2: () => [
-        { x: centerX, y: 650 },
-        { x: centerX, y: 150 },
-      ],
-      3: () => [
-        { x: centerX, y: 650 },
-        { x: 200, y: 150 },
-        { x: 800, y: 150 },
-      ],
-      4: () => [
-        { x: centerX, y: 650 },
-        { x: centerX, y: 150 },
-        { x: 150, y: centerY },
-        { x: 850, y: centerY },
-      ],
-    };
-
-    return layouts[count]?.() ?? this.getCircularPositions(count);
-  }
-
-  private getCircularPositions(count: number) {
-    const centerX = 500;
-    const centerY = 400;
-    const radius = 250;
-
-    const positions = [];
+    const res: Position[] = [];
 
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
+      const a = (i / count) * Math.PI * 2 - Math.PI / 2;
 
-      positions.push({
-        x: centerX + Math.cos(angle) * radius,
-        y: centerY + Math.sin(angle) * radius,
+      res.push({
+        x: cx + Math.cos(a) * r,
+        y: cy + Math.sin(a) * r,
       });
     }
 
-    return positions;
-  }
-
-  // Create players
-
-  private createPlayers(num: number): Player[] {
-    if (num == 1) return [new Player("1", "Beta")];
-    if (num == 2) {
-      return [new Player("1", "Beta"), new Player("2", "Gamma")];
-    }
-    if (num == 3) {
-      return [
-        new Player("1", "Beta"),
-        new Player("2", "Gamma"),
-        new Player("3", "Alpha"),
-      ];
-    }
-    return [];
-  }
-
-  private rerender() {
-    this.gameContainer.removeAll(true); // 🔥 destruye todo
-    this.renderHands();
+    return res;
   }
 }
-
