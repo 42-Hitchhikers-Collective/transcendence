@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/24 15:02:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/13 16:28:07 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { FastifyInstance } from "fastify";
 import { Socket } from "socket.io";
-import { gameManager, utils } from "../../game";
+import { gameManager, utils } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";

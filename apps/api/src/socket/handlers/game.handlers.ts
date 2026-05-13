@@ -6,12 +6,12 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/10 15:35:09 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/13 17:05:55 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
-import { gameManager } from "../../game";
+import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 
 // --- Game Events ---

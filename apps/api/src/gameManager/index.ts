@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   index.ts                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:21:09 by ilazar            #+#    #+#             */
-/*   Updated: 2026/03/19 16:02:15 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/13 18:42:14 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,4 +17,15 @@ export { utils };
 
 
 import { GameManager } from "./gameManager";
-export const gameManager = new GameManager();
+import * as gameEventsModule from "./gameEvents";
+import * as roomEventsModule from "./roomEvents";
+
+const gameManagerInstance = new GameManager();
+
+gameEventsModule.setGameManager(gameManagerInstance);
+roomEventsModule.setGameManager(gameManagerInstance);
+
+export const gameManager = {
+  ...gameEventsModule,
+  ...roomEventsModule
+};

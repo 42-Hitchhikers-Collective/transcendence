@@ -6,15 +6,15 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/24 15:22:20 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/13 16:28:07 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
-import { gameManager } from "../../game";
+import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
-import { RECONNECTION_GRACE_PERIOD } from "../../game/types";
+import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
 
 // --- Connection Events ---
@@ -39,6 +39,7 @@ export function registerConnectionHandlers(
     
     // Disconnect and leave room if in any
     socket.on("disconnect", () => {
+        app.log.info({ socketId: socket.id }, "socket disconnected");
         app.log.info(`socket disconnected: ${playerId}`);
         startGracePeriod(app, socket, playerId, broadcastRoomState);
     });

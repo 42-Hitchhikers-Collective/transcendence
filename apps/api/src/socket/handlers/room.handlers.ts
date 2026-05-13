@@ -6,12 +6,12 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/15 13:48:29 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/13 18:36:33 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
-import { gameManager } from "../../game";
+import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 
 // --- Room Events ---
@@ -69,6 +69,18 @@ export function registerRoomHandlers(
       return;
     }
     socket.leave(res.roomId);
+    broadcastRoomState(res.roomId);
+  });
+
+
+  // Set ready to play
+  socket.on("set_ready", ({ isReady }: { isReady: boolean }) => {
+    const { playerId } = getIdentity(socket);
+    const res = gameManager.setReady(playerId, isReady); //TODO
+    if (!res.success) {
+      socket.emit("error", { message: res.error });
+      return;
+    }
     broadcastRoomState(res.roomId);
   });
 }
