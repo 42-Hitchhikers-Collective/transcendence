@@ -1,16 +1,16 @@
 import { Scene } from "phaser";
-import { Room } from "./Table";
-import { Card } from "./Card";
-import { Player } from "./Player";
+import { Table } from "../../../../api/src/gamelogic/Table";
+import { Card } from "../../../../api/src/gamelogic/Card";
+import { Player } from "../../../../api/src/gamelogic/Player";
 
 export class Render extends Scene {
   private pile!: Phaser.GameObjects.Zone;
   private gameContainer!: Phaser.GameObjects.Container;
 
-  rendergame(user: string, room: Room)
+  rendergame(user: string, table: Table)
   {
     this.createBoard();
-    this.renderHands(user, room);
+    this.renderHands(user, table);
   }
 
   createBoard() {
@@ -34,8 +34,8 @@ export class Render extends Scene {
 
   // RENDER
 
-  renderHands(user: string, room: Room) {
-    const players = room.players;
+  renderHands(user: string, table: Table) {
+    const players = table.players;
     const positions = this.getPlayerPositions(players.length);
     const userPlayer = players.find(player => player.id === user)
     const indexUser = players.findIndex(player => player.id === user)
@@ -53,7 +53,7 @@ export class Render extends Scene {
         pos = positions[0];
 
       this.renderPlayerInfo(player, pos);
-      this.renderPlayerCards(player, pos, room, userPlayer);
+      this.renderPlayerCards(player, pos, table, userPlayer);
     });
   }
 
@@ -73,23 +73,23 @@ export class Render extends Scene {
     });
   }
 
-  renderPlayerCards(player: Player, pos: { x: number; y: number },  room: Room, userPlayer?: Player) {
+  renderPlayerCards(player: Player, pos: { x: number; y: number },  table: Table, userPlayer?: Player) {
     let offsetX = -(player.hand.length * 20);
 
     for (const card of player.hand) {
       const x = pos.x + offsetX;
       const y = pos.y;
 
-      const sprite = this.createCardSprite(card, x, y, room, userPlayer);
+      const sprite = this.createCardSprite(card, x, y, table, userPlayer);
       this.gameContainer.add(sprite);
 
       offsetX += 40;
     }
   }
 
-  createCardSprite(card: Card, x: number, y: number, room: Room, userPlayer?: Player) {
+  createCardSprite(card: Card, x: number, y: number, table: Table, userPlayer?: Player) {
     let sprite;
-    if (userPlayer == room.players[room.turnIndex]) {
+    if (userPlayer == table.players[table.turnIndex]) {
       sprite = this.add.image(x, y, card.getKey()).setScale(0.3);
       sprite.setInteractive();
       this.input.setDraggable(sprite);
@@ -167,9 +167,9 @@ export class Render extends Scene {
     return [];
   }
 
-  rerender(user: string, room: Room) {
+  rerender(user: string, table: Table) {
     this.gameContainer.removeAll(true);
-    this.renderHands(user, room);
+    this.renderHands(user, table);
   }
 
 }

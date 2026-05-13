@@ -1,9 +1,8 @@
 import { Scene } from "phaser";
-// import { socket } from "../../socket/socket";
-
-import { Table } from "../models/Table";
-import { Player } from "../models/Player";
-import { Card } from "../models/Card";
+import { EventBus } from "../../events/EventBus";
+import { Table } from "../../../../api/src/gamelogic/Table";
+import { Player } from "../../../../api/src/gamelogic/Player";
+import { playCard } from "../../network/gameNetwork";
 
 type Position = { x: number; y: number };
 
@@ -14,10 +13,7 @@ export class GameScene extends Scene {
   private pile!: Phaser.GameObjects.Zone;
   private boardContainer!: Phaser.GameObjects.Container;
 
-  private playerContainers = new Map<
-    string,
-    Phaser.GameObjects.Container
-  >();
+  private playerContainers = new Map<string, Phaser.GameObjects.Container>();
 
   constructor() {
     super("Game");
@@ -35,28 +31,27 @@ export class GameScene extends Scene {
   create() {
     this.createBoard();
     this.setupInput();
-    this.setupSockets();
+
+    EventBus.on("ROOM_STATE", this.onRoomState, this);
+
+    EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.render(this.table);
 
     this.events.once("shutdown", () => {
-      socket.off("room_state");
+      EventBus.off("ROOM_STATE", this.onRoomState, this);
+
+      EventBus.off("SOCKET_ERROR", this.onSocketError, this);
     });
   }
 
-  // =========================
-  // SOCKETS
-  // =========================
+  private onRoomState(table: Table) {
+    this.table = table;
+    this.render(table);
+  }
 
-  private setupSockets() {
-    socket.on("room_state", (table: Table) => {
-      this.table = table;
-      this.render(table);
-    });
-
-    socket.on("error", (err: { message: string }) => {
-      console.error(err.message);
-    });
+  private onSocketError(err: { message: string }) {
+    console.error(err.message);
   }
 
   // =========================
@@ -64,9 +59,7 @@ export class GameScene extends Scene {
   // =========================
 
   private createBoard() {
-    this.add
-      .image(500, 400, "background")
-      .setScale(0.5);
+    this.add.image(500, 400, "background").setScale(0.5);
 
     this.boardContainer = this.add.container(0, 0);
 
@@ -86,9 +79,7 @@ export class GameScene extends Scene {
   private render(table: Table) {
     this.clearPlayers();
 
-    const positions = this.getPlayerPositions(
-      table.players.length
-    );
+    const positions = this.getPlayerPositions(table.players.length);
 
     table.players.forEach((player, i) => {
       this.renderPlayer(player, positions[i]);
@@ -101,15 +92,10 @@ export class GameScene extends Scene {
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    const title = this.add.text(
-      pos.x - 40,
-      pos.y - 120,
-      player.username,
-      {
-        fontSize: "24px",
-        color: "#fff",
-      }
-    );
+    const title = this.add.text(pos.x - 40, pos.y - 120, player.username, {
+      fontSize: "24px",
+      color: "#fff",
+    });
 
     container.add(title);
 
@@ -121,7 +107,7 @@ export class GameScene extends Scene {
       const sprite = this.add.image(
         pos.x + offsetX,
         pos.y,
-        isMe ? card.getKey() : "back"
+        isMe ? card.getKey() : "back",
       );
 
       sprite.setScale(0.3);
@@ -152,7 +138,7 @@ export class GameScene extends Scene {
     _: Phaser.Input.Pointer,
     obj: Phaser.GameObjects.Image,
     x: number,
-    y: number
+    y: number,
   ) {
     obj.x = x;
     obj.y = y;
@@ -161,7 +147,7 @@ export class GameScene extends Scene {
   private onDrop(
     _: Phaser.Input.Pointer,
     obj: Phaser.GameObjects.Image,
-    zone: Phaser.GameObjects.Zone
+    zone: Phaser.GameObjects.Zone,
   ) {
     if (zone !== this.pile) {
       this.resetCard(obj);
@@ -171,7 +157,7 @@ export class GameScene extends Scene {
     const cardId = obj.getData("cardId");
 
     // 👉 SOLO SOCKET DIRECTO
-    socket.emit("play_card", { cardId });
+    playCard(cardId);
 
     obj.disableInteractive();
   }
@@ -179,7 +165,7 @@ export class GameScene extends Scene {
   private onDragEnd(
     _: Phaser.Input.Pointer,
     obj: Phaser.GameObjects.Image,
-    dropped: boolean
+    dropped: boolean,
   ) {
     if (!dropped) {
       this.resetCard(obj);
@@ -200,9 +186,7 @@ export class GameScene extends Scene {
   // =========================
 
   private clearPlayers() {
-    this.playerContainers.forEach(c =>
-      c.destroy(true)
-    );
+    this.playerContainers.forEach((c) => c.destroy(true));
     this.playerContainers.clear();
   }
 

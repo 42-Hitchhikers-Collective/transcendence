@@ -1,5 +1,5 @@
-import { Card } from "./Card"
-import { Table } from "./Table"
+import { Card } from "./Card.ts"
+import { Table } from "./Table.ts"
 
 export class RuleEngine {
   validateMove(table: Table, playerId: string, card: Card): boolean {
@@ -23,7 +23,7 @@ export class RuleEngine {
       card.color === table.currentColor ||
       card.value === top?.value ||
       card.color === "wild"
-    );
+    )
   }
 }
 

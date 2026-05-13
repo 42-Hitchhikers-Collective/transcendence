@@ -57,4 +57,13 @@ export class Table {
 
     if (topCard) this.discardPile.push(topCard); // devolver la carta visible
   }
+
+  getHand(playerId: string) {
+    const player = this.players.find((p) => p.id === playerId);
+    return player?.hand ?? null;
+  }
+  getCardCount(playerId: string) {
+    const player = this.players.find((p) => p.id === playerId);
+    return player?.hand.length;
+  }
 }

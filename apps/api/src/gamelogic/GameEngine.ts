@@ -1,6 +1,6 @@
 import { CardEffectResolver, RuleEngine, TurnManager } from "./RuleEngine";
 import { Table } from "./Table";
-import { Card } from "./Card";
+import { Card } from "./Card.ts";
 
 export class GameEngine {
   private rules: RuleEngine;
