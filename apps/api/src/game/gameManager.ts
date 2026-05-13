@@ -6,9 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/24 14:54:00 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/12 19:12:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
+
+//TODO - connection disconnection sockt id somthing isnt updated
+// All players need to set ready in order to start the game
 
 //will manage all active rooms -creating rooms, players joining/leaving
 
@@ -53,7 +58,7 @@ export class GameManager {
     if (room.state !== "waiting")
       return { success: false, error: "Game already begun" };
     this.leaveRoom(playerId);
-    room.players.push({ playerId, socketId, userName });
+    room.players.push({ playerId, socketId, userName, isReady:false });
     this.addToPlayerRoom(playerId, roomId); // add to playerRooms
     return { success: true, room: room };;
   }
@@ -108,7 +113,7 @@ export class GameManager {
       return {success: false, error: "No active game found"};
     
     // call the method defined in the Interface!
-    const res = room.game.playCard(playerId, cardIndex);
+    const res = room.game.playCard(playerId, cardIndex); //gabriel's function
     
     if (!res.success)
       return {success: false, error: res.error};

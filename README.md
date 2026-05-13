@@ -21,6 +21,10 @@ https://localhost:8443/socket-test0.html --> socket test
 
 ## Resources
 
+### Development Docs
+- **[Socket ↔ Game Flow](docs/socket_game_flow.md)** — Complete call hierarchy and timeline of how sockets and game logic interact, with concrete examples.
+- **[UNO Realtime Contract](docs/uno_realtime_contract.md)** — Shared interface between Gabriel (UNO engine) and Inbar (sockets + GameManager). Defines events, payloads, ownership boundaries, and integration requirements.
+
 ## Team, Roles & Responsibilities
 
 ## Project Management
