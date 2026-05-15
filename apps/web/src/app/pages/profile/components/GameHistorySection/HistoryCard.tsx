@@ -1,9 +1,9 @@
 import { cn } from "@/shared/lib/utils";
 import type { GameHistory } from "@/app/auth/mockProfiles";
-import { Players } from "./HistoryListPlayers";
+import { OpponentsList } from "./OpponentsList";
 import { HandThumbDownIcon, TrophyIcon } from "@heroicons/react/24/solid";
 
-type GameHistoryItemProps = {
+type HistoryCardProps = {
   game: GameHistory;
 };
 
@@ -15,7 +15,7 @@ type ResultViewModel = {
   titleStyle: string;
 };
 
-export function GameHistoryItem({ game }: GameHistoryItemProps) {
+export function HistoryCard({ game }: HistoryCardProps) {
   const RESULT_VIEW_BY_RESULT: Record<GameHistory["result"], ResultViewModel> =
     {
       win: {
@@ -54,7 +54,7 @@ export function GameHistoryItem({ game }: GameHistoryItemProps) {
       </div>
       <div className="flex flex-col items-end py-4">
         <MatchResult resultView={resultView} game={game} />
-        <Players opponent={game.opponents} />
+        <OpponentsList opponent={game.opponents} />
       </div>
 
     </div>

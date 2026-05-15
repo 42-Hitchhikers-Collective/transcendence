@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export function JoinRandomGame() {
+export function JoinRandom() {
   const [isWaitingPopupOpen, setIsWaitingPopupOpen] = useState(false)
 
   return (

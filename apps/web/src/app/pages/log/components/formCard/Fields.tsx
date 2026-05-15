@@ -36,13 +36,15 @@ export function Form({
       formFields.map((field) => [field.id, field.initialValue ?? ""])) as Record<string, string>
   );
 
+  const fieldSignature = formFields.map((field) => field.id).join("|");
+
   useEffect(() => {
     setFormData(
       Object.fromEntries(
         formFields.map((field) => [field.id, field.initialValue ?? ""]),
       ),
     );
-  }, [formFields]);
+  }, [fieldSignature]);
 
   const handleChange = (id: string, value: string) =>
     setFormData((p) => ({ ...p, [id]: value }));

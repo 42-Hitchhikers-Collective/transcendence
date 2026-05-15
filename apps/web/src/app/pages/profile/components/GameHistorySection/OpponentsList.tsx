@@ -15,7 +15,7 @@ function getInitial(username: string) {
   return username && username.length > 0 ? username[0].toUpperCase() : '?';
 }
 
-export const Players = ({opponent} :{opponent: {
+export const OpponentsList = ({opponent} :{opponent: {
     id: number;
     username: string;
     avatar: string;

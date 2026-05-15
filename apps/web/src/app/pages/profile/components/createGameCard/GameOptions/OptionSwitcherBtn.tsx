@@ -41,11 +41,11 @@
 //         <Button
 //           type="button"
 //           className={
-//             activeOption === GameOptions.CreateLinkRoom
+//             activeOption === GameOptions.CreateGameCard
 //               ? activeButtonStyle
 //               : inactiveButtonStyle
 //           }
-//           onClick={() => setActiveOption(GameOptions.CreateLinkRoom)}
+//           onClick={() => setActiveOption(GameOptions.CreateGameCard)}
 //         >
 //           Create a link room
 //         </Button>

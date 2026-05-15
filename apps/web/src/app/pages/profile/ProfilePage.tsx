@@ -1,36 +1,15 @@
-import { ProfileCard } from "./components/profileCard/ProfileCard";
-import { JoinGameCard } from "./components/gameSetup/SetupCard";
-import { GameHistoryCard } from "./components/playHistory/HistoryList";
-import { useEffect, useMemo, useState } from "react";
-import type { GameHistory } from "@/app/auth/mockProfiles";
-import background from "@/assets/backgrounds/unocards_gemini.png";
 import { useAuthContext } from "../../auth/AuthContext";
-import { CreateLinkRoom } from "./components/gameSetup/CreateLinkCard";
+import { useEffect, useMemo, useState } from "react";
 
-// import AlertEx from "@/shared/shadcn-studio/alert/alert-08";
-// import Uhh from "@/shared/shadcn-space/alert/alert-04";
+import { ProfileSection } from "./components/profileSection/ProfileSection";
+import { GamesHistorySection } from "./components/GameHistorySection/GameHistorySection";
+import type { GameHistory } from "@/app/auth/mockProfiles";
+import { CreateGameCard} from "./components/createGameCard/CreateGameCard";
 
-function WelcomeCard({ playerData }: { playerData: { username?: string } }) {
-  return (
-    <section className="relative overflow-hidden rounded-2xl border p-6 shadow-sm">
-      <div className="relative space-y-5">
-        <div className="space-y-2 border-b border-sky-200/70 pb-4">
-          <p>
-            <span className="font-bold">
-              Welcome to your player page, {playerData.username}!
-            </span>
-            <br />
-            It may look a little empty and boring right now, but in reality it's
-            just waiting for you to record it with with your epic gaming data!
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
+import { Footer } from "@/shared/components/footer";
+import background from "@/assets/backgrounds/unocards_gemini.png";
 
-function ProfilePage() {
-
+export default function ProfilePage() {
   /* This should be isolated in its own hook file and imported */
   const { user, logout, token } = useAuthContext(); // pulls the auth state
   const [history, setHistory] = useState<GameHistory[]>([]); // stores the game history for the user
@@ -64,24 +43,40 @@ function ProfilePage() {
   }, [history]);
 
   return (
-    <div className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
-    style={{ backgroundImage: `url(${background})`,  backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', backgroundBlendMode:'saturation'  }}
+    <div
+      className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
+      style={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backgroundBlendMode: "saturation",
+      }}
     >
-      
-      <ProfileCard user={user} stats={stats} onLogout={logout} />
-      {/* <WelcomeCard playerData={playerData} /> */}
+      <div className="flex items-start justify-end gap-4 p-4">
+        <button
+          type="button"
+          onClick={logout}
+          className="rounded-full border-2 border-slate-100/20 bg-gray-400 px-4 py-2 text-xs font-semibold uppercase text-white shadow-sm transition hover:bg-red-500"
+        >
+          Logout
+        </button>
+      </div>
+      <ProfileSection user={user} stats={stats} onLogout={logout} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
-        <div className="order-2 lg:order-1"> {/* switches view order between children */}
-          <GameHistoryCard games={historyLoading ? [] : history} />
+          {/* switches view order between children */}
+        <div className="order-2 lg:order-1">
+          <GamesHistorySection games={historyLoading ? [] : history} />
         </div>
         <div className="order-1 lg:order-2">
-          <JoinGameCard />
+          <CreateGameCard />
+        </div>
+      </div>
+      <div className="mt-6 flex justify-end">
+        <div className="max-w-md">
+          <Footer />
         </div>
       </div>
     </div>
   );
 }
-
-export default ProfilePage;
-
-

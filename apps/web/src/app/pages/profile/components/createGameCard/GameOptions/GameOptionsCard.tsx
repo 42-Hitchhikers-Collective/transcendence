@@ -1,21 +1,19 @@
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { CreateLinkRoom } from "./CreateLinkCard";
+import { CreateGameCard } from "../CreateGameCard.tsx";
 // import { useState } from "react";
 // import { CardSwitcherBtn } from "./CardSwitcherBtn";
-// import { CreateGame } from "./optional/JoinFriendsCard";
-// import { JoinRandomGame } from "./optional/JoinRandomCard";
-
-
+// import { InviteFriends } from "./optional/JoinFriendsCard";
+// import { JoinRandom } from "./optional/JoinRandomCard";
 
 // export const GameOptions = {
 //   JoinRandomRoom: 0,
 //   CreateRoom: 1,
-//   CreateLinkRoom: 2,
+//   CreateGameCard: 2,
 // } as const;
 // export type Option = (typeof GameOptions)[keyof typeof GameOptions];
 
-export function JoinGameCard() {
-  // const [activeOption, setActiveOption] = useState<Option>(GameOptions.CreateLinkRoom);
+export function GameOptionsCard() {
+  // const [activeOption, setActiveOption] = useState<Option>(GameOptions.CreateGameCard);
 
   return (
     <Card className="w-full h-full">
@@ -24,11 +22,11 @@ export function JoinGameCard() {
           activeOption={activeOption}
           setActiveOption={setActiveOption}
         /> */}
-          <CreateLinkRoom />
-          {/* 
-          {activeOption === "create-link" && <CreateLinkRoom />}
-          {activeOption === "create-game" && <CreateGame />}
-          {activeOption === "join-random-game" && <JoinRandomGame />} */}
+        <CreateGameCard />
+
+        {/* {activeOption === "create-link" && <CreateGameCard />}
+        {activeOption === "create-game" && <InviteFriends />}
+        {activeOption === "join-random-game" && <JoinRandom />} */}
       </CardContent>
     </Card>
   );
