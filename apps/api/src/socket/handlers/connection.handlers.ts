@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/13 16:28:07 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/15 14:00:54 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
+
+// Pausing the game if a player disconnects ?
 
 // --- Connection Events ---
 
@@ -29,6 +31,8 @@ export function registerConnectionHandlers(
     // Auto-rejoin player to their room if they were in one (handles reconnections)
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
+        updateSocketId(playerId, socket.id);
+        app.log.info(`Player ${playerId} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId);
         app.log.info(`Player ${playerId} automatically rejoin room ${roomId}`);
         broadcastRoomState(roomId);
@@ -47,6 +51,17 @@ export function registerConnectionHandlers(
 
 
 // --- Private ---
+
+function updateSocketId(playerId: string, newSocketId: string) {
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const room = gameManager.getRoomById(roomId);
+    if (!room) return;
+    const player = room.players.find(p => p.playerId === playerId);
+    if (player)
+        player.socketId = newSocketId;
+}
+
 
 // Start grace period before removing player from their room
 function startGracePeriod(

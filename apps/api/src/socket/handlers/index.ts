@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/13 16:28:07 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/15 13:55:35 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ export function registerSocketHandlers(
   const room = gameManager.getRoomById(roomId);
   if (!room) return;
   room.players.forEach((player) => {
-    const sanitizedRoomData = utils.getSanitizedRoom(room, player.playerId); 
-    socket.nsp.to(player.socketId).emit("room_state", sanitizedRoomData);
+    const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
+    socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
   });
   gameManager.debugState();
 }

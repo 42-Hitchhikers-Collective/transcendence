@@ -6,41 +6,29 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/13 18:37:10 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/15 14:01:15 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
-
-//TODO - connection disconnection sockt id somthing isnt updated
-// All players need to set ready in order to start the game
-
 //will manage all active rooms -creating rooms, players joining/leaving
 
-import { Player, Room, RoomResult, RoomIdResult, GameInstance } from "./types";
+import { Player, Room, RoomResult, RoomIdResult } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
-import * as GameEvents from "./gameEvents";
-import * as RoomEvents from "./roomEvents";
 
-export const gameManager = {
-    ...GameEvents,
-    ...RoomEvents,
-};
 
-export class GameManager {
-  
-  private roomsById: Map<string, Room> = new Map();         // roomId → Room
-  private playerRooms: Map<string, string> = new Map();     // playerId → roomId
-  private roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
+const roomsById: Map<string, Room> = new Map();         // roomId → Room
+const playerRooms: Map<string, string> = new Map();     // playerId → roomId
+const roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
   
 
 
 // ---> Msg Events ---
-sendMessage(playerId: string, msg: string): RoomIdResult {
-  const roomId = this.getPlayerRoomId(playerId);
+export function sendMessage(playerId: string, msg: string): RoomIdResult {
+  const roomId = getPlayerRoomId(playerId);
   if (!roomId)
     return {success: false, error: "Player is not in room"};
-  const room = this.getRoomById(roomId);
+  const room = getRoomById(roomId);
   if (!room)
     return {success: false, error: "Room not found"};
   if (msg.length === 0 || msg.length > 200)
@@ -53,22 +41,22 @@ sendMessage(playerId: string, msg: string): RoomIdResult {
 
 
 // Returns true if player is in a room, false otherwise
-isInRoom(playerId: string): boolean {
-  return this.playerRooms.has(playerId);
+export function isInRoom(playerId: string): boolean {
+  return playerRooms.has(playerId);
 }
 
 // Deletes an Empty Room.
-deleteRoomIfEmpty(room: Room): boolean {
+export function deleteRoomIfEmpty(room: Room): boolean {
   if (room.players.length === 0) {
-    this.roomsByName.delete(room.name);
-    this.roomsById.delete(room.id);
+    roomsByName.delete(room.name);
+    roomsById.delete(room.id);
     return true;
   }
   return false;
 }
 
 // Removes player from it's room player[] array
-removePlayerFromPlayersArray(players: Player[], playerId: string): boolean {
+export function removePlayerFromPlayersArray(players: Player[], playerId: string): boolean {
   const index = players.findIndex(p => p.playerId === playerId);
   if (index === -1) return false;
   players.splice(index, 1);
@@ -76,22 +64,22 @@ removePlayerFromPlayersArray(players: Player[], playerId: string): boolean {
 }
 
 // add to playerRooms. map naturaly avoids duplicates.
-addToPlayerRoom(playerId: string, roomId: string) {
-  this.playerRooms.set(playerId, roomId);
+export function addToPlayerRoom(playerId: string, roomId: string) {
+  playerRooms.set(playerId, roomId);
 }
 
 //lookup in playerRoom map after a player. returns roomId. Null if not in a room
-getPlayerRoomId(playerId: string): string | null {
-  return this.playerRooms.get(playerId) ?? null;
+export function getPlayerRoomId(playerId: string): string | null {
+  return playerRooms.get(playerId) ?? null;
 }
 
-getRoomById(roomId: string): Room | null  {
-  const room = this.roomsById.get(roomId);
+export function getRoomById(roomId: string): Room | null  {
+  const room = roomsById.get(roomId);
   return room ?? null;
 }
 
-getRoomByName(roomName: string): Room | null {
-  const room = this.roomsByName.get(roomName);
+export function getRoomByName(roomName: string): Room | null {
+  const room = roomsByName.get(roomName);
   console.log(`Looking up room by name: ${roomName} - Found: ${!!room}`);
   return room ?? null;
 }
@@ -99,44 +87,43 @@ getRoomByName(roomName: string): Room | null {
 
 //--- Getters ---
 
-getMaxPlayersPerRoom() {
+export function getMaxPlayersPerRoom() {
   return MAX_PLAYERS_PER_ROOM;
 }
   
 // Returns an array of all Room objects
-getAllRooms(): Room[] {
-  return Array.from(this.roomsById.values());
+export function getAllRooms(): Room[] {
+  return Array.from(roomsById.values());
 }
 
-getRoomsByIdMap(): Map<string, Room> {
-  return this.roomsById;
+export function getRoomsByIdMap(): Map<string, Room> {
+  return roomsById;
 }
 
-getPlayerRoomsMap(): Map<string, string> {
-  return this.playerRooms;
+export function getPlayerRoomsMap(): Map<string, string> {
+  return playerRooms;
 }
 
-getRoomsByNameMap(): Map<string, Room> {
-  return this.roomsByName;
+export function getRoomsByNameMap(): Map<string, Room> {
+  return roomsByName;
 }
 
 
 // --- DEBUG ---
-  public debugState() {
+  export function debugState() {
     console.log("---- GAME STATE ----");
 
-    for (const [roomId, room] of this.roomsById) {
+    for (const [roomId, room] of roomsById) {
       const name = room.name ? `${room.name}` : "";
       console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
       console.log("Players:", room.players.map(p => p.playerId).join(", "));
     }
 
     console.log("Player list:");
-    for (const [playerId, roomId] of this.playerRooms) {
+    for (const [playerId, roomId] of playerRooms) {
       console.log(`${playerId} → ${roomId}`);
     }
   }
-}
 
 
 

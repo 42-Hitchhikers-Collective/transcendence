@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/13 17:05:55 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/15 13:45:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,6 @@ export function registerGameHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void
 ) {
-
-    // Start the game
-    socket.on("start_game", () => {
-    const { playerId } = getIdentity(socket);
-    const res = gameManager.startGame(playerId);
-    if (!res.success) {
-        socket.emit("error", { message: res.error });
-        return;
-    }
-    const roomId = res.room.id;
-    broadcastRoomState(roomId);
-    });
-
 
     // Play a card
     socket.on("play_card", ({ cardIndex }) => {
@@ -53,4 +40,35 @@ export function registerGameHandlers(
     else
         socket.emit("error", { message: res.error });
     })
+
+    
+    // --- Start Game Events ---
+
+    // Set player ready to play, if set ready checks if game can be started and starts it.
+    socket.on("set_ready", ({ isReady }: { isReady: boolean }) => {
+        const { playerId } = getIdentity(socket);
+        const res = gameManager.setReady(playerId, isReady);
+        if (!res.success) {
+            socket.emit("error", { message: res.error });
+            return;
+        }
+        broadcastRoomState(res.roomId);
+        if (isReady) {
+            const gameStartRes = gameManager.startGame(playerId);
+            if (gameStartRes.success)
+                broadcastRoomState(gameStartRes.room.id);
+        }
+    });
+
+
+    // Start the game. This version allows starting the game by pressing a button.
+    socket.on("start_game", () => {
+        const { playerId } = getIdentity(socket);
+        const res = gameManager.startGame(playerId);
+        if (!res.success) {
+            socket.emit("error", { message: res.error });
+            return;
+        }
+        broadcastRoomState(res.room.id);
+    });
 };

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/13 15:37:34 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/15 14:03:41 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,18 +44,21 @@ export type Room = {
   game?: GameInstance;
 };
 
-// What the frontend sees for "other" players
-export type SanitizedPlayer = {
+// What the frontend sees for players
+export type FrontendPlayer = {
   id: string;
+  userName: string;
+  isTheObserver: boolean; // true if this is the player themselves, false for other players
+  isReady: boolean;
   cardCount: number;
   cards?: { color: string; value: string }[];
 };
 
 // What the frontend sees for a Room
-export type SanitizedRoom = {
+export type FrontendRoom = {
   id: string;
   state: GameState;
-  players: SanitizedPlayer[];
+  players: FrontendPlayer[];
   game?: {
     currentPlayerId: string;
     discardTopCard: { color: string; value: string };
