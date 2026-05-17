@@ -5,32 +5,46 @@ import { Player } from "./Player";
 export class Table {
   gameID: number;
   players: Player[];
+
   user: Player;
+
   n_player: number;
+
   turnIndex: number;
   direction: 1 | -1;
-  plus: number;
+
+  pendingDraw: number;
+
   drawPile: Card[];
   discardPile: Card[];
+
   currentColor: null | "red" | "blue" | "green" | "yellow" | "wild";
+  pass_turn: boolean;
+
+  lastCard: Card | null;
 
   constructor(gameID: number, rivals: Player[], user: Player) {
     this.gameID = gameID;
+
     this.players = [...rivals, user];
     this.user = user;
 
-    this.plus = 0;
-
     this.n_player = this.players.length;
-    const randomIndex = Math.floor(Math.random() * this.players.length);
-    console.log("Random Index Generated: ", randomIndex);
-    this.turnIndex = randomIndex;
+
+    this.turnIndex = Math.floor(Math.random() * this.players.length);
+
     this.direction = 1;
+
+    this.pendingDraw = 0;
+
+    this.lastCard = null;
 
     const deck = new Deck();
 
     this.drawPile = deck.cards;
     this.discardPile = [];
+    this.pass_turn = false;
+
     this.currentColor = null;
 
     this.dealCards();
@@ -65,5 +79,20 @@ export class Table {
   getCardCount(playerId: string) {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand.length;
+  }
+  
+  drawCards(player: Player, amount: number) {
+    for (let i = 0; i < amount; i++) {
+      let card = this.drawPile.pop();
+  
+      if (!card) {
+        this.shuffleDiscardPile();
+        card = this.drawPile.pop();
+      }
+  
+      if (card) {
+        player.hand.push(card);
+      }
+    }
   }
 }

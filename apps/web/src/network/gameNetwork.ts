@@ -11,3 +11,11 @@ export function drawCard() {
 export function startGame() {
   socket.emit("start_game");
 }
+
+export function selectWildColor(color: "red" | "blue" | "green" | "yellow") {
+  socket.emit("select_wild_color", { color });
+}
+
+export function passTurn() {
+  socket.emit("pass_turn");
+}

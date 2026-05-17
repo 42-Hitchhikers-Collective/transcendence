@@ -2,7 +2,7 @@ import { Scene } from "phaser";
 import { EventBus } from "../../events/EventBus";
 import { Table } from "../../../../api/src/gamelogic/Table";
 import { Player } from "../../../../api/src/gamelogic/Player";
-import { playCard } from "../../network/gameNetwork";
+import { playCard, selectWildColor, drawCard } from "../../network/gameNetwork";
 
 type Position = { x: number; y: number };
 
@@ -12,8 +12,10 @@ export class GameScene extends Scene {
 
   private pile!: Phaser.GameObjects.Zone;
   private boardContainer!: Phaser.GameObjects.Container;
+  private drawCardButton!: Phaser.GameObjects.Container;
 
   private playerContainers = new Map<string, Phaser.GameObjects.Container>();
+  private wildColorContainer: Phaser.GameObjects.Container | null = null;
 
   constructor() {
     super("Game");
@@ -47,6 +49,14 @@ export class GameScene extends Scene {
 
   private onRoomState(table: Table) {
     this.table = table;
+    
+    // Check if a wild card was just played
+    if (table.lastCard && table.lastCard.color === "wild") {
+      this.showWildColorButtons();
+    } else {
+      this.hideWildColorButtons();
+    }
+    
     this.render(table);
   }
 
@@ -70,6 +80,47 @@ export class GameScene extends Scene {
     const g = this.add.graphics();
     g.lineStyle(4, 0xffffff);
     g.strokeRectShape(this.pile.getBounds());
+
+    // Create Draw Card Button
+    this.drawCardButton = this.add.container(500, 430);
+
+    const buttonBg = this.add.rectangle(0, 0, 100, 40, 0x4a90e2).setInteractive();
+    buttonBg.setStrokeStyle(2, 0xffffff);
+
+    const buttonText = this.add.text(0, 0, "Draw Card", {
+      fontSize: "14px",
+      color: "#fff",
+      align: "center",
+    });
+    buttonText.setOrigin(0.5);
+
+    const buttonPass = this.add.text(0, 0, "Pass Turn", {
+      fontSize: "14px",
+      color: "#fff",
+      align: "center",
+    });
+    buttonPass.setOrigin(0.5);
+
+    buttonBg.on("pointerdown", () => {
+      drawCard();
+      buttonBg.setFillStyle(0x3a80d2);
+    });
+
+    buttonBg.on("pointerup", () => {
+      buttonBg.setFillStyle(0x4a90e2);
+    });
+
+    buttonBg.on("pointerover", () => {
+      this.input.setDefaultCursor("pointer");
+      buttonBg.setFillStyle(0x3a80d2);
+    });
+
+    buttonBg.on("pointerout", () => {
+      this.input.setDefaultCursor("default");
+      buttonBg.setFillStyle(0x4a90e2);
+    });
+
+    this.drawCardButton.add([buttonBg, buttonText]);
   }
 
   // =========================
@@ -182,12 +233,71 @@ export class GameScene extends Scene {
   }
 
   // =========================
+  // WILD COLOR SELECTION
+  // =========================
+
+  private showWildColorButtons() {
+    // Hide existing buttons first
+    this.hideWildColorButtons();
+
+    // Create container for color buttons
+    this.wildColorContainer = this.add.container(500, 200);
+
+    const colors: Array<{
+      color: "red" | "blue" | "green" | "yellow";
+      hex: number;
+    }> = [
+      { color: "red", hex: 0xff0000 },
+      { color: "green", hex: 0x00ff00 },
+      { color: "blue", hex: 0x0000ff },
+      { color: "yellow", hex: 0xffff00 },
+    ];
+
+    const startX = -150;
+    const spacing = 100;
+
+    colors.forEach((item, index) => {
+      const x = startX + index * spacing;
+      const y = 0;
+
+      // Create button background
+      const button = this.add.rectangle(x, y, 80, 60, item.hex).setInteractive();
+      button.setStrokeStyle(3, 0xffffff);
+
+      // Create button label
+      const label = this.add.text(x, y, item.color.toUpperCase(), {
+        fontSize: "12px",
+        color: "#000",
+        align: "center",
+      });
+      label.setOrigin(0.5);
+
+      // Add click handler
+      button.on("pointerdown", () => {
+        selectWildColor(item.color);
+        this.hideWildColorButtons();
+      });
+
+      // Add to container
+      this.wildColorContainer!.add([button, label]);
+    });
+  }
+
+  private hideWildColorButtons() {
+    if (this.wildColorContainer) {
+      this.wildColorContainer.destroy(true);
+      this.wildColorContainer = null;
+    }
+  }
+
+  // =========================
   // CLEANUP
   // =========================
 
   private clearPlayers() {
     this.playerContainers.forEach((c) => c.destroy(true));
     this.playerContainers.clear();
+    this.hideWildColorButtons();
   }
 
   // =========================
