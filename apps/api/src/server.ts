@@ -9,7 +9,7 @@ import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
 import { setupSocket } from "./socket/socket";
-import { gameManager } from "./game";
+import { gameManager } from "./gameManager";
 
 dotenv.config();
 
