@@ -80,19 +80,22 @@ export class Table {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand.length;
   }
-  
+
   drawCards(player: Player, amount: number) {
     for (let i = 0; i < amount; i++) {
       let card = this.drawPile.pop();
-  
+
       if (!card) {
         this.shuffleDiscardPile();
         card = this.drawPile.pop();
       }
-  
+
       if (card) {
         player.hand.push(card);
       }
     }
+  }
+  changeColor(color: "red" | "blue" | "green" | "yellow" | "wild") {
+    this.currentColor = color;
   }
 }
