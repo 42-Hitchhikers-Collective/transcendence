@@ -25,9 +25,9 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
       isTheObserver: isMe,
       isReady: p.isReady,
       // Everyone sees the count
-      cardCount: room.game?.playerHands.get(p.playerId) || 0,
+      cardCount: room.game?.table.getCardCount(p.playerId) || 0,
       // ONLY the observer sees their own actual cards
-      cards: isMe ? room.game?.getHand(p.playerId) : undefined
+      cards: isMe ? room.game?.table.getHand(p.playerId) : undefined
     };
   });
 
@@ -37,9 +37,9 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
     state: room.state,
     players: frontendPlayers,
     game: room.game ? {
-      currentPlayerId: room.game.currentPlayerId,
-      discardTopCard: room.game.discardTopCard,
-      drawPileCount: room.game.drawPileCount,
+      currentPlayerId: room.game.table.players[room.game.table.turnIndex]?.id || "",
+      discardTopCard: room.game.table.discardPile[room.game.table.discardPile.length - 1] || null,
+      drawPileCount: room.game.table.drawPile.length || 0,
     } : undefined
   };
 }

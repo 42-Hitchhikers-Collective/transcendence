@@ -6,13 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 18:12:25 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 19:45:03 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult } from "./types";
-
+import { Game as GameInstance } from "../gamelogic/Game";
+import { Player as GabrielPlayer } from "../gamelogic/Player";
 
  // --- Game Events ---
 
@@ -26,6 +27,7 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
     return {success: false, error: "No active game found"};
   
   // call the method defined in the Interface!
+  
   const res = room.game.playCard(playerId, cardIndex); //gabriel's function
   
   if (!res.success)
@@ -60,15 +62,12 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
     if (!room || room.state !== "playing" || !room.game)
       return {success: false, error: "No active game found"};
     
-    // Access the table directly (Game class is cast to any to access table property)
-    // Shouldn't we acess a method like game.selectWildColor instead of accessing the table directly??
-    const game = room.game as any;
-    if (game.table) {
-      game.table.currentColor = color;
-    }
+    // Set the chosen color directly on the game table
+    // Consider to change into a function in the Game class if you want to add validation or other logic
+    room.game.table.currentColor = color;
     
     return {success: true, roomId: roomId};
-  }
+}
 
 
 //  --- Start Game Events ---
@@ -99,10 +98,22 @@ export function startGame(playerId: string): RoomResult {
     return {success: false, error: "Room not found"};
   if (startGameCondition(room)) {
       room.state = "playing";
-      // room.game = new GameInstanceImpl(room.players); // Initialize the "Game Slot" with the actual game instance;
+      const playersMap = mapPlayersForGame(room.players);
+      // room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
       return {success: true, room};
   }
   return {success: false, error: "Start conditions aren't met"};;
+}
+
+// Convert players array to the format expected by the Game constructor
+function mapPlayersForGame(players: { playerId: string; userName: string }[]): Map<string, string>[] {
+  if (!players || players.length === 0)
+    return [];  
+  return players.map(player => {
+      const userMap = new Map<string, string>();
+      userMap.set(player.playerId, player.userName);
+      return userMap;
+  });
 }
 
 // Returns true only if game is in waiting mode, at least 2 players in the room, and all players are ready
