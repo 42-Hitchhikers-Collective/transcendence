@@ -6,12 +6,12 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/15 13:00:50 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 19:04:26 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
-import { Player, Room, RoomResult, RoomIdResult, GameInstance } from "./types";
+import { Player, Room, RoomResult, RoomIdResult } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
 
 // --- Room Events ---
