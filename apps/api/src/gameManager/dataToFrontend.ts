@@ -27,7 +27,7 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
       // Everyone sees the count
       cardCount: room.game?.table.getCardCount(p.playerId) || 0,
       // ONLY the observer sees their own actual cards
-      cards: isMe ? room.game?.table.getHand(p.playerId) : undefined
+      cards: isMe ? room.game?.table.getHand(p.playerId)?.map(card => ({ color: card.color, value: card.value })) : undefined
     };
   });
 
