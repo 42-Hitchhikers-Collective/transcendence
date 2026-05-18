@@ -21,7 +21,6 @@ export class Game {
 
   constructor(
     users: Map<string, string>[],
-    myPlayer: Player
   ) {
     this.gameId = Date.now();
 
@@ -40,7 +39,6 @@ export class Game {
     this.table = new Table(
       this.gameId,
       this.players,
-      myPlayer
     );
   }
 

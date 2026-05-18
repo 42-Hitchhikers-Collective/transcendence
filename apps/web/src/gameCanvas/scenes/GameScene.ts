@@ -1,18 +1,16 @@
 import { Scene } from "phaser";
 import { EventBus } from "../../events/EventBus";
-import { Table } from "../../../../api/src/gamelogic/Table";
-import { Player } from "../../../../api/src/gamelogic/Player";
+import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
 import { playCard, selectWildColor, drawCard } from "../../network/gameNetwork";
 
 type Position = { x: number; y: number };
 
 export class GameScene extends Scene {
-  private table!: Table;
-  private myPlayerId!: string;
-
   private pile!: Phaser.GameObjects.Zone;
   private boardContainer!: Phaser.GameObjects.Container;
   private drawCardButton!: Phaser.GameObjects.Container;
+  private room!: FrontendRoom;
+  private myPlayerId: string = "";
 
   private playerContainers = new Map<string, Phaser.GameObjects.Container>();
   private wildColorContainer: Phaser.GameObjects.Container | null = null;
@@ -25,9 +23,7 @@ export class GameScene extends Scene {
   // INIT
   // =========================
 
-  init(data: { table: Table; myPlayerId: string }) {
-    this.table = data.table;
-    this.myPlayerId = data.myPlayerId;
+  init() {
   }
 
   create() {
@@ -38,8 +34,6 @@ export class GameScene extends Scene {
 
     EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
-    this.render(this.table);
-
     this.events.once("shutdown", () => {
       EventBus.off("ROOM_STATE", this.onRoomState, this);
 
@@ -47,17 +41,22 @@ export class GameScene extends Scene {
     });
   }
 
-  private onRoomState(table: Table) {
-    this.table = table;
+  private onRoomState(room: FrontendRoom) {
+    this.room = room;
     
-    // Check if a wild card was just played
-    if (table.lastCard && table.lastCard.color === "wild") {
+    // Extract myPlayerId from observer on first call
+    if (!this.myPlayerId) {
+      const observer = room.players.find(p => p.isTheObserver);
+      if (observer) this.myPlayerId = observer.id;
+    }
+    
+    if (room.game && room.game.discardTopCard.color === "wild") {
       this.showWildColorButtons();
     } else {
       this.hideWildColorButtons();
     }
     
-    this.render(table);
+    this.render(room);
   }
 
   private onSocketError(err: { message: string }) {
@@ -127,51 +126,69 @@ export class GameScene extends Scene {
   // RENDER
   // =========================
 
-  private render(table: Table) {
+  private render(room: FrontendRoom) {
     this.clearPlayers();
 
-    const positions = this.getPlayerPositions(table.players.length);
+    // Reorder so observer (current player) is always at the bottom
+    const orderedPlayers = this.reorderPlayersWithObserverAtBottom(room.players);
+    const positions = this.getPlayerPositions(orderedPlayers.length);
 
-    table.players.forEach((player, i) => {
+    orderedPlayers.forEach((player, i) => {
       this.renderPlayer(player, positions[i]);
     });
   }
 
-  private renderPlayer(player: Player, pos: Position) {
+  private reorderPlayersWithObserverAtBottom(players: FrontendPlayer[]): FrontendPlayer[] {
+    const observer = players.find(p => p.isTheObserver);
+    if (!observer) return players;
+    
+    const others = players.filter(p => !p.isTheObserver);
+    return [...others, observer];
+  }
+
+  private renderPlayer(player: FrontendPlayer, pos: Position) {
     const container = this.add.container(0, 0);
 
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    const title = this.add.text(pos.x - 40, pos.y - 120, player.username, {
+    const title = this.add.text(pos.x - 40, pos.y - 120, player.userName, {
       fontSize: "24px",
       color: "#fff",
     });
 
     container.add(title);
 
-    let offsetX = -(player.hand.length * 20);
+    // Only render cards for the current player
+    const isMe = player.id === this.myPlayerId;
+    if (isMe && player.cards) {
+      let offsetX = -(player.cards.length * 20);
 
-    for (const card of player.hand) {
-      const isMe = player.id === this.myPlayerId;
+      for (const card of player.cards) {
+        const sprite = this.add.image(
+          pos.x + offsetX,
+          pos.y,
+          `${card.color}_${card.value}`,
+        );
 
-      const sprite = this.add.image(
-        pos.x + offsetX,
-        pos.y,
-        isMe ? card.getKey() : "back",
-      );
-
-      sprite.setScale(0.3);
-      sprite.setData("cardId", card.id);
-
-      if (isMe) {
+        sprite.setScale(0.3);
+        sprite.setData("cardId", `${card.color}_${card.value}`);
         sprite.setInteractive();
         this.input.setDraggable(sprite);
+
+        container.add(sprite);
+
+        offsetX += 40;
       }
-
-      container.add(sprite);
-
-      offsetX += 40;
+    } else {
+      // Show card count for other players
+      const cardCountText = this.add.text(pos.x, pos.y + 30, `🎴 ${player.cardCount}`, {
+        fontSize: "16px",
+        color: "#fff",
+        align: "center",
+      });
+      cardCountText.setOrigin(0.5);
+      container.add(cardCountText);
     }
   }
 
@@ -312,7 +329,8 @@ export class GameScene extends Scene {
     const res: Position[] = [];
 
     for (let i = 0; i < count; i++) {
-      const a = (i / count) * Math.PI * 2 - Math.PI / 2;
+      // The last player (observer) is always at the bottom (angle π/2)
+      const a = (i / count) * Math.PI * 2 + Math.PI;
 
       res.push({
         x: cx + Math.cos(a) * r,

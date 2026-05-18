@@ -6,8 +6,6 @@ export class Table {
   gameID: number;
   players: Player[];
 
-  user: Player;
-
   n_player: number;
 
   turnIndex: number;
@@ -23,11 +21,10 @@ export class Table {
 
   lastCard: Card | null;
 
-  constructor(gameID: number, rivals: Player[], user: Player) {
+  constructor(gameID: number, rivals: Player[]) {
     this.gameID = gameID;
 
-    this.players = [...rivals, user];
-    this.user = user;
+    this.players = rivals;
 
     this.n_player = this.players.length;
 
