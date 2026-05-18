@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: grial <grial@student.42berlin.de>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 19:45:03 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 20:32:08 by grial            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,26 @@ import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Player as GabrielPlayer } from "../gamelogic/Player";
+import { Card } from "../gamelogic/Card";
+
+// ===============================
+// HELPER: Convert cardIndex to Card
+// ===============================
+function getCardFromIndex(playerId: string, cardIndex: number): Card | null {
+  const roomId = gm.getPlayerRoomId(playerId);
+  if (!roomId) return null;
+  
+  const room = gm.getRoomById(roomId);
+  if (!room || !room.game) return null;
+  
+  // Get player's hand from the game table
+  const hand = room.game.table.getHand(playerId);
+  if (!hand || cardIndex < 0 || cardIndex >= hand.length) {
+    return null;
+  }
+  
+  return hand[cardIndex];
+}
 
  // --- Game Events ---
 
@@ -26,12 +46,16 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
   if (!room || room.state !== "playing" || !room.game)
     return {success: false, error: "No active game found"};
   
-  // call the method defined in the Interface!
+  // Convert cardIndex to Card
+  const card = getCardFromIndex(playerId, cardIndex);
+  if (!card)
+    return {success: false, error: "Invalid card index"};
   
-  const res = room.game.playCard(playerId, cardIndex); //gabriel's function
+  // Call the game's playCard with the Card object
+  const res = room.game.playCard(playerId, card);
   
-  if (!res.success)
-    return {success: false, error: res.error};
+  if (!res)
+    return {success: false, error: "Card play failed"};
   return {success: true, roomId: roomId};
 };
 

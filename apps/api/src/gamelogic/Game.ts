@@ -97,7 +97,7 @@ export class Game {
     //this.table.discardPile.push(playedCard);
     //this.table.currentColor = playedCard.color;
   }
-  playCard(playerId: string, card: Card): boolean {
+  playCard2(playerId: string, card: Card): boolean {
     if (!this.rules.playCard(this.table, playerId, card))
       return false;
     this.rules.advance(this.table);

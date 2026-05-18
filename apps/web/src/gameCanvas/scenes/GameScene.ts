@@ -164,7 +164,7 @@ export class GameScene extends Scene {
     if (isMe && player.cards) {
       let offsetX = -(player.cards.length * 20);
 
-      for (const card of player.cards) {
+      player.cards.forEach((card, cardIndex) => {
         const sprite = this.add.image(
           pos.x + offsetX,
           pos.y,
@@ -172,14 +172,14 @@ export class GameScene extends Scene {
         );
 
         sprite.setScale(0.3);
-        sprite.setData("cardId", `${card.color}_${card.value}`);
+        sprite.setData("cardIndex", cardIndex);
         sprite.setInteractive();
         this.input.setDraggable(sprite);
 
         container.add(sprite);
 
         offsetX += 40;
-      }
+      });
     } else {
       // Show card count for other players
       const cardCountText = this.add.text(pos.x, pos.y + 30, `🎴 ${player.cardCount}`, {
@@ -222,9 +222,9 @@ export class GameScene extends Scene {
       return;
     }
 
-    const cardId = obj.getData("cardId");
+    const cardIndex = obj.getData("cardIndex");
 
-    playCard(cardId);
+    playCard(cardIndex);
 
     obj.disableInteractive();
   }
