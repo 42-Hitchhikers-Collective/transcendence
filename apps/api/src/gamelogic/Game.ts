@@ -81,25 +81,6 @@ export class Game {
   playCard(playerId: string, card: Card): boolean {
     if (!this.rules.playCard(this.table, playerId, card))
       return false;
-    return true;
-    //const player = this.table.players.find((p) => p.id === playerId);
-    //if (!player) return;
-    //
-    //const index = player.hand.findIndex((c) => c.id === card.id);
-    //
-    //if (index === -1) {
-    //  console.warn("Card not found in hand", card);
-    //  return;
-    //}
-    //
-    //const [playedCard] = player.hand.splice(index, 1);
-    //
-    //this.table.discardPile.push(playedCard);
-    //this.table.currentColor = playedCard.color;
-  }
-  playCard(playerId: string, card: Card): boolean {
-    if (!this.rules.playCard(this.table, playerId, card))
-      return false;
     this.rules.advance(this.table);
     return true;
     //const player = this.table.players.find((p) => p.id === playerId);

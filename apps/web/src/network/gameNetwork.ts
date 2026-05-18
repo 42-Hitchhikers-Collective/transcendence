@@ -1,7 +1,7 @@
 import { socket } from "../socket/Socket.ts";
 
-export function playCard(cardId: string) {
-  socket.emit("play_card", { cardId });
+export function playCard(cardIndex: number) {
+  socket.emit("play_card", { cardIndex });
 }
 
 export function drawCard() {

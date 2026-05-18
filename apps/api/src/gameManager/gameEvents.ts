@@ -6,13 +6,16 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 20:29:39 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 20:35:42 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
+import { Player as GabrielPlayer } from "../gamelogic/Player";
+import { Card } from "../gamelogic/Card";
+
 
  // --- Game Events ---
 
@@ -25,11 +28,16 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
   if (!room || room.state !== "playing" || !room.game)
     return {success: false, error: "No active game found"};
   
-  // call the method defined in the Interface!
-  const success = room.game.playCard(playerId, cardIndex);
+  // Convert cardIndex to Card
+  const card = getCardFromIndex(playerId, cardIndex);
+  if (!card)
+    return {success: false, error: "Invalid card index"};
   
-  if (!success)
-    return {success: false, error: "Game logic error: invalid move"};
+  // Call the game's playCard with the Card object
+  const res = room.game.playCard(playerId, card);
+  
+  if (!res)
+    return {success: false, error: "Card play failed"};
   return {success: true, roomId: roomId};
 };
 
@@ -98,6 +106,24 @@ export function startGame(playerId: string): RoomResult {
       return {success: true, room};
   }
   return {success: false, error: "Start conditions aren't met"};;
+}
+
+
+// --- Helpers ---
+
+function getCardFromIndex(playerId: string, cardIndex: number): Card | null {
+  const roomId = gm.getPlayerRoomId(playerId);
+  if (!roomId) return null;
+  
+  const room = gm.getRoomById(roomId);
+  if (!room || !room.game) return null;
+  
+  // Get player's hand from the game table
+  const hand = room.game.table.getHand(playerId);
+  if (!hand || cardIndex < 0 || cardIndex >= hand.length) {
+    return null;
+  }
+   return hand[cardIndex];
 }
 
 // Convert players array to the format expected by the Game constructor
