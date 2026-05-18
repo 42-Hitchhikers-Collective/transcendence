@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 19:45:03 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 20:28:58 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,10 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
     return {success: false, error: "No active game found"};
   
   // call the method defined in the Interface!
+  const success = room.game.playCard(playerId, cardIndex);
   
-  const res = room.game.playCard(playerId, cardIndex); //gabriel's function
-  
-  if (!res.success)
-    return {success: false, error: res.error};
+  if (!success)
+    return {success: false, error: "Game logic error: invalid move"};
   return {success: true, roomId: roomId};
 };
 
@@ -46,14 +45,15 @@ export function drawCard(playerId: string): RoomIdResult {
     return {success: false, error: "No active game found"};
   
   // call the method defined in the Interface!
-  const res = room.game.drawCard(playerId);
+  const success = room.game.drawCard(playerId);
   
-  if (!res.success)
-    return {success: false, error: res.error};
+  if (!success)
+    return {success: false, error: "Game logic error: invalid move"};
   return {success: true, roomId: roomId};
 }
 
 
+// Select color for wild card
 export function selectWildColor(playerId: string, color: "red" | "blue" | "green" | "yellow"): RoomIdResult {
     const roomId = gm.getPlayerRoomId(playerId);
     if (!roomId)
@@ -61,11 +61,7 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
     const room = gm.getRoomById(roomId);
     if (!room || room.state !== "playing" || !room.game)
       return {success: false, error: "No active game found"};
-    
-    // Set the chosen color directly on the game table
-    // Consider to change into a function in the Game class if you want to add validation or other logic
-    room.game.table.currentColor = color;
-    
+    room.game.table.changeColor(color);
     return {success: true, roomId: roomId};
 }
 
@@ -99,7 +95,7 @@ export function startGame(playerId: string): RoomResult {
   if (startGameCondition(room)) {
       room.state = "playing";
       const playersMap = mapPlayersForGame(room.players);
-      // room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
+      room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
       return {success: true, room};
   }
   return {success: false, error: "Start conditions aren't met"};;
