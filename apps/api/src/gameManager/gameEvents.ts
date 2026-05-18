@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/15 13:44:43 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 18:12:25 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,23 @@ export function drawCard(playerId: string): RoomIdResult {
 }
 
 
-
+export function selectWildColor(playerId: string, color: "red" | "blue" | "green" | "yellow"): RoomIdResult {
+    const roomId = gm.getPlayerRoomId(playerId);
+    if (!roomId)
+      return {success: false, error: "Player is not in room"};
+    const room = gm.getRoomById(roomId);
+    if (!room || room.state !== "playing" || !room.game)
+      return {success: false, error: "No active game found"};
+    
+    // Access the table directly (Game class is cast to any to access table property)
+    // Shouldn't we acess a method like game.selectWildColor instead of accessing the table directly??
+    const game = room.game as any;
+    if (game.table) {
+      game.table.currentColor = color;
+    }
+    
+    return {success: true, roomId: roomId};
+  }
 
 
 //  --- Start Game Events ---

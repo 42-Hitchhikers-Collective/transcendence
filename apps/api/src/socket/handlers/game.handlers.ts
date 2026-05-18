@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/15 13:45:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/18 18:12:47 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,16 @@ export function registerGameHandlers(
     else
         socket.emit("error", { message: res.error });
     })
+
+    // Select color for wild card
+    socket.on("select_wild_color", ({ color }) => {
+    const { playerId } = getIdentity(socket);
+    const res = gameManager.selectWildColor(playerId, color);
+    if (res.success)
+        broadcastRoomState(res.roomId);
+    else
+        socket.emit("error", { message: res.error });
+    });
 
     
     // --- Start Game Events ---
