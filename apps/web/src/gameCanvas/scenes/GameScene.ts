@@ -224,7 +224,6 @@ export class GameScene extends Scene {
 
     const cardId = obj.getData("cardId");
 
-    // 👉 SOLO SOCKET DIRECTO
     playCard(cardId);
 
     obj.disableInteractive();

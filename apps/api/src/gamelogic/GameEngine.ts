@@ -6,6 +6,7 @@ export class GameEngine {
   private rules: RuleEngine;
   private effects: CardEffectResolver;
   private turns: TurnManager;
+
   //private wincheck: WinConditionchecker
 
   constructor() {
@@ -29,20 +30,26 @@ export class GameEngine {
     return true;
   }
 
-  private playCard(Table: Table, playerId: string, card: Card) {
-    const player = Table.players.find((p) => p.id === playerId);
-    if (!player) return;
+  playCard(table: Table, playerId: string, card: Card) {
+    const player = table.players.find((p) => p.id === playerId);
+    if (!player) return false;
 
     const index = player.hand.findIndex((c) => c.id === card.id);
 
     if (index === -1) {
       console.warn("Card not found in hand", card);
-      return;
+      return false;
     }
 
     const [playedCard] = player.hand.splice(index, 1);
 
-    Table.discardPile.push(playedCard);
-    Table.currentColor = playedCard.color;
+    table.discardPile.push(playedCard);
+    table.currentColor = playedCard.color;
+    return true;
+  }
+
+  advance(table: Table)
+  {
+    this.turns.advanceTurn(table);
   }
 }

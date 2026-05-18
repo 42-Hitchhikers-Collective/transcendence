@@ -1,6 +1,7 @@
 import { Player } from "./Player";
 import { Table } from "./Table";
 import { GameEngine } from "./GameEngine";
+import { Card } from "./Card";
 
 export class Game {
   public gameId: number;
@@ -75,5 +76,64 @@ export class Game {
     this.isFinished = true;
 
     this.timestampEnd = Date.now();
+  }
+
+  playCard(playerId: string, card: Card): boolean {
+    if (!this.rules.playCard(this.table, playerId, card))
+      return false;
+    return true;
+    //const player = this.table.players.find((p) => p.id === playerId);
+    //if (!player) return;
+    //
+    //const index = player.hand.findIndex((c) => c.id === card.id);
+    //
+    //if (index === -1) {
+    //  console.warn("Card not found in hand", card);
+    //  return;
+    //}
+    //
+    //const [playedCard] = player.hand.splice(index, 1);
+    //
+    //this.table.discardPile.push(playedCard);
+    //this.table.currentColor = playedCard.color;
+  }
+  playCard(playerId: string, card: Card): boolean {
+    if (!this.rules.playCard(this.table, playerId, card))
+      return false;
+    this.rules.advance(this.table);
+    return true;
+    //const player = this.table.players.find((p) => p.id === playerId);
+    //if (!player) return;
+    //
+    //const index = player.hand.findIndex((c) => c.id === card.id);
+    //
+    //if (index === -1) {
+    //  console.warn("Card not found in hand", card);
+    //  return;
+    //}
+    //
+    //const [playedCard] = player.hand.splice(index, 1);
+    //
+    //this.table.discardPile.push(playedCard);
+    //this.table.currentColor = playedCard.color;
+  }
+
+  drawCard(playerId: string): boolean {
+    const player = this.table.players.find((p) => p.id === playerId);
+
+    if (!player) return false;
+
+    let card = this.table.drawPile.pop();
+
+    if (!card) {
+      this.table.shuffleDiscardPile();
+      card = this.table.drawPile.pop();
+    }
+
+    if (!card) return false;
+
+    player.hand.push(card);
+
+    return true;
   }
 }
