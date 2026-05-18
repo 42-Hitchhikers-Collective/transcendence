@@ -1,4 +1,4 @@
-import { EventBus } from "../EventBus";
+import { EventBus } from "../../events/EventBus.ts";
 import { Scene } from "phaser";
 
 export class MainMenu extends Scene {
