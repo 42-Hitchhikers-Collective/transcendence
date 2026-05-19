@@ -31,11 +31,13 @@ export class GameScene extends Scene {
     this.setupInput();
 
     EventBus.on("ROOM_STATE", this.onRoomState, this);
+    EventBus.on("COLOR", this.onRoomState, this);
 
     EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.events.once("shutdown", () => {
       EventBus.off("ROOM_STATE", this.onRoomState, this);
+      EventBus.off("COLOR", this.selectColor, this);
 
       EventBus.off("SOCKET_ERROR", this.onSocketError, this);
     });
@@ -56,6 +58,15 @@ export class GameScene extends Scene {
     }
     
     this.render(room);
+  }
+
+  private selectColor(room: FrontendRoom)
+  {
+    const observer = room.players.find(p => p.isTheObserver);
+    this.room = room;
+    this.render(room);
+    if (observer)
+      this.showWildColorButtons();
   }
 
   private onSocketError(err: { message: string }) {
