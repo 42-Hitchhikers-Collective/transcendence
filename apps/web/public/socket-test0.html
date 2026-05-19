@@ -37,6 +37,7 @@
 <button onclick="leaveRoom()">Leave Room</button>
 <br/>
 
+<button onclick="setReady()">Set Ready</button>
 <button onclick="startGame()">Start Game</button>
 
 <br/>
@@ -62,7 +63,8 @@ let socket;
 function connectSocket() {
   const jwtToken = document.getElementById("jwtInput").value;
   // Use same-origin (scheme/host/port) to avoid CORS + mixed-content issues.
-  socket = io({
+  // socket = io({   //use this for same-origin
+  socket = io("http://localhost:3000", {
     path: "/socket.io",
     auth: {
       token: jwtToken
@@ -112,12 +114,16 @@ function leaveRoom() {
   addMessage("You left the room.");
 }
 
-function startGame() {
-  socket.emit("start_game");
+function setReady() {
+  socket.emit("set_ready", { isReady: true });
 }
 
 function debug() {
   socket.emit("debug");
+}
+
+function startGame() {
+  socket.emit("start_game");
 }
 
 function joinRoom() {
