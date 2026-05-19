@@ -1,5 +1,6 @@
 import { Card } from "./Card.ts"
 import { Table } from "./Table.ts"
+import { Player } from "./Player.ts"
 
 export class RuleEngine {
   validateMove(table: Table, playerId: string, card: Card): boolean {
@@ -37,10 +38,10 @@ export class CardEffectResolver {
         this.skip(table);
         break;
       case "2plus":
-        table.plus += 2;
+        table.pendingDraw += 2;
         break;
       case "4plus":
-        table.plus += 4;
+        table.pendingDraw += 4;
         break;
     }
   }
@@ -63,7 +64,6 @@ export class CardEffectResolver {
       table.shuffleDiscardPile();
       card = table.drawPile.pop();
     }
-
     if (card) {
       next.hand.push(card);
     }
@@ -90,5 +90,14 @@ export class TurnManager {
 
   getCurrentPlayer(table: Table) {
     return table.players[table.turnIndex];
+  }
+}
+
+export class WinConditionchecker {
+  lastCard(table: Table, player: Player): boolean
+  {
+    if (player.hand.length == 1)
+      return true;
+    return false;
   }
 }

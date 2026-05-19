@@ -1,4 +1,4 @@
-import { CardEffectResolver, RuleEngine, TurnManager } from "./RuleEngine";
+import { CardEffectResolver, RuleEngine, TurnManager, WinConditionchecker } from "./RuleEngine";
 import { Table } from "./Table";
 import { Card } from "./Card.ts";
 
@@ -6,14 +6,13 @@ export class GameEngine {
   private rules: RuleEngine;
   private effects: CardEffectResolver;
   private turns: TurnManager;
-
-  //private wincheck: WinConditionchecker
+  private wincheck: WinConditionchecker
 
   constructor() {
     this.rules = new RuleEngine();
     this.effects = new CardEffectResolver();
     this.turns = new TurnManager();
-    //this.wincheck = new WinConditionchecker()
+    this.wincheck = new WinConditionchecker()
   }
 
   processMove(table: Table, playerId: string, card: Card) {
@@ -26,6 +25,7 @@ export class GameEngine {
     this.playCard(table, playerId, card);
     this.effects.applyEffect(table, card);
     this.turns.advanceTurn(table);
+    
 
     return true;
   }

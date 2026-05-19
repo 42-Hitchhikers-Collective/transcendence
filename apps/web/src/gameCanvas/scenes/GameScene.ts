@@ -43,8 +43,7 @@ export class GameScene extends Scene {
 
   private onRoomState(room: FrontendRoom) {
     this.room = room;
-    
-    // Extract myPlayerId from observer on first call
+
     if (!this.myPlayerId) {
       const observer = room.players.find(p => p.isTheObserver);
       if (observer) this.myPlayerId = observer.id;
