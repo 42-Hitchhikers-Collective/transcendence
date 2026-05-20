@@ -24,9 +24,9 @@ export class GameMaster {
 		table.discardPile.push(playedCard);
 		table.currentColor = playedCard.color;
 		//if (this.uno(table, player))
-			// emitir signal;
+		// emitir signal;
 		//if (this.noCard(player))
-			// winning signal
+		// winning signal
 		return true;
 	}
 
@@ -36,14 +36,12 @@ export class GameMaster {
 		if (!this.pendingCards(table, card)) return false;
 		return true;
 	}
-	pendingCards(table: Table, card: Card) : boolean
-	{
+	pendingCards(table: Table, card: Card): boolean {
 		if (table.pendingDraw == 0)
 			return true;
-		if (table.pendingDraw != 0 && card.color == "wild")
+		if (table.pendingDraw != 0 && (card.value == "4plus" || card.value == "2plus"))
 			return true;
-		if (table.pendingDraw != 0 && card.value == "2plus")
-			return true;
+
 		return false;
 	}
 
@@ -96,7 +94,7 @@ export class GameMaster {
 			table.players.length;
 	}
 
-	private drawCards(table: Table, playerId: string): boolean {
+	drawCards(table: Table, playerId: string): boolean {
 		const player = table.players.find((p) => p.id === playerId);
 		if (!this.isPlayerTurn(table, playerId) || !player) return false;
 
@@ -119,16 +117,7 @@ export class GameMaster {
 		return true;
 	}
 
-	private getNextPlayer(table: Table): Player {
-		const next = (table.turnIndex + table.direction + table.players.length) %
-			table.players.length;
-		console.log("getNextPlayer: ", next);
-		const player = table.players[next];
-		console.log("getNextPlayer ID: ", player.id);
-		return player;
-	}
-
-	private advanceTurn(table: Table): void {
+	advanceTurn(table: Table): void {
 		table.turnIndex =
 			(table.turnIndex + table.direction + table.players.length) %
 			table.players.length;
@@ -139,7 +128,7 @@ export class GameMaster {
 		return table.players[table.turnIndex];
 	}
 
-	uno(table: Table,player: Player): boolean {
+	uno(table: Table, player: Player): boolean {
 		if (table.pendingDraw == 0)
 			return player.hand.length === 1;
 	}
