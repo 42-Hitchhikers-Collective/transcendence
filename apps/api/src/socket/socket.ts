@@ -2,6 +2,8 @@ import { Server as SocketIOServer } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { registerSocketHandlers } from "./handlers";
 import { createAuthMiddleware } from "./middleware/auth";
+import { gameManager } from "../gameManager";
+import { Player } from "../gameManager/types";
 
 export function setupSocket(app: FastifyInstance) {
   const io = new SocketIOServer(app.server, {
@@ -13,24 +15,23 @@ export function setupSocket(app: FastifyInstance) {
   io.use(createAuthMiddleware(app));
   
   io.on("connection", (socket) => {
-    const userId = (socket as any).userId as string;
+    const playerId = (socket as any).userId as string;
+    const userName = (socket as any).userName as string;
 
-    app.log.info({ socketId: socket.id, userId }, "socket connected");
+    app.log.info({ socketId: socket.id, playerId }, "socket connected");
 
-    // Notify everyone a new client joined
-    // io.emit("newClient", socket.id);
-
-    // Presence
-    // io.emit("presence:online", { userId });
-
-    // Basic ping/pong health check
-    // socket.emit("hello", { message: "Hello from Socket.IO" });
-    // socket.on("ping", () => socket.emit("pong"));
-
-    // socket.on("disconnect", () => {
-    //   io.emit("presence:offline", { userId });
-    //   app.log.info({ socketId: socket.id, userId }, "socket disconnected");
-    // });
+    // Add player to online players list (or update socketId if already exists)
+    const existingPlayer = gameManager.getOnlinePlayer(playerId);
+    if (existingPlayer) {
+      app.log.info(`Player ${playerId} already online, updating socketId to ${socket.id}`);
+      existingPlayer.socketId = socket.id;
+      io.emit("playerUpdate", existingPlayer); // TODO: optimize to only emit to the room the player is in
+    } else {
+      app.log.info(`Adding new online player: ${playerId} (${userName})`);
+      const newPlayer: Player = { playerId, socketId: socket.id, userName, isReady: false };
+      gameManager.addPlayerToOnlinePlayers(newPlayer);
+      io.emit("playerUpdate", newPlayer); // TODO: optimize to only emit to the room the player is in?
+    }
 
     // Game room handlers (create_room, join_room, leave_room, start_game, play_card, draw_card)
     registerSocketHandlers(app, socket);

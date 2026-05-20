@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 20:35:42 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/19 12:22:01 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
-import { Room, RoomResult, RoomIdResult } from "./types";
+import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
-import { Player as GabrielPlayer } from "../gamelogic/Player";
+// import { Player as GabrielPlayer } from "../gamelogic/Player";
 import { Card } from "../gamelogic/Card";
 
 
@@ -76,7 +76,7 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
 //  --- Start Game Events ---
 
 
-// Set isReady for given player true or false. if true, checks if game can be started and starts it.
+// Set isReady for given player true or false.
 export function setReady(playerId: string, isReady: boolean): RoomIdResult {
   const roomId = gm.getPlayerRoomId(playerId);
   if (!roomId)
@@ -91,8 +91,29 @@ export function setReady(playerId: string, isReady: boolean): RoomIdResult {
   return { success: true, roomId: roomId };
 }
 
-// Start the game
-export function startGame(playerId: string): RoomResult {
+// Start the game automatically if MAX_PLAYERS_PER_ROOM players are ready, and all conditions are met
+export function startGameAuto(playerId: string): RoomResult {
+  const roomId = gm.getPlayerRoomId(playerId);
+  if (!roomId)
+    return {success: false, error: "Player is not in a room"};
+  const room = gm.getRoomById(roomId);
+  if (!room)
+    return {success: false, error: "Room not found"};
+  const allPlayersReady = room.players.every(player => player.isReady);
+  if (room.players.length == MAX_PLAYERS_PER_ROOM && allPlayersReady) {
+    if (startGameCondition(room)) {
+        room.state = "playing";
+        const playersMap = mapPlayersForGame(room.players);
+        room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
+        return {success: true, room};
+    }
+  }
+  return {success: false, error: "Start conditions aren't met"};;
+}
+
+
+//  Start the game manually if start button was pressed, and all condition are met  
+export function startGameButton(playerId: string): RoomResult {
   const roomId = gm.getPlayerRoomId(playerId);
   if (!roomId)
     return {success: false, error: "Player is not in a room"};
@@ -107,6 +128,7 @@ export function startGame(playerId: string): RoomResult {
   }
   return {success: false, error: "Start conditions aren't met"};;
 }
+
 
 
 // --- Helpers ---

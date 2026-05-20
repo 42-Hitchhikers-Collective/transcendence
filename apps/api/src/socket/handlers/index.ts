@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/15 13:55:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 13:13:54 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,18 @@ export function registerSocketHandlers(
   gameManager.debugState();
 }
 
+
+function broadcastPlayerState(playerId: string) {
+  const player = gameManager.getOnlinePlayer(playerId);
+  if (!player) return;
+  const roomId = gameManager.getPlayerRoomId(playerId);
+  if (!roomId) return;
+  socket.nsp.to(roomId).emit("player_state", player);
+}
+
   // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState);
+  registerGameHandlers(socket, broadcastRoomState, broadcastPlayerState);
   registerConnectionHandlers(app, socket, broadcastRoomState);
 
 

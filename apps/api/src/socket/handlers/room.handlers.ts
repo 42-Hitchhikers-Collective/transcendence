@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/15 13:38:03 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 16:08:25 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ export function registerRoomHandlers(
 
   // Create a new room. Enter it and leave old room if in any
   socket.on("create_room", ({ roomName }) => {
-    const { playerId, socketId, userName } = getIdentity(socket);
+    const { playerId } = getIdentity(socket);
     const res = gameManager.createRoom(roomName);
     if (!res.success)
       return socket.emit("error", { message: res.error });
@@ -40,7 +40,7 @@ export function registerRoomHandlers(
         socket.leave(oldRoomId);
         broadcastRoomState(oldRoomId);
       }
-      gameManager.joinRoom(roomName, playerId, socketId, userName);
+      gameManager.joinRoom(roomName, playerId);
       socket.join(newRoom.id);
       socket.emit("room_created", { roomName: newRoom.name });
     }
@@ -48,8 +48,8 @@ export function registerRoomHandlers(
 
   // Join an existing room
   socket.on("join_room", ({ roomName }) => {
-    const { playerId, socketId, userName } = getIdentity(socket);
-    const res = gameManager.joinRoom(roomName, playerId, socketId, userName);
+    const { playerId } = getIdentity(socket);
+    const res = gameManager.joinRoom(roomName, playerId);
     if (!res.success) {
       socket.emit("error", { message: res.error });
       return;

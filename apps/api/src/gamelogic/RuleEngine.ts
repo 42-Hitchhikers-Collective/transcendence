@@ -37,7 +37,7 @@ export class CardEffectResolver {
         this.skip(table);
         break;
       case "2plus":
-        table.plus += 2;
+        table.pend += 2;
         break;
       case "4plus":
         table.plus += 4;

@@ -43,8 +43,10 @@ export class GameEngine {
 
     const [playedCard] = player.hand.splice(index, 1);
 
+
     table.discardPile.push(playedCard);
     table.currentColor = playedCard.color;
+
     return true;
   }
 
