@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/19 12:22:01 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 18:49:44 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,8 +167,8 @@ function startGameCondition(room: Room): boolean {
         return false;
     if (room.players.length < 2)
         return false;
-    const allPlayersReady = room.players.every(player => player.isReady);
-    if (!allPlayersReady)
-        return false;
+    // const allPlayersReady = room.players.every(player => player.isReady);
+    // if (!allPlayersReady)
+        // return false;
     return true;
   }
