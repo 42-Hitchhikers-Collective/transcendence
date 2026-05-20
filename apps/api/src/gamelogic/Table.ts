@@ -57,7 +57,7 @@ export class Table {
   shuffleDiscardPile() {
     if (this.discardPile.length <= 1) return;
 
-    const topCard = this.discardPile.pop(); // guardar la última
+    const topCard = this.discardPile.pop();
 
     while (this.discardPile.length > 0) {
       const card = this.discardPile.pop();
@@ -66,7 +66,7 @@ export class Table {
 
     Phaser.Utils.Array.Shuffle(this.drawPile);
 
-    if (topCard) this.discardPile.push(topCard); // devolver la carta visible
+    if (topCard) this.discardPile.push(topCard);
   }
 
   getHand(playerId: string) {

@@ -1,9 +1,32 @@
-import { Card } from "./Card.ts"
-import { Table } from "./Table.ts"
+import { Table } from "./Table.ts";
+import { Card } from "./Card.ts";
 import { Player } from "./Player.ts"
 
-export class RuleEngine {
-  
+export class Rules {
+
+  playCard(table: Table, playerId: string, card: Card): boolean {
+    const player = table.players.find((p) => p.id === playerId);
+    if (!player) return false;
+
+    const index = player.hand.findIndex((c) => c.id === card.id);
+
+    if (index === -1) {
+      console.warn("Card not found in hand", card);
+      return false;
+    }
+
+    const [playedCard] = player.hand.splice(index, 1);
+
+    table.discardPile.push(playedCard);
+    table.currentColor = playedCard.color;
+    return true;
+  }
+
+  advance(table: Table): void {
+    this.advanceTurn(table);
+  }
+
+
   validateMove(table: Table, playerId: string, card: Card): boolean {
     if (!this.isPlayerTurn(table, playerId)) return false;
     if (!this.isCardPlayable(table, card)) return false;
@@ -11,6 +34,7 @@ export class RuleEngine {
   }
 
   private isPlayerTurn(table: Table, playerId: string): boolean {
+    console.log("Current Player: ", table.players[table.turnIndex], " Player: ", playerId);
     return table.players[table.turnIndex].id === playerId;
   }
 
@@ -26,9 +50,7 @@ export class RuleEngine {
       card.color === "wild"
     )
   }
-}
 
-export class CardEffectResolver {
   applyEffect(table: Table, card: Card): void {
     switch (card.value) {
       case "reverse":
@@ -44,8 +66,6 @@ export class CardEffectResolver {
         table.pendingDraw += 4;
         break;
     }
-    //if (card.color == "wild")
-      // BROADCAST COLOR
   }
 
   private reverse(table: Table): void {
@@ -58,7 +78,7 @@ export class CardEffectResolver {
       table.players.length;
   }
 
-  private drawCards(table: Table, amount: number): void {
+  drawCards(table: Table, amount: number): void {
     const next = this.getNextPlayer(table);
 
     for (let i = 0; i < amount; i++) {
@@ -77,28 +97,25 @@ export class CardEffectResolver {
   private getNextPlayer(table: Table): Player {
     const next = (table.turnIndex + table.direction + table.players.length) %
       table.players.length;
-    console.log("getNextPlayer: ", next);
     const player = table.players[next];
-    console.log("getNextPlayer ID: ", player.id);
     return player;
   }
-}
 
-export class TurnManager {
   advanceTurn(table: Table): void {
     table.turnIndex =
       (table.turnIndex + table.direction + table.players.length) %
       table.players.length;
-    console.log("Current Turn Index: ", table.turnIndex);
   }
 
   getCurrentPlayer(table: Table): Player {
     return table.players[table.turnIndex];
   }
-}
 
-export class WinConditionchecker {
-  lastCard(table: Table, player: Player): boolean {
+  uno(player: Player): boolean {
     return player.hand.length === 1;
+  }
+
+  noCard(player: Player): boolean {
+    return player.hand.length === 0;
   }
 }
