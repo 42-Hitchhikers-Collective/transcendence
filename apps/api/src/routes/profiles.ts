@@ -3,7 +3,8 @@ import { createWriteStream, mkdirSync } from "fs";
 import { pipeline } from "stream/promises";
 import path from "path";
 
-const AVATAR_DIR = "/app/data/avatars";
+// const AVATAR_DIR = "/app/data/avatars";  // Use this in production (inside Docker)
+const AVATAR_DIR = process.env.AVATAR_DIR || "./data/avatars"; // Use this in development (local filesystem)
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const EXT: Record<string, string> = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif" };
 

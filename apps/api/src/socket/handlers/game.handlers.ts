@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 18:12:47 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 13:14:51 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ import { getIdentity } from "../socket.utils";
 
 export function registerGameHandlers(
   socket: Socket,
-  broadcastRoomState: (roomId: string) => void
+  broadcastRoomState: (roomId: string) => void,
+  broadcastPlayerState: (playerId: string) => void
 ) {
 
     // Play a card
@@ -62,11 +63,13 @@ export function registerGameHandlers(
             socket.emit("error", { message: res.error });
             return;
         }
-        broadcastRoomState(res.roomId);
+        broadcastPlayerState(playerId);
         if (isReady) {
-            const gameStartRes = gameManager.startGame(playerId);
-            if (gameStartRes.success)
+            const gameStartRes = gameManager.startGameAuto(playerId);
+            if (gameStartRes.success) {
                 broadcastRoomState(gameStartRes.room.id);
+                console.log(`Game started automatically in room ${gameStartRes.room.id} as all players are ready.`);
+            }
         }
     });
 
@@ -74,11 +77,12 @@ export function registerGameHandlers(
     // Start the game. This version allows starting the game by pressing a button.
     socket.on("start_game", () => {
         const { playerId } = getIdentity(socket);
-        const res = gameManager.startGame(playerId);
+        const res = gameManager.startGameButton(playerId);
         if (!res.success) {
             socket.emit("error", { message: res.error });
             return;
         }
+        console.log(`Game started manually in room ${res.room.id}`);
         broadcastRoomState(res.room.id);
     });
 };

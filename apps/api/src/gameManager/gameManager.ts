@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/15 14:01:15 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 14:51:20 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ import { MAX_PLAYERS_PER_ROOM } from "./types";
 const roomsById: Map<string, Room> = new Map();         // roomId → Room
 const playerRooms: Map<string, string> = new Map();     // playerId → roomId
 const roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
+const onlinePlayers: Map<string, Player> = new Map();   // playerId → Player
+const timeouts: Map<string, NodeJS.Timeout> = new Map(); // playerId → timeout for handling disconnection grace period
   
 
 
@@ -36,8 +38,35 @@ export function sendMessage(playerId: string, msg: string): RoomIdResult {
   return {success: true, roomId: roomId};
 }
 
+// --- Timeout ---
+export function setPlayerTimeout(playerId: string, timeout: NodeJS.Timeout) {
+  timeouts.set(playerId, timeout);
+}
+
+export function clearPlayerTimeout(playerId: string) {
+  const timeout = timeouts.get(playerId);
+  if (timeout) {
+    clearTimeout(timeout);
+    timeouts.delete(playerId);
+  }
+}
+
 // --- HELPERS ---
 
+
+// Adds player to onlinePlayers set. Returns true if player was added, false if already exists.
+export function addPlayerToOnlinePlayers(player: Player): boolean {
+  if (!onlinePlayers.has(player.playerId)) {
+    onlinePlayers.set(player.playerId, player);
+    return true;
+  }
+  return false;
+}
+
+// Removes player from onlinePlayers set. Returns true if player was removed, false if player was not in the set.
+export function removePlayerFromOnlinePlayers(playerId: string): boolean {
+  return onlinePlayers.delete(playerId);
+}
 
 
 // Returns true if player is in a room, false otherwise
@@ -108,6 +137,15 @@ export function getRoomsByNameMap(): Map<string, Room> {
   return roomsByName;
 }
 
+export function getOnlinePlayersMap(): Map<string, Player> {
+  return onlinePlayers;
+}
+
+export function getOnlinePlayer(playerId: string): Player | null {
+  const player = onlinePlayers.get(playerId);
+  return player ?? null;
+}
+
 
 // --- DEBUG ---
   export function debugState() {
@@ -116,14 +154,19 @@ export function getRoomsByNameMap(): Map<string, Room> {
     for (const [roomId, room] of roomsById) {
       const name = room.name ? `${room.name}` : "";
       console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
-      console.log("Players:", room.players.map(p => p.playerId).join(", "));
+      console.log("Players:", room.players.map(p => `${p.userName} , isReady: ${p.isReady}`).join(", \n"));
     }
 
-    console.log("Player list:");
-    for (const [playerId, roomId] of playerRooms) {
-      console.log(`${playerId} → ${roomId}`);
+    if (onlinePlayers.size === 0) {
+      console.log("No online players");
+    } else {
+      for (const [playerId, player] of onlinePlayers) {
+        const username = player.userName ? `${player.userName}` : "No Username";
+        console.log(`Player: ${username} - Room: ${getPlayerRoomId(playerId)}`);
+      }
     }
   }
+
 
 
 

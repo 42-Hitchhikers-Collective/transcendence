@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 19:04:26 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 16:07:43 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ export function createRoom(roomName: string): RoomResult {
 }
 
 // Add player to room. removes player from old room
-export function joinRoom(name: string, playerId: string, socketId: string, userName: string): RoomResult {
+export function joinRoom(name: string, playerId: string): RoomResult {
   const room = gm.getRoomByName(name);
   if (!room)
     return { success: false, error: "Room not found" };
@@ -46,7 +46,10 @@ export function joinRoom(name: string, playerId: string, socketId: string, userN
   if (room.state !== "waiting")
     return { success: false, error: "Game already begun" };
   leaveRoom(playerId);
-  room.players.push({ playerId, socketId, userName, isReady:false });
+  const player = gm.getOnlinePlayer(playerId);
+  if (!player)
+    return { success: false, error: "Player not found" };
+  room.players.push({ playerId, socketId: player.socketId, userName: player.userName, isReady: false });
   gm.addToPlayerRoom(playerId, roomId); // add to playerRooms
   return { success: true, room: room };;
 }
