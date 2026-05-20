@@ -1,6 +1,6 @@
 import { Player } from "./Player";
 import { Table } from "./Table";
-import { GameEngine } from "./GameEngine";
+import { GameMaster } from "./GameMaster";
 import { Card } from "./Card";
 
 export class Game {
@@ -18,7 +18,7 @@ export class Game {
 
   public table: Table;
 
-  public rules: GameEngine;
+  public gameMaster: GameMaster;
 
   constructor(
     users: Map<string, string>[],
@@ -35,7 +35,7 @@ export class Game {
 
     this.players = this.createPlayers(users);
 
-    this.rules = new GameEngine();
+    this.gameMaster = new GameMaster();
 
     this.table = new Table(
       this.gameId,
@@ -75,9 +75,8 @@ export class Game {
   }
 
   playCard(playerId: string, card: Card): boolean {
-    if (!this.rules.playCard(this.table, playerId, card))
+    if (!this.gameMaster.playCard(this.table, playerId, card))
       return false;
-    this.rules.advance(this.table);
     return true;
   }
 
