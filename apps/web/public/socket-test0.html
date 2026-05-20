@@ -50,6 +50,12 @@
   <div id="messages"></div>
 </div>
 
+<div id="playerInfo">
+  <h3>Player Info</h3>
+  <p><strong>Username:</strong> <span id="username">N/A</span></p>
+  <p><strong>Ready Status:</strong> <span id="isReady">N/A</span></p>
+</div>
+
 <br />
 <label for="msgInput">Message:</label>
 <input id="msgInput" placeholder="Enter message">
@@ -73,6 +79,11 @@ function connectSocket() {
 
   socket.on("connect", () => {
     console.log("Connected:", socket.id);
+  });
+
+  socket.on("playerUpdate", (player) => {
+    // console.log("Received player update:", player);
+    updatePlayerInfo(player);
   });
 
   socket.on("room_created", (data) => {
@@ -143,6 +154,13 @@ function addMessage(message) {
   messagesDiv.appendChild(messageElement);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
+function updatePlayerInfo(player) {
+  console.log("Updating player info:", player);
+  document.getElementById("username").innerText = player.userName || "N/A";
+  document.getElementById("isReady").innerText = player.isReady ? "Ready" : "Not Ready";
+}
+
 </script>
 
 </body>
