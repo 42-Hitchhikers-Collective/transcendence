@@ -12,6 +12,7 @@ export class Table {
   direction: 1 | -1;
 
   pendingDraw: number;
+  draw: number;
 
   drawPile: Card[];
   discardPile: Card[];
@@ -33,6 +34,8 @@ export class Table {
     this.direction = 1;
 
     this.pendingDraw = 0;
+
+    this.draw = 1;
 
     this.lastCard = null;
 

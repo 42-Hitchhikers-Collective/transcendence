@@ -100,8 +100,10 @@ export class GameMaster {
 
 		let amount = table.pendingDraw;
 		if (amount == 0)
-			amount++;
+			amount = table.draw;
 
+		if (table.pendingDraw == 0 || table.draw == 0)
+			return false;
 
 		for (let i = 0; i < amount; i++) {
 			let card = table.drawPile.pop();
@@ -114,6 +116,8 @@ export class GameMaster {
 				player.hand.push(card);
 			}
 		}
+		table.pendingDraw = 0;
+		table.draw = 0;
 		return true;
 	}
 
@@ -121,7 +125,8 @@ export class GameMaster {
 		table.turnIndex =
 			(table.turnIndex + table.direction + table.players.length) %
 			table.players.length;
-		console.log("Current Turn Index: ", table.turnIndex);
+
+		table.draw = 1;
 	}
 
 	getCurrentPlayer(table: Table): Player {
