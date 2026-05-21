@@ -1,34 +1,62 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { socket } from "@/socket/Socket"; // adjust path if different
 import cardBack from "@/assets/icons/uno_card_back.png";
 
 export function CreateGameCard() {
   const [isCreating, setIsCreating] = useState(false);
-  const [roomName, setRoomName] = useState<string | null>(null);
+  const [roomNameInput, setRoomNameInput] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
-  const link = useMemo(() => {
-    if (!roomName) return "";
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/game?room=${encodeURIComponent(roomName)}`;
-  }, [roomName]);
-
-  useEffect(() => {
-    if (!link) return;
-    if (typeof window === "undefined") return;
-    window.location.assign(link);
-  }, [link]);
-
-  const handleCreate = () => {
-    setIsCreating(true);
-    setRoomName(null);
-
-    const id = `room-${Math.random().toString(36).slice(2, 8)}`;
-    window.setTimeout(() => {
-      setRoomName(id);
-      setIsCreating(false);
-    }, 700);
+useEffect(() => {
+  const onCreated = (data: { roomName: string }) => {
+    console.log("[CreateGame] room_created received from server:", data);
+    setIsCreating(false);
+    console.log("[CreateGame] navigating to /game?room=" + data.roomName);
+    navigate(`/game?room=${encodeURIComponent(data.roomName)}`);
+  };
+  const onError = (data: { message: string }) => {
+    console.warn("[CreateGame] error event from server:", data);
+    setIsCreating(false);
+    setError(data.message);
   };
 
+  console.log("[CreateGame] mounting, registering socket listeners");
+  socket.on("room_created", onCreated);
+  socket.on("error", onError);
+
+  return () => {
+    console.log("[CreateGame] unmounting, removing socket listeners");
+    socket.off("room_created", onCreated);
+    socket.off("error", onError);
+  };
+}, [navigate]);
+
+const handleCreate = () => {
+  const name = roomNameInput.trim();
+  console.log("[CreateGame] handleCreate clicked, input:", JSON.stringify(roomNameInput), "→ trimmed:", JSON.stringify(name));
+
+  if (!name) {
+    console.warn("[CreateGame] empty name, aborting");
+    setError("Room name required");
+    return;
+  }
+
+  setError(null);
+  setIsCreating(true);
+
+  if (!socket.connected) {
+    console.log("[CreateGame] socket not connected, calling socket.connect()");
+    socket.connect();
+  } else {
+    console.log("[CreateGame] socket already connected, id:", socket.id);
+  }
+
+  console.log("[CreateGame] emitting create_room with roomName:", name);
+  socket.emit("create_room", { roomName: name });
+};
   return (
     <div className="relative h-full overflow-hidden rounded-2xl border bg-gradient-to-br from-rose-50 via-white to-amber-50 p-12">
       <style>{styles}</style>
@@ -41,37 +69,42 @@ export function CreateGameCard() {
           style={{ "--card-back": `url(${cardBack})` } as React.CSSProperties}
           aria-hidden="true"
         >
-          <div className="fan-card fan-card-1" />
-          <div className="fan-card fan-card-2" />
-          <div className="fan-card fan-card-3" />
-          <div className="fan-card fan-card-4" />
-          <div className="fan-card fan-card-5" />
-          <div className="fan-card fan-card-6" />
-          <div className="fan-card fan-card-7" />
+          {Array.from({ length: 7 }, (_, i) => (
+            <div key={i} className={`fan-card fan-card-${i + 1}`} />
+          ))}
         </div>
-      
 
-        <div className="space-y-3">
+        <div className="space-y-3 text-center">
           <h3 className="text-5xl font-extrabold tracking-tight text-slate-900">
             Start playing now
           </h3>
           <p className="max-w-xl text-lg text-slate-600">
-            Create a private room link and jump straight into the game. We will
-            redirect you as soon as the room is ready.
+            Pick a room name and share the link with a friend.
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center gap-3">
+          <input
+            type="text"
+            value={roomNameInput}
+            onChange={(e) => setRoomNameInput(e.target.value)}
+            placeholder="Room name"
+            disabled={isCreating}
+            className="h-12 w-72 rounded-lg border border-slate-300 px-4 text-lg"
+          />
+
           <button
             type="button"
             onClick={handleCreate}
-            disabled={isCreating}
+            disabled={isCreating || !roomNameInput.trim()}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             className="h-14 rounded-lg bg-rose-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isCreating ? "Creating room..." : "Play Uno"}
+            {isCreating ? "Creating..." : "Start a room"}
           </button>
+
+          {error && <p className="text-sm text-rose-600">{error}</p>}
         </div>
       </div>
     </div>
