@@ -128,8 +128,7 @@ export class GameMaster {
 		return table.players[table.turnIndex];
 	}
 
-	uno(table: Table, player: Player): boolean {
-		if (table.pendingDraw == 0)
+	uno(player: Player): boolean {
 			return player.hand.length === 1;
 	}
 
