@@ -6,14 +6,13 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 18:49:44 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/21 17:35:50 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
-import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM } from "./types";
+import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_START } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
-// import { Player as GabrielPlayer } from "../gamelogic/Player";
 import { Card } from "../gamelogic/Card";
 
 
@@ -165,7 +164,7 @@ function startGameCondition(room: Room): boolean {
         return false;
     if (room.state !== "waiting")
         return false;
-    if (room.players.length < 2)
+    if (room.players.length < MIN_PLAYERS_TO_START)
         return false;
     // const allPlayersReady = room.players.every(player => player.isReady);
     // if (!allPlayersReady)

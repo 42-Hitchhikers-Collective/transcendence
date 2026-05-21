@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 14:51:20 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/21 17:55:14 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 //will manage all active rooms -creating rooms, players joining/leaving
 
 import { Player, Room, RoomResult, RoomIdResult } from "./types";
-import { MAX_PLAYERS_PER_ROOM } from "./types";
+import { MAX_PLAYERS_PER_ROOM, MAX_MSG_LENGTH } from "./types";
 
 
 const roomsById: Map<string, Room> = new Map();         // roomId → Room
@@ -24,19 +24,6 @@ const onlinePlayers: Map<string, Player> = new Map();   // playerId → Player
 const timeouts: Map<string, NodeJS.Timeout> = new Map(); // playerId → timeout for handling disconnection grace period
   
 
-
-// ---> Msg Events ---
-export function sendMessage(playerId: string, msg: string): RoomIdResult {
-  const roomId = getPlayerRoomId(playerId);
-  if (!roomId)
-    return {success: false, error: "Player is not in room"};
-  const room = getRoomById(roomId);
-  if (!room)
-    return {success: false, error: "Room not found"};
-  if (msg.length === 0 || msg.length > 200)
-    return {success: false, error: "Message must be between 1 and 200 characters"};
-  return {success: true, roomId: roomId};
-}
 
 // --- Timeout ---
 export function setPlayerTimeout(playerId: string, timeout: NodeJS.Timeout) {
@@ -53,6 +40,12 @@ export function clearPlayerTimeout(playerId: string) {
 
 // --- HELPERS ---
 
+
+// Get Username from PlayerId
+export function getUsername(playerId: string): string | null {
+  const player = onlinePlayers.get(playerId);
+  return player ? player.userName : null;
+}
 
 // Adds player to onlinePlayers set. Returns true if player was added, false if already exists.
 export function addPlayerToOnlinePlayers(player: Player): boolean {
