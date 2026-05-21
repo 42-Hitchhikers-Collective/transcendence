@@ -1,252 +1,352 @@
 import { Scene } from "phaser";
-import { Game } from "../models/Game";
-import { Card } from "../models/Card";
-import { Player } from "../models/Player";
-import { GameEngine } from "../models/GameEngine";
+import { EventBus } from "../../events/EventBus";
+import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
+import { playCard, selectWildColor, drawCard } from "../../network/gameNetwork";
+
+type Position = { x: number; y: number };
 
 export class GameScene extends Scene {
-  private currentGame!: Game;
-  private rules!: GameEngine;
   private pile!: Phaser.GameObjects.Zone;
-  private gameContainer!: Phaser.GameObjects.Container;
+  private boardContainer!: Phaser.GameObjects.Container;
+  private drawCardButton!: Phaser.GameObjects.Container;
+  private room!: FrontendRoom;
+  private myPlayerId: string = "";
+
+  private playerContainers = new Map<string, Phaser.GameObjects.Container>();
+  private wildColorContainer: Phaser.GameObjects.Container | null = null;
 
   constructor() {
     super("Game");
   }
 
-  init(data: { rivals?: Player[]; user?: Player }) {
-    this.createGame(data);
-    this.createBoard();
-    this.setupPlayers();
-    this.renderHands();
+  // =========================
+  // INIT
+  // =========================
+
+  init() {
   }
 
   create() {
+    this.createBoard();
     this.setupInput();
+
+    EventBus.on("ROOM_STATE", this.onRoomState, this);
+    EventBus.on("COLOR", this.onRoomState, this);
+
+    EventBus.on("SOCKET_ERROR", this.onSocketError, this);
+
+    this.events.once("shutdown", () => {
+      EventBus.off("ROOM_STATE", this.onRoomState, this);
+      EventBus.off("COLOR", this.selectColor, this);
+
+      EventBus.off("SOCKET_ERROR", this.onSocketError, this);
+    });
   }
 
-  // GAME SETUP
+  private onRoomState(room: FrontendRoom) {
+    this.room = room;
 
-  private createGame(data: { rivals?: Player[]; user?: Player }) {
-    const rivals = data?.rivals ?? this.createPlayers(2);
-    const user = data?.user ?? new Player("0", "You");
-
-    this.rules = new GameEngine();
-    this.currentGame = new Game(1, rivals, user);
+    if (!this.myPlayerId) {
+      const observer = room.players.find(p => p.isTheObserver);
+      if (observer) this.myPlayerId = observer.id;
+    }
+    
+    if (room.game && room.game.discardTopCard.color === "wild") {
+      this.showWildColorButtons();
+    } else {
+      this.hideWildColorButtons();
+    }
+    
+    this.render(room);
   }
 
-  private setupPlayers() {
-    this.syncCurrentPlayer();
-    console.log(
-      "Current user = ",
-      this.currentGame.room.user.id,
-      this.currentGame.room.user.username,
-    );
+  private selectColor(room: FrontendRoom)
+  {
+    const observer = room.players.find(p => p.isTheObserver);
+    this.room = room;
+    this.render(room);
+    if (observer)
+      this.showWildColorButtons();
   }
 
-  private syncCurrentPlayer() {
-    this.currentGame.room.user = this.currentGame.room.players[this.currentGame.room.turnIndex];
+  private onSocketError(err: { message: string }) {
+    console.error(err.message);
   }
 
+  // =========================
   // BOARD
-  private createBoard() {
-    this.add.image(400, 400, "background").setScale(0.5);
+  // =========================
 
-    this.gameContainer = this.add.container(0, 0);
+  private createBoard() {
+    this.add.image(500, 400, "background").setScale(0.5);
+
+    this.boardContainer = this.add.container(0, 0);
 
     this.pile = this.add
-      .zone(300, 300, 100, 150)
-      .setRectangleDropZone(300, 300);
+      .zone(500, 350, 120, 160)
+      .setRectangleDropZone(120, 160);
 
-    this.drawZone(this.pile);
-  }
-
-  private drawZone(zone: Phaser.GameObjects.Zone) {
     const g = this.add.graphics();
     g.lineStyle(4, 0xffffff);
-    g.strokeRectShape(zone.getBounds());
-    return g;
+    g.strokeRectShape(this.pile.getBounds());
+
+    // Create Draw Card Button
+    this.drawCardButton = this.add.container(500, 430);
+
+    const buttonBg = this.add.rectangle(0, 0, 100, 40, 0x4a90e2).setInteractive();
+    buttonBg.setStrokeStyle(2, 0xffffff);
+
+    const buttonText = this.add.text(0, 0, "Draw Card", {
+      fontSize: "14px",
+      color: "#fff",
+      align: "center",
+    });
+    buttonText.setOrigin(0.5);
+
+    const buttonPass = this.add.text(0, 0, "Pass Turn", {
+      fontSize: "14px",
+      color: "#fff",
+      align: "center",
+    });
+    buttonPass.setOrigin(0.5);
+
+    buttonBg.on("pointerdown", () => {
+      drawCard();
+      buttonBg.setFillStyle(0x3a80d2);
+    });
+
+    buttonBg.on("pointerup", () => {
+      buttonBg.setFillStyle(0x4a90e2);
+    });
+
+    buttonBg.on("pointerover", () => {
+      this.input.setDefaultCursor("pointer");
+      buttonBg.setFillStyle(0x3a80d2);
+    });
+
+    buttonBg.on("pointerout", () => {
+      this.input.setDefaultCursor("default");
+      buttonBg.setFillStyle(0x4a90e2);
+    });
+
+    this.drawCardButton.add([buttonBg, buttonText]);
   }
 
+  // =========================
   // RENDER
+  // =========================
 
-  private renderHands() {
-    const players = this.currentGame.room.players;
-    const positions = this.getPlayerPositions(players.length);
+  private render(room: FrontendRoom) {
+    this.clearPlayers();
 
-    players.forEach((player, index) => {
-      const pos = positions[index];
+    // Reorder so observer (current player) is always at the bottom
+    const orderedPlayers = this.reorderPlayersWithObserverAtBottom(room.players);
+    const positions = this.getPlayerPositions(orderedPlayers.length);
 
-      this.renderPlayerInfo(player, pos);
-      this.renderPlayerCards(player, pos);
+    orderedPlayers.forEach((player, i) => {
+      this.renderPlayer(player, positions[i]);
     });
   }
 
-  private renderPlayerInfo(player: Player, pos: { x: number; y: number }) {
-    this.gameContainer.add(
-      this.add.text(pos.x - 40, pos.y - 120, player.username, {
-        fontSize: "24px",
-        color: "#ab4242",
-        fontFamily: "Arial",
-      }),
-    );
+  private reorderPlayersWithObserverAtBottom(players: FrontendPlayer[]): FrontendPlayer[] {
+    const observer = players.find(p => p.isTheObserver);
+    if (!observer) return players;
+    
+    const others = players.filter(p => !p.isTheObserver);
+    return [...others, observer];
+  }
 
-    this.add.text(pos.x - 20, pos.y - 100, player.id, {
+  private renderPlayer(player: FrontendPlayer, pos: Position) {
+    const container = this.add.container(0, 0);
+
+    this.playerContainers.set(player.id, container);
+    this.boardContainer.add(container);
+
+    const title = this.add.text(pos.x - 40, pos.y - 120, player.userName, {
       fontSize: "24px",
-      color: "#ab4242",
-      fontFamily: "Arial",
+      color: "#fff",
     });
-  }
 
-  private renderPlayerCards(player: Player, pos: { x: number; y: number }) {
-    let offsetX = -(player.hand.length * 20);
+    container.add(title);
 
-    for (const card of player.hand) {
-      const x = pos.x + offsetX;
-      const y = pos.y;
+    // Only render cards for the current player
+    const isMe = player.id === this.myPlayerId;
+    if (isMe && player.cards) {
+      let offsetX = -(player.cards.length * 20);
 
-      const sprite = this.createCardSprite(card, x, y, player);
-      this.gameContainer.add(sprite);
+      player.cards.forEach((card, cardIndex) => {
+        const sprite = this.add.image(
+          pos.x + offsetX,
+          pos.y,
+          `${card.color}_${card.value}`,
+        );
 
-      offsetX += 40;
-    }
-  }
+        sprite.setScale(0.3);
+        sprite.setData("cardIndex", cardIndex);
+        sprite.setInteractive();
+        this.input.setDraggable(sprite);
 
-  private createCardSprite(card: Card, x: number, y: number, player: Player) {
-    let sprite;
-    if (player == this.currentGame.room.user) {
-      sprite = this.add.image(x, y, card.getKey()).setScale(0.3);
-      sprite.setInteractive();
-      this.input.setDraggable(sprite);
+        container.add(sprite);
+
+        offsetX += 40;
+      });
     } else {
-      sprite = this.add.image(x, y, "back").setScale(0.3);
+      // Show card count for other players
+      const cardCountText = this.add.text(pos.x, pos.y + 30, `🎴 ${player.cardCount}`, {
+        fontSize: "16px",
+        color: "#fff",
+        align: "center",
+      });
+      cardCountText.setOrigin(0.5);
+      container.add(cardCountText);
     }
-
-    sprite.setData("card", card);
-    sprite.setData("player", player);
-    sprite.setData("startX", x);
-    sprite.setData("startY", y);
-
-    return sprite;
   }
 
-  //INPUT
+  // =========================
+  // INPUT
+  // =========================
 
   private setupInput() {
     this.input.on("drag", this.onDrag, this);
     this.input.on("drop", this.onDrop, this);
+    this.input.on("dragend", this.onDragEnd, this);
   }
 
-  private onDrag(_: any, obj: any, x: number, y: number) {
+  private onDrag(
+    _: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.Image,
+    x: number,
+    y: number,
+  ) {
     obj.x = x;
     obj.y = y;
   }
 
-  private onDrop(_: any, obj: any, zone: any) {
-    if (zone !== this.pile) return;
+  private onDrop(
+    _: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.Image,
+    zone: Phaser.GameObjects.Zone,
+  ) {
+    if (zone !== this.pile) {
+      this.resetCard(obj);
+      return;
+    }
 
-    const card = obj.getData("card") as Card;
+    const cardIndex = obj.getData("cardIndex");
 
-    const success = this.rules.processMove(
-      this.currentGame.room,
-      this.currentGame.room.user.id,
-      card,
-    );
+    playCard(cardIndex);
 
-    if (success) {
-      this.handleSuccessfulMove(obj, card);
-      this.rerender();
-      this.currentGame.room.user =
-        this.currentGame.room.players[this.currentGame.room.turnIndex];
-    } else {
-      this.resetCardPosition(obj);
+    obj.disableInteractive();
+  }
+
+  private onDragEnd(
+    _: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.Image,
+    dropped: boolean,
+  ) {
+    if (!dropped) {
+      this.resetCard(obj);
     }
   }
 
-  private handleSuccessfulMove(obj: any, card: Card) {
-    this.add.image(550, 330, card.getKey()).setScale(0.3);
-    obj.destroy();
-
-    this.syncCurrentPlayer();
-
-    console.log(
-      "User next = ",
-      this.currentGame.room.user.id,
-      this.currentGame.room.user.username,
-    );
+  private resetCard(obj: Phaser.GameObjects.Image) {
+    this.tweens.add({
+      targets: obj,
+      x: obj.input?.dragStartX,
+      y: obj.input?.dragStartY,
+      duration: 150,
+    });
   }
 
-  private resetCardPosition(obj: any) {
-    obj.x = obj.getData("startX");
-    obj.y = obj.getData("startY");
+  // =========================
+  // WILD COLOR SELECTION
+  // =========================
+
+  private showWildColorButtons() {
+    // Hide existing buttons first
+    this.hideWildColorButtons();
+
+    // Create container for color buttons
+    this.wildColorContainer = this.add.container(500, 200);
+
+    const colors: Array<{
+      color: "red" | "blue" | "green" | "yellow";
+      hex: number;
+    }> = [
+      { color: "red", hex: 0xff0000 },
+      { color: "green", hex: 0x00ff00 },
+      { color: "blue", hex: 0x0000ff },
+      { color: "yellow", hex: 0xffff00 },
+    ];
+
+    const startX = -150;
+    const spacing = 100;
+
+    colors.forEach((item, index) => {
+      const x = startX + index * spacing;
+      const y = 0;
+
+      // Create button background
+      const button = this.add.rectangle(x, y, 80, 60, item.hex).setInteractive();
+      button.setStrokeStyle(3, 0xffffff);
+
+      // Create button label
+      const label = this.add.text(x, y, item.color.toUpperCase(), {
+        fontSize: "12px",
+        color: "#000",
+        align: "center",
+      });
+      label.setOrigin(0.5);
+
+      // Add click handler
+      button.on("pointerdown", () => {
+        selectWildColor(item.color);
+        this.hideWildColorButtons();
+      });
+
+      // Add to container
+      this.wildColorContainer!.add([button, label]);
+    });
   }
 
-  //LAYOUT
-
-  private getPlayerPositions(count: number) {
-    const centerX = 500;
-    const centerY = 400;
-
-    const layouts: Record<number, () => { x: number; y: number }[]> = {
-      2: () => [
-        { x: centerX, y: 650 },
-        { x: centerX, y: 150 },
-      ],
-      3: () => [
-        { x: centerX, y: 650 },
-        { x: 200, y: 150 },
-        { x: 800, y: 150 },
-      ],
-      4: () => [
-        { x: centerX, y: 650 },
-        { x: centerX, y: 150 },
-        { x: 150, y: centerY },
-        { x: 850, y: centerY },
-      ],
-    };
-
-    return layouts[count]?.() ?? this.getCircularPositions(count);
+  private hideWildColorButtons() {
+    if (this.wildColorContainer) {
+      this.wildColorContainer.destroy(true);
+      this.wildColorContainer = null;
+    }
   }
 
-  private getCircularPositions(count: number) {
-    const centerX = 500;
-    const centerY = 400;
-    const radius = 250;
+  // =========================
+  // CLEANUP
+  // =========================
 
-    const positions = [];
+  private clearPlayers() {
+    this.playerContainers.forEach((c) => c.destroy(true));
+    this.playerContainers.clear();
+    this.hideWildColorButtons();
+  }
+
+  // =========================
+  // POSITIONS
+  // =========================
+
+  private getPlayerPositions(count: number): Position[] {
+    const cx = 500;
+    const cy = 400;
+    const r = 250;
+
+    const res: Position[] = [];
 
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
+      // The last player (observer) is always at the bottom (angle π/2)
+      const a = (i / count) * Math.PI * 2 + Math.PI;
 
-      positions.push({
-        x: centerX + Math.cos(angle) * radius,
-        y: centerY + Math.sin(angle) * radius,
+      res.push({
+        x: cx + Math.cos(a) * r,
+        y: cy + Math.sin(a) * r,
       });
     }
 
-    return positions;
-  }
-
-  // Create players
-
-  private createPlayers(num: number): Player[] {
-    if (num == 1) return [new Player("1", "Beta")];
-    if (num == 2) {
-      return [new Player("1", "Beta"), new Player("2", "Gamma")];
-    }
-    if (num == 3) {
-      return [
-        new Player("1", "Beta"),
-        new Player("2", "Gamma"),
-        new Player("3", "Alpha"),
-      ];
-    }
-    return [];
-  }
-
-  private rerender() {
-    this.gameContainer.removeAll(true); // 🔥 destruye todo
-    this.renderHands();
+    return res;
   }
 }
-

@@ -37,6 +37,7 @@
 <button onclick="leaveRoom()">Leave Room</button>
 <br/>
 
+<button onclick="setReady()">Set Ready</button>
 <button onclick="startGame()">Start Game</button>
 
 <br/>
@@ -47,6 +48,12 @@
 <div id="chatWindow">
   <div id="roomName">Room: <span id="currentRoom">None</span></div>
   <div id="messages"></div>
+</div>
+
+<div id="playerInfo">
+  <h3>Player Info</h3>
+  <p><strong>Username:</strong> <span id="username">N/A</span></p>
+  <p><strong>Ready Status:</strong> <span id="isReady">N/A</span></p>
 </div>
 
 <br />
@@ -62,7 +69,8 @@ let socket;
 function connectSocket() {
   const jwtToken = document.getElementById("jwtInput").value;
   // Use same-origin (scheme/host/port) to avoid CORS + mixed-content issues.
-  socket = io({
+  // socket = io({   //use this for same-origin
+  socket = io("http://localhost:3000", {
     path: "/socket.io",
     auth: {
       token: jwtToken
@@ -71,6 +79,11 @@ function connectSocket() {
 
   socket.on("connect", () => {
     console.log("Connected:", socket.id);
+  });
+
+  socket.on("playerUpdate", (player) => {
+    // console.log("Received player update:", player);
+    updatePlayerInfo(player);
   });
 
   socket.on("room_created", (data) => {
@@ -112,12 +125,16 @@ function leaveRoom() {
   addMessage("You left the room.");
 }
 
-function startGame() {
-  socket.emit("start_game");
+function setReady() {
+  socket.emit("set_ready", { isReady: true });
 }
 
 function debug() {
   socket.emit("debug");
+}
+
+function startGame() {
+  socket.emit("start_game");
 }
 
 function joinRoom() {
@@ -137,6 +154,13 @@ function addMessage(message) {
   messagesDiv.appendChild(messageElement);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
+
+function updatePlayerInfo(player) {
+  console.log("Updating player info:", player);
+  document.getElementById("username").innerText = player.userName || "N/A";
+  document.getElementById("isReady").innerText = player.isReady ? "Ready" : "Not Ready";
+}
+
 </script>
 
 </body>

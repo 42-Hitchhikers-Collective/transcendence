@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/24 15:02:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 13:13:54 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { FastifyInstance } from "fastify";
 import { Socket } from "socket.io";
-import { gameManager, utils } from "../../game";
+import { gameManager, utils } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
@@ -30,15 +30,24 @@ export function registerSocketHandlers(
   const room = gameManager.getRoomById(roomId);
   if (!room) return;
   room.players.forEach((player) => {
-    const sanitizedRoomData = utils.getSanitizedRoom(room, player.playerId); 
-    socket.nsp.to(player.socketId).emit("room_state", sanitizedRoomData);
+    const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
+    socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
   });
   gameManager.debugState();
 }
 
+
+function broadcastPlayerState(playerId: string) {
+  const player = gameManager.getOnlinePlayer(playerId);
+  if (!player) return;
+  const roomId = gameManager.getPlayerRoomId(playerId);
+  if (!roomId) return;
+  socket.nsp.to(roomId).emit("player_state", player);
+}
+
   // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState);
+  registerGameHandlers(socket, broadcastRoomState, broadcastPlayerState);
   registerConnectionHandlers(app, socket, broadcastRoomState);
 
 

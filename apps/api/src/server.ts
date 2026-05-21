@@ -9,7 +9,7 @@ import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
 import { setupSocket } from "./socket/socket";
-import { gameManager } from "./game";
+import { gameManager } from "./gameManager";
 
 dotenv.config();
 
@@ -51,8 +51,8 @@ const start = async () => {
   await app.register(userRoutes, { prefix: "/api/users" });
   await app.register(profileRoutes, { prefix: "/api/profiles" });
 
-  await app.listen({ port, host: "0.0.0.0" });
   setupSocket(app);
+  await app.listen({ port, host: "0.0.0.0" });
 };
 
 start().catch((err) => {

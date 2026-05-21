@@ -35,7 +35,11 @@ export class Deck {
       this.cards.push(new Card(id++, "wild", "4plus"));
     }
 
-    Phaser.Utils.Array.Shuffle(this.cards);
+    // Fisher-Yates shuffle (no Phaser needed)
+    for (let i = this.cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+    }
   }
 
   get_card()

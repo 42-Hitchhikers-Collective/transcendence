@@ -1,5 +1,5 @@
-import { EventBus } from "../EventBus";
 import { Scene } from "phaser";
+import { EventBus } from "../../events/EventBus";
 
 export class GameOver extends Scene {
   constructor() {

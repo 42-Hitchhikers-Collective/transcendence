@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/24 15:03:47 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 14:30:29 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,47 +17,41 @@ export type Player = {
   playerId: string;      // permanent identity (userId) used for game logic
   socketId: string;      // current connection used for networking
   userName: string;      // display name for UI/chat
+  isReady:  boolean;
+  timeout?: NodeJS.Timeout; // for handling disconnection grace period
 };
 
 export type GameState = "waiting" | "playing" | "finished";
 
 
-export interface GameInstance {
-  currentPlayerId: string;
-  discardTopCard: { color: string; value: string };
-  drawPileCount: number;
-  playerHands: Map<string, number>; // playerId -> number of cards
-  
-  // The actions you'll call from your Socket handlers
-  playCard(playerId: string, cardIndex: number): { success: boolean; error?: string };
-  drawCard(playerId: string): { success: boolean; error?: string };
-  getHand(playerId: string): { color: string; value: string }[];
-}
-
+import { Game } from "../gamelogic/Game";
 
 export type Room = {
   id: string;
   name: string;
   players: Player[];
   state: GameState;
-  game?: GameInstance;
+  game?: Game; // This will hold the actual Gabriel's game instance when the game starts
 };
 
 // What the frontend sees for "other" players
-export type SanitizedPlayer = {
+export type FrontendPlayer = {
   id: string;
+  userName: string;
+  isTheObserver: boolean; // true if this is the player themselves, false for other players
+  isReady: boolean;
   cardCount: number;
-  cards?: { color: string; value: string }[];
+  cards?: { color: string; value: string | number }[];
 };
 
 // What the frontend sees for a Room
-export type SanitizedRoom = {
+export type FrontendRoom = {
   id: string;
   state: GameState;
-  players: SanitizedPlayer[];
+  players: FrontendPlayer[];
   game?: {
     currentPlayerId: string;
-    discardTopCard: { color: string; value: string };
+    discardTopCard: { color: string; value: string | number } | null;
     drawPileCount: number;
   };
 };

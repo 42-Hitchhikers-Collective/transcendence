@@ -6,33 +6,21 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/04/10 15:35:09 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/20 13:14:51 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
-import { gameManager } from "../../game";
+import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 
 // --- Game Events ---
 
 export function registerGameHandlers(
   socket: Socket,
-  broadcastRoomState: (roomId: string) => void
+  broadcastRoomState: (roomId: string) => void,
+  broadcastPlayerState: (playerId: string) => void
 ) {
-
-    // Start the game
-    socket.on("start_game", () => {
-    const { playerId } = getIdentity(socket);
-    const res = gameManager.startGame(playerId);
-    if (!res.success) {
-        socket.emit("error", { message: res.error });
-        return;
-    }
-    const roomId = res.room.id;
-    broadcastRoomState(roomId);
-    });
-
 
     // Play a card
     socket.on("play_card", ({ cardIndex }) => {
@@ -53,4 +41,48 @@ export function registerGameHandlers(
     else
         socket.emit("error", { message: res.error });
     })
+
+    // Select color for wild card
+    socket.on("select_wild_color", ({ color }) => {
+    const { playerId } = getIdentity(socket);
+    const res = gameManager.selectWildColor(playerId, color);
+    if (res.success)
+        broadcastRoomState(res.roomId);
+    else
+        socket.emit("error", { message: res.error });
+    });
+
+    
+    // --- Start Game Events ---
+
+    // Set player ready to play, if set ready checks if game can be started and starts it.
+    socket.on("set_ready", ({ isReady }: { isReady: boolean }) => {
+        const { playerId } = getIdentity(socket);
+        const res = gameManager.setReady(playerId, isReady);
+        if (!res.success) {
+            socket.emit("error", { message: res.error });
+            return;
+        }
+        broadcastPlayerState(playerId);
+        if (isReady) {
+            const gameStartRes = gameManager.startGameAuto(playerId);
+            if (gameStartRes.success) {
+                broadcastRoomState(gameStartRes.room.id);
+                console.log(`Game started automatically in room ${gameStartRes.room.id} as all players are ready.`);
+            }
+        }
+    });
+
+
+    // Start the game. This version allows starting the game by pressing a button.
+    socket.on("start_game", () => {
+        const { playerId } = getIdentity(socket);
+        const res = gameManager.startGameButton(playerId);
+        if (!res.success) {
+            socket.emit("error", { message: res.error });
+            return;
+        }
+        console.log(`Game started manually in room ${res.room.id}`);
+        broadcastRoomState(res.room.id);
+    });
 };
