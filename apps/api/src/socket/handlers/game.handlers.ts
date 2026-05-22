@@ -6,20 +6,23 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 13:14:51 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/22 14:38:14 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
+import { getPlayerRoomId } from "../../gameManager/gameManager";
+import { ChatMsgType, sendStrInChat } from "../../gameManager/chatEvents";
 
 // --- Game Events ---
 
 export function registerGameHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void,
-  broadcastPlayerState: (playerId: string) => void
+  broadcastChatHistory: (roomId: string) => void,
+//   broadcastPlayerState: (playerId: string) => void
 ) {
 
     // Play a card
@@ -63,7 +66,8 @@ export function registerGameHandlers(
             socket.emit("error", { message: res.error });
             return;
         }
-        broadcastPlayerState(playerId);
+        // broadcastPlayerState(playerId); instead of room?
+        broadcastRoomState(res.roomId);
         if (isReady) {
             const gameStartRes = gameManager.startGameAuto(playerId);
             if (gameStartRes.success) {
@@ -84,5 +88,9 @@ export function registerGameHandlers(
         }
         console.log(`Game started manually in room ${res.room.id}`);
         broadcastRoomState(res.room.id);
+        
+        sendStrInChat(playerId, ChatMsgType.STARTED_GAME);
+        socket.nsp.to(res.room.id).emit("roomStateUpdate", res.room);
+        broadcastChatHistory(res.room.id);
     });
-};
+}

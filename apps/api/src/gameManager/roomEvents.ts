@@ -6,13 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/21 17:49:15 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/22 14:38:52 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
 import { Player, Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
+// import { addStrToChatHistory, addMsgToChatHistory } from "./chatEvents";
 
 // --- Room Events ---
 
@@ -52,6 +53,8 @@ export function joinRoom(name: string, playerId: string): RoomResult {
     return { success: false, error: "Player not found" };
   room.players.push({ playerId, socketId: player.socketId, userName: player.userName, isReady: false });
   gm.addToPlayerRoom(playerId, roomId); // add to playerRooms
+  // add join msg to chat
+  // sendMsgInChat(playerId, JOIN_ROOM_MSG);
   return { success: true, room: room };;
 }
 

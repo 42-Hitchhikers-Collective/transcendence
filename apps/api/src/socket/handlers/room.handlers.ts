@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/21 17:23:07 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/22 14:50:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ export function registerRoomHandlers(
     const roomId = res.room.id;
     socket.join(roomId);
     socket.emit("room_joined", { roomName });
-    broadcastRoomState(roomId);
+    broadcastRoomState(roomId); //chat history inside
   });
 
   // Leave room

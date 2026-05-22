@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/21 18:01:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/22 14:49:44 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,20 +37,31 @@ export function registerSocketHandlers(
 }
 
 
-function broadcastPlayerState(playerId: string) {
-  const player = gameManager.getOnlinePlayer(playerId);
-  if (!player) return;
-  const roomId = gameManager.getPlayerRoomId(playerId);
-  if (!roomId) return;
-  socket.nsp.to(roomId).emit("player_state", player);
+// Broadcast chat history to everyone in the room including the sender
+function broadcastChatHistory(roomId: string) {
+  const room = gameManager.getRoomById(roomId);
+  if (!room) return;
+  const chatHistory = room.chatHistory || [];
+  socket.nsp.to(roomId).emit("chat_history", chatHistory);
 }
+
+
+// // AT THE MOMENT UNUSED
+// function broadcastPlayerState(playerId: string) {
+//   const player = gameManager.getOnlinePlayer(playerId);
+//   if (!player) return;
+//   const roomId = gameManager.getPlayerRoomId(playerId);
+//   if (!roomId) return;
+//   socket.nsp.to(roomId).emit("player_state", player);
+// }
+
 
   // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState, broadcastPlayerState);
+  registerGameHandlers(socket, broadcastRoomState, broadcastChatHistory /*broadcastPlayerState*/);
   registerConnectionHandlers(app, socket, broadcastRoomState);
 
-
+  
 // ---> Msg Events ---
 socket.on("send_msg", ({ msg }) => {
   const { playerId, userName } = getIdentity(socket);
@@ -60,10 +71,8 @@ socket.on("send_msg", ({ msg }) => {
     return;
   }
   if (res.roomId) {
-    // console.log("Broadcasting message to room:", res.roomId);
     socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
   }
-  //broadcast chat history to the room?
 });
 
 // ---> DEBUG <---

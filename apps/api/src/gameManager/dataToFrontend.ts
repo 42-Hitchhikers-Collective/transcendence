@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   dataToFrontend.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: grial <grial@student.42berlin.de>          +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/18 19:26:05 by grial            ###   ########.fr       */
+/*   Updated: 2026/05/22 14:51:08 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { Room, FrontendRoom, FrontendPlayer } from "./types";
 
+//ADD ROOM CHAT HISTORY
 
 // Get a filtered room version for the frontend that doesn't show cards of other players except the observer
 export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendRoom {

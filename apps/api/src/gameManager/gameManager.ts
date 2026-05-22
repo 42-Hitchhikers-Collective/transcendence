@@ -6,23 +6,31 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/21 17:55:14 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/22 14:11:42 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 //will manage all active rooms -creating rooms, players joining/leaving
 
-import { Player, Room, RoomResult, RoomIdResult } from "./types";
-import { MAX_PLAYERS_PER_ROOM, MAX_MSG_LENGTH } from "./types";
+import { Player, Room} from "./types";
+import { MAX_PLAYERS_PER_ROOM} from "./types";
 
 
-const roomsById: Map<string, Room> = new Map();         // roomId → Room
 const playerRooms: Map<string, string> = new Map();     // playerId → roomId
-const roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
+const roomsById: Map<string, Room> = new Map();         // roomId → Room
 const onlinePlayers: Map<string, Player> = new Map();   // playerId → Player
+const roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
 const timeouts: Map<string, NodeJS.Timeout> = new Map(); // playerId → timeout for handling disconnection grace period
   
+
+// --- Friends ---
+// async getFriendsWithStatus(userId: string) {
+  // Call friends.service.getFriendsList(userId)
+  // Then check onlinePlayers map
+  // Return combined result
+// }
+
 
 
 // --- Timeout ---
