@@ -20,7 +20,7 @@ export default function GamePage() {
   const [messages, setMessages] = useState<string[]>([]);
 
   // On mount, ensure socket is connected and we are in the room.
-  // join_room is idempotent on the backend: if you are already a member
+  // join_room is unchanged on the backend: if you are already a member
   // (because you are the room creator), it succeeds without side effects.
   useEffect(() => {
     if (!socket.connected) socket.connect();
@@ -37,8 +37,9 @@ export default function GamePage() {
 
     return () => {
       socket.off("error", handleError);
-      console.log("[GamePage] leaving room", roomName);
-      socket.emit("leave_room");
+      // When the page Does not auto-leave on unmount; reloads and reconnects should keep room state intact.
+      // console.log("[GamePage] leaving room", roomName);
+      // socket.emit("leave_room");
     };
   }, [navigate, roomName]);
 
