@@ -85,7 +85,7 @@ export class Game {
     return true;
   }
 
-  public checkEvent(): string {
-    return (this.checkEvent);
+  public checkEvent(table: Table): "uno" | "color" | "finished" | "next" | null {
+    return (table.event);
   }
 }

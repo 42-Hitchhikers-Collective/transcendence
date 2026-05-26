@@ -80,7 +80,7 @@ export class Table {
     this.setEventNext();
   }
 
-  private setEventNext() {
+  private setEventNext()  {
     this.event = "next";
     this.passTurn = true;
   }

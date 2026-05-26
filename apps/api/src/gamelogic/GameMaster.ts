@@ -4,10 +4,6 @@ import { Player } from "./Player.ts"
 
 export class GameMaster {
 
-	// ============================================================
-	// EJECUTORES PÚBLICOS
-	// ============================================================
-
 	playCard(table: Table, playerId: string, card: Card): boolean {
 		const player = table.players.find((p) => p.id === playerId);
 		if (!player) return false;
@@ -32,11 +28,10 @@ export class GameMaster {
 		this.applyEffect(table, playedCard);
 
 		if (this.uno(player))
-			console.log("UNO!");
+			table.event = "uno";
 
 		if (this.noCard(player))
-			console.log("WIN!");
-
+			table.event = "finished";
 		this.advance(table);
 		return true;
 	}
@@ -54,9 +49,7 @@ export class GameMaster {
 
 		for (let i = 0; i < amount; i++) {
 			let card = table.drawPile.pop();
-			// ============================================================
-			// GESTIÓN DE PILAS DE CARTAS
-			// ============================================================
+
 			if (!card) {
 				this.reuseDiscardPile(table);
 				card = table.drawPile.pop();
@@ -75,8 +68,6 @@ export class GameMaster {
 	}
 
 	// ============================================================
-	// effects
-	// ============================================================
 
 	private applyEffect(table: Table, card: Card): void {
 		switch (card.value) {
@@ -93,9 +84,8 @@ export class GameMaster {
 				table.pendingDraw += 4;
 				break;
 		}
-		//if (card.color == "wild")
-		// SEND SIGNAL TO FRONTEND TO SELECT COLOR
-		// emit(wild_card)
+		if (card.color == "wild")
+			table.event = "color";
 	}
 
 	private reverse(table: Table): void {
@@ -108,8 +98,6 @@ export class GameMaster {
 			table.players.length;
 	}
 
-	// ============================================================
-	// validations
 	// ============================================================
 
 	private validateMove(table: Table, playerId: string, card: Card): boolean {
