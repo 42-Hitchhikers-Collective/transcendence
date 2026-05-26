@@ -18,9 +18,14 @@ export class Table {
   discardPile: Card[];
 
   currentColor: null | "red" | "blue" | "green" | "yellow";
-  pass_turn: boolean;
+  passTurn: boolean;
 
   lastCard: Card | null;
+  event: "uno" | "color" | "finished" | "next" | null;
+
+  // ============================================================
+  //  initializer
+  // ============================================================
 
   constructor(gameID: number, rivals: Player[]) {
     this.gameID = gameID;
@@ -43,12 +48,14 @@ export class Table {
 
     this.drawPile = deck.cards;
     this.discardPile = [];
-    this.pass_turn = false;
+    this.passTurn = false;
+    this.event = null;
 
     this.currentColor = null;
 
     this.dealCards();
   }
+
   private dealCards() {
     for (const player of this.players) {
       for (let i = 0; i < 7; i++) {
@@ -58,50 +65,25 @@ export class Table {
     }
   }
 
-  reuseDiscardPile() {
-    if (this.discardPile.length <= 1) return;
-
-    const topCard = this.discardPile.pop();
-
-    while (this.discardPile.length > 0) {
-      const card = this.discardPile.pop();
-      if (card) this.drawPile.push(card);
-    }
-
-    this.shuffle(this.drawPile);
-
-    if (topCard) this.discardPile.push(topCard);
-  }
-
   getHand(playerId: string): Card[] | null {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand ?? null;
   }
+
   getCardCount(playerId: string): number | undefined {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand.length;
   }
 
-  drawCards(player: Player, amount: number) {
-    for (let i = 0; i < amount; i++) {
-      if (this.drawPile.length === 0) {
-        this.reuseDiscardPile();
-      }
-
-      const card = this.drawPile.pop();
-
-      if (card) {
-        player.hand.push(card);
-      }
-    }
-  }
-
   changeColor(color: "red" | "blue" | "green" | "yellow") {
     this.currentColor = color;
+    this.setEventNext();
   }
 
-  shuffle = <T>(array: T[]): void => {
-    array.sort(() => Math.random() - 0.5);
+  private setEventNext() {
+    this.event = "next";
+    this.passTurn = true;
   }
+
 }
 

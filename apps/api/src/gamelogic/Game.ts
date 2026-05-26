@@ -72,32 +72,20 @@ export class Game {
     this.timestampEnd = Date.now();
   }
 
-  playCard(playerId: string, card: Card): boolean {
+  public playCard(playerId: string, card: Card): boolean {
     if (!this.gameMaster.playCard(this.table, playerId, card))
       return false;
     return true;
   }
 
 
-  drawCard(playerId: string): boolean {
+  public drawCard(playerId: string): boolean {
     if (!this.gameMaster.drawCard(this.table, playerId))
       return false;
     return true;
-    //const player = this.table.players.find((p) => p.id === playerId);
-//
-    //if (!player) return false;
-//
-    //let card = this.table.drawPile.pop();
-//
-    //if (!card) {
-    //  this.table.reuseDiscardPile();
-    //  card = this.table.drawPile.pop();
-    //}
-//
-    //if (!card) return false;
-//
-    //player.hand.push(card);
-//
-    //return true;
+  }
+
+  public checkEvent(): string {
+    return (this.checkEvent);
   }
 }

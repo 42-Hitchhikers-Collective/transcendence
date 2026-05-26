@@ -4,6 +4,10 @@ import { Player } from "./Player.ts"
 
 export class GameMaster {
 
+	// ============================================================
+	// EJECUTORES PÚBLICOS
+	// ============================================================
+
 	playCard(table: Table, playerId: string, card: Card): boolean {
 		const player = table.players.find((p) => p.id === playerId);
 		if (!player) return false;
@@ -24,49 +28,57 @@ export class GameMaster {
 		table.discardPile.push(playedCard);
 		if (playedCard.color != "wild")
 			table.currentColor = playedCard.color;
-		//if (this.uno(table, player))
-		// emit("uno")
-		//if (this.noCard(player))
-		// emit("win")
+
+		this.applyEffect(table, playedCard);
+
+		if (this.uno(player))
+			console.log("UNO!");
+
+		if (this.noCard(player))
+			console.log("WIN!");
+
+		this.advance(table);
 		return true;
 	}
 
-	validateMove(table: Table, playerId: string, card: Card): boolean {
-		if (!this.isPlayerTurn(table, playerId)) return false;
-		if (!this.isCardPlayable(table, card)) return false;
-		if (!this.pendingCards(table, card)) return false;
+	drawCard(table: Table, playerId: string): boolean {
+		const player = table.players.find((p) => p.id === playerId);
+		if (!this.isPlayerTurn(table, playerId) || !player) return false;
+
+		let amount = table.pendingDraw;
+		if (amount == 0)
+			amount = table.draw;
+
+		if (table.pendingDraw == 0 || table.draw == 0)
+			return false;
+
+		for (let i = 0; i < amount; i++) {
+			let card = table.drawPile.pop();
+			// ============================================================
+			// GESTIÓN DE PILAS DE CARTAS
+			// ============================================================
+			if (!card) {
+				this.reuseDiscardPile(table);
+				card = table.drawPile.pop();
+			}
+			if (card) {
+				player.hand.push(card);
+			}
+		}
+		table.pendingDraw = 0;
+		table.draw = 0;
 		return true;
-	}
-	pendingCards(table: Table, card: Card): boolean {
-		if (table.pendingDraw == 0)
-			return true;
-		if (table.pendingDraw != 0 && (card.value == "4plus" || card.value == "2plus"))
-			return true;
-
-		return false;
-	}
-
-	private isPlayerTurn(table: Table, playerId: string): boolean {
-		return table.players[table.turnIndex].id === playerId;
-	}
-
-	private isCardPlayable(table: Table, card: Card): boolean {
-		const top = table.discardPile.at(-1);
-		if (!top)
-			return true;
-
-		return (
-			card.color === table.currentColor ||
-			card.value === top?.value ||
-			card.color === "wild"
-		)
 	}
 
 	advance(table: Table): void {
 		this.advanceTurn(table);
 	}
 
-	applyEffect(table: Table, card: Card): void {
+	// ============================================================
+	// effects
+	// ============================================================
+
+	private applyEffect(table: Table, card: Card): void {
 		switch (card.value) {
 			case "reverse":
 				this.reverse(table);
@@ -96,50 +108,90 @@ export class GameMaster {
 			table.players.length;
 	}
 
-	drawCard(table: Table, playerId: string): boolean {
-		const player = table.players.find((p) => p.id === playerId);
-		if (!this.isPlayerTurn(table, playerId) || !player) return false;
+	// ============================================================
+	// validations
+	// ============================================================
 
-		let amount = table.pendingDraw;
-		if (amount == 0)
-			amount = table.draw;
-
-		if (table.pendingDraw == 0 || table.draw == 0)
-			return false;
-
-		for (let i = 0; i < amount; i++) {
-			let card = table.drawPile.pop();
-
-			if (!card) {
-				table.reuseDiscardPile();
-				card = table.drawPile.pop();
-			}
-			if (card) {
-				player.hand.push(card);
-			}
-		}
-		table.pendingDraw = 0;
-		table.draw = 0;
+	private validateMove(table: Table, playerId: string, card: Card): boolean {
+		if (!this.isPlayerTurn(table, playerId)) return false;
+		if (!this.isCardPlayable(table, card)) return false;
+		if (!this.pendingCards(table, card)) return false;
 		return true;
 	}
 
-	advanceTurn(table: Table): void {
+	private isPlayerTurn(table: Table, playerId: string): boolean {
+		return table.players[table.turnIndex].id === playerId;
+	}
+
+	private isCardPlayable(table: Table, card: Card): boolean {
+		const top = table.discardPile.at(-1);
+		if (!top)
+			return true;
+
+		return (
+			card.color === table.currentColor ||
+			card.value === top?.value ||
+			card.color === "wild"
+		)
+	}
+
+	private pendingCards(table: Table, card: Card): boolean {
+		if (table.pendingDraw == 0)
+			return true;
+		if (table.pendingDraw != 0 && (card.value == "4plus" || card.value == "2plus"))
+			return true;
+
+		return false;
+	}
+
+	// ============================================================
+	// HELPERS & GETTERS
+	// ============================================================
+
+	private advanceTurn(table: Table): void {
 		table.turnIndex =
 			(table.turnIndex + table.direction + table.players.length) %
 			table.players.length;
 
 		table.draw = 1;
+		table.passTurn = false;
 	}
 
 	getCurrentPlayer(table: Table): Player {
 		return table.players[table.turnIndex];
 	}
 
-	uno(player: Player): boolean {
-			return player.hand.length === 1;
+	private uno(player: Player): boolean {
+		return player.hand.length === 1;
 	}
 
-	noCard(player: Player): boolean {
+	private noCard(player: Player): boolean {
 		return player.hand.length === 0;
+	}
+
+
+	/**
+	* When there are no more cards in the draw pile,
+	* it keeps the last one from discard pile,
+	* shuffle the rest and use them as draw pile.
+	*/
+	private reuseDiscardPile(table: Table) {
+		if (table.discardPile.length <= 1) return;
+
+		const topCard = table.discardPile.pop();
+
+		while (table.discardPile.length > 0) {
+			const card = table.discardPile.pop();
+			if (card) table.drawPile.push(card);
+		}
+
+		this.shuffle(table.drawPile);
+
+		if (topCard) table.discardPile.push(topCard);
+	}
+
+
+	shuffle = <T>(array: T[]): void => {
+		array.sort(() => Math.random() - 0.5);
 	}
 }
