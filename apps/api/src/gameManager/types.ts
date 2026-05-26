@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/21 17:48:11 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:13:46 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ export type Room = {
   players: Player[];
   state: GameState;
   chatHistory: Array<{ username: string; msg: string }>;
-  game?: Game; // This will hold the actual Gabriel's game instance when the game starts
+  game?: Game;
 };
 
 // What the frontend sees for "other" players

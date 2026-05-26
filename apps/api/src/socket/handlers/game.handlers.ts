@@ -6,22 +6,22 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/22 14:38:14 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:45:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
-import { getPlayerRoomId } from "../../gameManager/gameManager";
-import { ChatMsgType, sendStrInChat } from "../../gameManager/chatEvents";
+import { systemMsg } from "./index";
+import { ChatMsgType } from "../../gameManager/chatEvents";
+
 
 // --- Game Events ---
 
 export function registerGameHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void,
-  broadcastChatHistory: (roomId: string) => void,
 //   broadcastPlayerState: (playerId: string) => void
 ) {
 
@@ -87,10 +87,7 @@ export function registerGameHandlers(
             return;
         }
         console.log(`Game started manually in room ${res.room.id}`);
+        systemMsg(playerId, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
-        
-        sendStrInChat(playerId, ChatMsgType.STARTED_GAME);
-        socket.nsp.to(res.room.id).emit("roomStateUpdate", res.room);
-        broadcastChatHistory(res.room.id);
     });
 }

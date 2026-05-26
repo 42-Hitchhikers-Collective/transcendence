@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/22 14:51:42 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:50:38 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
   [ChatMsgType.WON_GAME]: "won the game!"
 };
 
-
-export function sendMessage(playerId: string, msg: string): RoomIdResult {
+// Validate a chat msg and add it to room's chat history
+export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
     const roomId = getPlayerRoomId(playerId);
     if (!roomId)
         return {success: false, error: "Player is not in room"};
@@ -48,18 +48,8 @@ export function sendMessage(playerId: string, msg: string): RoomIdResult {
     return {success: true, roomId: roomId};
 }
 
-
-
-// Helper to add message to room's chat history and trim if exceeds max TODO: Check correctness!
-function addMsgToChatHistory(room: Room, username: string, msg: string) {
-    room.chatHistory.push({ username, msg });
-    if (room.chatHistory.length > MAX_MSG_HISTORY) {
-        room.chatHistory.shift();
-    }
-}
-
-// Helper to send predefined system messages like join/leave/start/win
-export function sendStrInChat(playerId: string, msgType: ChatMsgType): RoomIdResult {
+// Helper to create predefined system messages like join/leave/start/win. and add it to chat history
+export function prepareStrChatMsg(playerId: string, msgType: ChatMsgType): RoomIdResult {
   const roomId = getPlayerRoomId(playerId);
   if (!roomId)
     return {success: false, error: "Player is not in room"};
@@ -74,9 +64,10 @@ export function sendStrInChat(playerId: string, msgType: ChatMsgType): RoomIdRes
 }
 
 
-
-
-//joined room
-//left room
-//started game
-//won game
+// Helper to add message to room's chat history and trim history if exceeds max
+function addMsgToChatHistory(room: Room, username: string, msg: string) {
+    room.chatHistory.push({ username, msg });
+    if (room.chatHistory.length > MAX_MSG_HISTORY) {
+        room.chatHistory.shift();
+    }
+}

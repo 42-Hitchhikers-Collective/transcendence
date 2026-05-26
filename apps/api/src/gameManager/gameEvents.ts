@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/21 17:35:50 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:59:32 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_START } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
+import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 
  // --- Game Events ---
