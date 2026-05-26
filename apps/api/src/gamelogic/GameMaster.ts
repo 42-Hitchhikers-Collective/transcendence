@@ -22,11 +22,12 @@ export class GameMaster {
 		const [playedCard] = player.hand.splice(index, 1);
 
 		table.discardPile.push(playedCard);
-		table.currentColor = playedCard.color;
+		if (playedCard.color != "wild")
+			table.currentColor = playedCard.color;
 		//if (this.uno(table, player))
-		// emitir signal;
+		// emit("uno")
 		//if (this.noCard(player))
-		// winning signal
+		// emit("win")
 		return true;
 	}
 
@@ -81,7 +82,8 @@ export class GameMaster {
 				break;
 		}
 		//if (card.color == "wild")
-		// SEND SIGNAL TO FRONTEND
+		// SEND SIGNAL TO FRONTEND TO SELECT COLOR
+		// emit(wild_card)
 	}
 
 	private reverse(table: Table): void {
@@ -94,7 +96,7 @@ export class GameMaster {
 			table.players.length;
 	}
 
-	drawCards(table: Table, playerId: string): boolean {
+	drawCard(table: Table, playerId: string): boolean {
 		const player = table.players.find((p) => p.id === playerId);
 		if (!this.isPlayerTurn(table, playerId) || !player) return false;
 
@@ -109,7 +111,7 @@ export class GameMaster {
 			let card = table.drawPile.pop();
 
 			if (!card) {
-				table.shuffleDiscardPile();
+				table.reuseDiscardPile();
 				card = table.drawPile.pop();
 			}
 			if (card) {

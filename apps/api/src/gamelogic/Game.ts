@@ -20,9 +20,7 @@ export class Game {
 
   public gameMaster: GameMaster;
 
-  constructor(
-    users: Map<string, string>[],
-  ) {
+  constructor(users: Map<string, string>[],) {
     this.gameId = Date.now();
 
     this.winner = null;
@@ -80,22 +78,26 @@ export class Game {
     return true;
   }
 
+
   drawCard(playerId: string): boolean {
-    const player = this.table.players.find((p) => p.id === playerId);
-
-    if (!player) return false;
-
-    let card = this.table.drawPile.pop();
-
-    if (!card) {
-      this.table.shuffleDiscardPile();
-      card = this.table.drawPile.pop();
-    }
-
-    if (!card) return false;
-
-    player.hand.push(card);
-
+    if (!this.gameMaster.drawCard(this.table, playerId))
+      return false;
     return true;
+    //const player = this.table.players.find((p) => p.id === playerId);
+//
+    //if (!player) return false;
+//
+    //let card = this.table.drawPile.pop();
+//
+    //if (!card) {
+    //  this.table.reuseDiscardPile();
+    //  card = this.table.drawPile.pop();
+    //}
+//
+    //if (!card) return false;
+//
+    //player.hand.push(card);
+//
+    //return true;
   }
 }

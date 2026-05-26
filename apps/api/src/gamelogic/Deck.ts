@@ -36,7 +36,7 @@ export class Deck {
     this.shuffle(this.cards);
   }
 
-  shuffle = (array) => {
+  shuffle = <T>(array: T[]): void => {
     array.sort(() => Math.random() - 0.5);
   }
 

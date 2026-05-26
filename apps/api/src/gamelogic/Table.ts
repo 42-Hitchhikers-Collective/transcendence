@@ -17,7 +17,7 @@ export class Table {
   drawPile: Card[];
   discardPile: Card[];
 
-  currentColor: null | "red" | "blue" | "green" | "yellow" | "wild";
+  currentColor: null | "red" | "blue" | "green" | "yellow";
   pass_turn: boolean;
 
   lastCard: Card | null;
@@ -57,7 +57,8 @@ export class Table {
       }
     }
   }
-  shuffleDiscardPile() {
+
+  reuseDiscardPile() {
     if (this.discardPile.length <= 1) return;
 
     const topCard = this.discardPile.pop();
@@ -67,35 +68,40 @@ export class Table {
       if (card) this.drawPile.push(card);
     }
 
-    Phaser.Utils.Array.Shuffle(this.drawPile);
+    this.shuffle(this.drawPile);
 
     if (topCard) this.discardPile.push(topCard);
   }
 
-  getHand(playerId: string) {
+  getHand(playerId: string): Card[] | null {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand ?? null;
   }
-  getCardCount(playerId: string) {
+  getCardCount(playerId: string): number | undefined {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand.length;
   }
 
   drawCards(player: Player, amount: number) {
     for (let i = 0; i < amount; i++) {
-      let card = this.drawPile.pop();
-
-      if (!card) {
-        this.shuffleDiscardPile();
-        card = this.drawPile.pop();
+      if (this.drawPile.length === 0) {
+        this.reuseDiscardPile();
       }
+
+      const card = this.drawPile.pop();
 
       if (card) {
         player.hand.push(card);
       }
     }
   }
-  changeColor(color: "red" | "blue" | "green" | "yellow" | "wild") {
+
+  changeColor(color: "red" | "blue" | "green" | "yellow") {
     this.currentColor = color;
   }
+
+  shuffle = <T>(array: T[]): void => {
+    array.sort(() => Math.random() - 0.5);
+  }
 }
+
