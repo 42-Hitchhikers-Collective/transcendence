@@ -5,7 +5,7 @@ import App from "./app/App.tsx";
 
 //  TODO: currently the viewpoirt on mobile is not working as it should - need to fix how i implement the backgound
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  // <StrictMode> // needs to be removed when the app is ready for production as it runs openrartions twice
     <App />
-  </StrictMode>,
+  // </StrictMode>,
 );

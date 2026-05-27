@@ -1,7 +1,7 @@
 import type { GameHistory } from "@/app/auth/mockProfiles";
-import { GameHistoryItem } from "./HistoryListItem";
+import { HistoryCard } from "./HistoryCard";
 
-export function GameHistoryCard({
+export function GamesHistorySection({
   games,
 }: React.ComponentProps<"div"> & { games: GameHistory[] }) {
   const gamesPlayed = games.slice(0, 5); // <--- important to limit
@@ -26,7 +26,7 @@ export function GameHistoryCard({
   const foundHistory = () => (
     <div>
       {gamesPlayed.map((game) => (
-        <GameHistoryItem key={game.id} game={game} />
+        <HistoryCard key={game.id} game={game} />
       ))}
     </div>
   );

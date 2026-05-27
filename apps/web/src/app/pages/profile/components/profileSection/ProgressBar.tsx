@@ -1,5 +1,4 @@
-import * as React from 'react';
-
+import { useState, useEffect } from "react"; 
 interface ProgressBarProps {
   wins: number;
   losses: number;
@@ -8,9 +7,9 @@ interface ProgressBarProps {
 export const ProgressBar = ({ wins, losses }: ProgressBarProps) => {
   const total = wins + losses;
   const winTarget = total > 0 ? (wins / total) * 100 : 0;
-  const [winProgress, setWinProgress] = React.useState(0);
+  const [winProgress, setWinProgress] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setWinProgress(0);
     const t = window.setTimeout(() => setWinProgress(winTarget), 40);
     return () => window.clearTimeout(t);

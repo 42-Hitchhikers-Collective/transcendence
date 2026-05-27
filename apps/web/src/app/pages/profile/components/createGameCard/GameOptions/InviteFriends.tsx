@@ -3,7 +3,7 @@ import { mockProfiles } from '@/app/auth/mockProfiles'
 import { useNavigate } from 'react-router'
 
 /* 
-Preview of the CreateGame component, which is a part of the JoinGameCard component.
+Preview of the InviteFriends component, which is a part of the InviteFriendsCard component.
 It allows users to invite online players by inputting their username.
 The component handles:
 - Username Input: handles duplicates, self-invitation, user limit (max 3 invites), and empty input
@@ -15,7 +15,7 @@ The component handles:
 */
 
 
-export function CreateGame() {
+export function InviteFriends() {
   const navigate = useNavigate()
   const [inviteName, setInviteName] = useState('')
   const [invitedUsers, setInvitedUsers] = useState<string[]>([])

@@ -35,9 +35,17 @@ export function registerConnectionHandlers(
         // updateSocketId(playerId, socket.id); // is this eccessary? i update socket.id on the player object when they connect
         app.log.info(`Player ${playerId} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId);
-        gameManager.joinRoom(playerId, roomId); // Re-add player to the room in gameManager (in case they were removed on disconnect)
+        // ----- START EDIT BY JESS ----- 
+        // We no longer need to call "gameManager.joinRoom(playerId, roomId)" on the gameManager here because we never remove the player
+        // from the room when they disconnect; we just start a grace period timer fro your commented function updateRoomSocketId.
+        // If they reconnect before the timer ends, we cancel the timer and keep them in the same room with their updated socket id.
+        // If they fail to reconnect before the timer ends, only then do we remove them from the room.
+
+        // PlayerRooms already tracks the room; refresh the socketId stored on the room's player entry.
+        updateRoomSocketId(playerId, socket.id);
         app.log.info(`Player ${playerId} automatically rejoin room ${roomId}`);
         broadcastRoomState(roomId);
+        // -----  END EDIT BY JESS ----- 
     }
     
     // Disconnect and leave room if in any
@@ -90,13 +98,13 @@ function cancelDisconnectTimer(playerId: string) {
 
 // --- Private ---
 
-
-// function updateSocketId(playerId: string, newSocketId: string) {
-//     const roomId = gameManager.getPlayerRoomId(playerId);
-//     if (!roomId) return;
-//     const room = gameManager.getRoomById(roomId);
-//     if (!room) return;
-//     const player = room.players.find(p => p.playerId === playerId);
-//     if (player)
-//         player.socketId = newSocketId;
-// }
+// EDIT BY JESS: I just uncommented this so it can be used in  line 45
+function updateRoomSocketId(playerId: string, newSocketId: string) {
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const room = gameManager.getRoomById(roomId);
+    if (!room) return;
+    const player = room.players.find(p => p.playerId === playerId);
+    if (player)
+        player.socketId = newSocketId;
+}

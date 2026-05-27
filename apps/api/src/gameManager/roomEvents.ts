@@ -41,8 +41,21 @@ export function joinRoom(name: string, playerId: string): RoomResult {
   if (!room)
     return { success: false, error: "Room not found" };
   const roomId = room.id;
-  if (gm.getPlayerRoomId(playerId) === roomId) // Already in same room
+  if (gm.getPlayerRoomId(playerId) === roomId) { // Already in same room
+    // START EDIT BY JESS
+    // Added this code to avoid losing the player's socket id
+    // when the player tries to refresh the game room 
+    const onlinePlayer = gm.getOnlinePlayer(playerId); 
+    if (onlinePlayer) {
+      const existing = room.players.find(p => p.playerId === playerId); 
+      // if the playerIs is found as part of the room's player array, update the socketId to the current one from the onlinePlayers map
+      if (existing) {
+        existing.socketId = onlinePlayer.socketId;
+      }
+    }
+    // FINISH EDIT BY JESS
     return { success: true, room: room };
+  }
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
     return { success: false, error: "Room is full" };
   if (room.state !== "waiting")
