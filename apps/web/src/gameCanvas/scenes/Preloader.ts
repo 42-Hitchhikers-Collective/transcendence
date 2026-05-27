@@ -21,7 +21,6 @@ export class Preloader extends Scene {
 
     const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "skip", "reverse", "2plus"];
 
-    // cartas normales
     for (const color of colors) {
       for (const value of values) {
         const key = `${value}_${color}`;
@@ -31,7 +30,6 @@ export class Preloader extends Scene {
       }
     }
 
-    // cartas wild
     this.load.image("4plus_wild", `${cardAssets}wild/4plus_wild.png`);
 
     this.load.image(
@@ -41,7 +39,6 @@ export class Preloader extends Scene {
 
     this.load.image("background", `${tableAssets}table.jpeg`);
 
-    // carta trasera
     this.load.image("back", `${cardAssets}back/card_back.png`);
   }
 }

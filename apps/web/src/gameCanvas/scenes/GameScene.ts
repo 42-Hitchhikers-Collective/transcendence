@@ -51,7 +51,7 @@ export class GameScene extends Scene {
     const observer = room.players.find(p => p.isTheObserver);
     this.room = room;
     if (observer)
-      this.showWildColorButtons();
+      this.showPassTurnButtons();
   }
 
   private onRoomState(room: FrontendRoom) {
@@ -63,9 +63,9 @@ export class GameScene extends Scene {
     }
     
     if (room.game && room.game.discardTopCard.color === "wild") {
-      this.showWildColorButtons();
+      this.showPassTurnButtons();
     } else {
-      this.hideWildColorButtons();
+      this.hidePassTurnButtons();
     }
     
     this.render(room);
@@ -84,9 +84,6 @@ export class GameScene extends Scene {
     console.error(err.message);
   }
 
-  // =========================
-  // BOARD
-  // =========================
 
   private createBoard() {
     this.add.image(500, 400, "background").setScale(0.5);
@@ -101,7 +98,6 @@ export class GameScene extends Scene {
     g.lineStyle(4, 0xffffff);
     g.strokeRectShape(this.pile.getBounds());
 
-    // Create Draw Card Button
     this.drawCardButton = this.add.container(500, 430);
 
     const buttonBg = this.add.rectangle(0, 0, 100, 40, 0x4a90e2).setInteractive();
@@ -143,14 +139,10 @@ export class GameScene extends Scene {
     this.drawCardButton.add([buttonBg, buttonText]);
   }
 
-  // =========================
-  // RENDER
-  // =========================
 
   private render(room: FrontendRoom) {
     this.clearPlayers();
 
-    // Reorder so observer (current player) is always at the bottom
     const orderedPlayers = this.reorderPlayersWithObserverAtBottom(room.players);
     const positions = this.getPlayerPositions(orderedPlayers.length);
 
@@ -180,7 +172,6 @@ export class GameScene extends Scene {
 
     container.add(title);
 
-    // Only render cards for the current player
     const isMe = player.id === this.myPlayerId;
     if (isMe && player.cards) {
       let offsetX = -(player.cards.length * 20);
@@ -202,7 +193,6 @@ export class GameScene extends Scene {
         offsetX += 40;
       });
     } else {
-      // Show card count for other players
       const cardCountText = this.add.text(pos.x, pos.y + 30, `🎴 ${player.cardCount}`, {
         fontSize: "16px",
         color: "#fff",
@@ -213,9 +203,6 @@ export class GameScene extends Scene {
     }
   }
 
-  // =========================
-  // INPUT
-  // =========================
 
   private setupInput() {
     this.input.on("drag", this.onDrag, this);
@@ -269,15 +256,12 @@ export class GameScene extends Scene {
     });
   }
 
-  // =========================
-  // WILD COLOR SELECTION
-  // =========================
 
   private showWildColorButtons() {
-    // Hide existing buttons first
+
     this.hideWildColorButtons();
 
-    // Create container for color buttons
+
     this.wildColorContainer = this.add.container(500, 200);
 
     const colors: Array<{
@@ -297,11 +281,11 @@ export class GameScene extends Scene {
       const x = startX + index * spacing;
       const y = 0;
 
-      // Create button background
+
       const button = this.add.rectangle(x, y, 80, 60, item.hex).setInteractive();
       button.setStrokeStyle(3, 0xffffff);
 
-      // Create button label
+
       const label = this.add.text(x, y, item.color.toUpperCase(), {
         fontSize: "12px",
         color: "#000",
@@ -309,13 +293,13 @@ export class GameScene extends Scene {
       });
       label.setOrigin(0.5);
 
-      // Add click handler
+
       button.on("pointerdown", () => {
         selectWildColor(item.color);
         this.hideWildColorButtons();
       });
 
-      // Add to container
+
       this.wildColorContainer!.add([button, label]);
     });
   }
@@ -328,10 +312,10 @@ export class GameScene extends Scene {
   }
 
   private showPassTurnButtons() {
-    // Hide existing buttons first
-    this.showPassTurnButtons();
 
-    // Create container for color buttons
+    this.hidePassTurnButtons();
+
+
     this.passTurnContainer = this.add.container(700, 200);
 
     const colors: Array<{
@@ -348,15 +332,15 @@ export class GameScene extends Scene {
       const x = startX + index * spacing;
       const y = 0;
 
-      // Create button background
+
       const button = this.add.rectangle(x, y, 80, 60, item.hex).setInteractive();
       button.setStrokeStyle(3, 0xffffff);
 
-      // Create button label
+
       const label = this.add.text(x, y, item.color.toUpperCase(), {
         fontSize: "12px",
         color: "#000",
-        align: "center",
+        align: "center",hideWildColorButtons
       });
       label.setOrigin(0.5);
 
@@ -366,7 +350,6 @@ export class GameScene extends Scene {
         this.hidePassTurnButtons();
       });
 
-      // Add to container
       this.wildColorContainer!.add([button, label]);
     });
   }
@@ -378,9 +361,7 @@ export class GameScene extends Scene {
     }
   }
 
-  // =========================
-  // CLEANUP
-  // =========================
+
 
   private clearPlayers() {
     this.playerContainers.forEach((c) => c.destroy(true));
@@ -388,9 +369,6 @@ export class GameScene extends Scene {
     this.hideWildColorButtons();
   }
 
-  // =========================
-  // POSITIONS
-  // =========================
 
   private getPlayerPositions(count: number): Position[] {
     const cx = 500;
