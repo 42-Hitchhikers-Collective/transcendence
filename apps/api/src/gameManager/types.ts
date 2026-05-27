@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:13:46 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/27 15:20:19 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ export type Player = {
   socketId: string;      // current connection used for networking
   userName: string;      // display name for UI/chat
   isReady:  boolean;
-  timeout?: NodeJS.Timeout; // for handling disconnection grace period
 };
 
 export type GameState = "waiting" | "playing" | "finished";
@@ -71,6 +70,6 @@ export type RoomIdResult =
   | { success: false; error: string | undefined};
 
 
-// export type Result =
-//   | { success: true }
-//   | { success: false; error: string | undefined };
+export type msgResult =
+  | { success: true ; msg: string }
+  | { success: false; error: string | undefined };

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:54:08 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/27 14:28:28 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
+import registerFriendHandlers from "./friend.handlers";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 
 
@@ -31,7 +32,8 @@ export function registerSocketHandlers(
     const room = gameManager.getRoomById(roomId);
     if (!room) return;
     room.players.forEach((player) => {
-      const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
+      if (!player.socketId) return; // skip players without an active socket
+      const frontendRoomData = utils.getFrontendRoom(room, player.playerId);
       socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
     });
     gameManager.debugState();
@@ -41,6 +43,7 @@ export function registerSocketHandlers(
   registerRoomHandlers(socket, broadcastRoomState);
   registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
   registerConnectionHandlers(app, socket, broadcastRoomState);
+  registerFriendHandlers(app, socket);
     
   // ---> Msg Events ---
   socket.on("send_msg", ({ msg }) => {
@@ -66,13 +69,14 @@ export function registerSocketHandlers(
 
 
 /// Helper function to send system messages to the room chat (like player joined, left, game started, etc)
-export function systemMsg(playerId: string, socket: Socket,msgType: ChatMsgType) {
+export function systemChatMsg(playerId: string, socket: Socket,msgType: ChatMsgType) {
   const res = gameManager.prepareStrChatMsg(playerId, msgType);
   if (!res.success) {
     console.error(`Failed to send system message: ${res.error}`);
     return;
   }
-  if (res.roomId) {
-    socket.nsp.to(res.roomId).emit("chat_message", { msg: msgType, senderId: "System" });
+  const roomId = gameManager.getPlayerRoomId(playerId);
+  if (roomId) {
+    socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: "System" });
   }
 }

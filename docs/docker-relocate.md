@@ -4,7 +4,7 @@ In case memory space isn't enough to build the containers.
 This document explains how to stop the rootless Docker daemon, clean up Docker data, move your Docker data directory to your local `goinfre` storage, and relink it so Docker uses that location. 
 
 `/goinfre/goinfre/Perso/<username>/docker`
-FYI: from notion page:
+FYI from notion page:
 "The goinfre folder uses local storage. On the computer itself. When the computer has less than 20% storage space available it will delete the contents of the entire goinfre folder. This is checked every monday"
 
 

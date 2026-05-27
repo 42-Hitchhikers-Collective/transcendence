@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:59:15 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/27 15:13:07 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
-import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
+// import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 // --- Room Events ---
 
@@ -41,21 +41,9 @@ export function joinRoom(name: string, playerId: string): RoomResult {
   if (!room)
     return { success: false, error: "Room not found" };
   const roomId = room.id;
-  if (gm.getPlayerRoomId(playerId) === roomId) { // Already in same room
-    // START EDIT BY JESS
-    // Added this code to avoid losing the player's socket id
-    // when the player tries to refresh the game room 
-    const onlinePlayer = gm.getOnlinePlayer(playerId); 
-    if (onlinePlayer) {
-      const existing = room.players.find(p => p.playerId === playerId); 
-      // if the playerIs is found as part of the room's player array, update the socketId to the current one from the onlinePlayers map
-      if (existing) {
-        existing.socketId = onlinePlayer.socketId;
-      }
-    }
-    // FINISH EDIT BY JESS
+  if (gm.getPlayerRoomId(playerId) === roomId) // Already in same room
+    // return rejoinRoom(playerId, room); // socket reassigning is being made in the connection handler
     return { success: true, room: room };
-  }
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
     return { success: false, error: "Room is full" };
   if (room.state !== "waiting")
@@ -64,7 +52,7 @@ export function joinRoom(name: string, playerId: string): RoomResult {
   const player = gm.getOnlinePlayer(playerId);
   if (!player)
     return { success: false, error: "Player not found" };
-  room.players.push({ playerId, socketId: player.socketId, userName: player.userName, isReady: false });
+  room.players.push(player);
   gm.addToPlayerRoom(playerId, roomId); // add to playerRooms
   return { success: true, room: room };;
 }
@@ -117,4 +105,17 @@ function validateRoomName(name: string): RoomResult {
   if (!regex.test(name))
     return { success: false, error: "Room name contains invalid characters"};
   return { success: true, room: null as any };
-  }
+}
+
+// socket reassigning is being made in the connection handler
+// When a player joins a room they are already in, reassign the socket id to avoid losing connection
+// function rejoinRoom(playerId: string, room: Room): RoomResult {
+//   const onlinePlayer = gm.getOnlinePlayer(playerId); 
+//   if (onlinePlayer) {
+//     const existing = room.players.find(p => p.playerId === playerId); 
+//     if (existing)
+//       existing.socketId = onlinePlayer.socketId;
+//     return { success: true, room: room };
+//   }
+//   return { success: false, error: "Player is in room but not in online players" };
+// }

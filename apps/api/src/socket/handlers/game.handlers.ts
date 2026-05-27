@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:45:36 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/27 14:51:01 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
-import { systemMsg } from "./index";
+import { systemChatMsg } from "./index";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 
 
@@ -87,7 +87,7 @@ export function registerGameHandlers(
             return;
         }
         console.log(`Game started manually in room ${res.room.id}`);
-        systemMsg(playerId, socket, ChatMsgType.STARTED_GAME);
+        systemChatMsg(playerId, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
     });
 }

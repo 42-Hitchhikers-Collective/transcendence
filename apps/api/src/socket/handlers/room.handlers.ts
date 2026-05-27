@@ -6,14 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:58:08 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/27 14:33:19 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
-import { systemMsg } from ".";
+import { systemChatMsg } from ".";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 
 // --- Room Events ---
@@ -45,7 +45,7 @@ export function registerRoomHandlers(
       gameManager.joinRoom(roomName, playerId);
       socket.join(newRoom.id);
       socket.emit("room_created", { roomName: newRoom.name });
-      systemMsg(playerId, socket, ChatMsgType.JOIN_ROOM);
+      systemChatMsg(playerId, socket, ChatMsgType.CREATE_ROOM);
       broadcastRoomState(newRoom.id);
     }
   });
@@ -61,7 +61,7 @@ export function registerRoomHandlers(
     const roomId = res.room.id;
     socket.join(roomId);
     socket.emit("room_joined", { roomName });
-    systemMsg(playerId, socket, ChatMsgType.JOIN_ROOM);
+    systemChatMsg(playerId, socket, ChatMsgType.JOIN_ROOM);
     socket.emit("chatHistory", res.room.chatHistory); // Send chat history to player when they join the room
     broadcastRoomState(roomId);
   });
@@ -74,7 +74,7 @@ export function registerRoomHandlers(
       socket.emit("error", { message: res.error });
       return;
     }
-    systemMsg(playerId, socket, ChatMsgType.LEFT_ROOM);
+    systemChatMsg(playerId, socket, ChatMsgType.LEFT_ROOM);
     socket.leave(res.roomId);
     broadcastRoomState(res.roomId);
   });

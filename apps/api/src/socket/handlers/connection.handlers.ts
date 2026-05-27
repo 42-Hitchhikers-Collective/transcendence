@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 17:10:28 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/27 15:50:48 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
+import { notifyFriendsPresence } from "./friend.handlers";
 import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
 
@@ -32,20 +33,11 @@ export function registerConnectionHandlers(
     // Auto-rejoin player to their room if they were in one (handles reconnections)
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
-        // updateSocketId(playerId, socket.id); // is this eccessary? i update socket.id on the player object when they connect
         app.log.info(`Player ${playerId} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId);
-        // ----- START EDIT BY JESS ----- 
-        // We no longer need to call "gameManager.joinRoom(playerId, roomId)" on the gameManager here because we never remove the player
-        // from the room when they disconnect; we just start a grace period timer fro your commented function updateRoomSocketId.
-        // If they reconnect before the timer ends, we cancel the timer and keep them in the same room with their updated socket id.
-        // If they fail to reconnect before the timer ends, only then do we remove them from the room.
-
-        // PlayerRooms already tracks the room; refresh the socketId stored on the room's player entry.
-        updateRoomSocketId(playerId, socket.id);
+        // updateRoomSocketId(playerId, socket.id); -- NOT NEEDED ANYMORE because I update socketId on the player object when they connect
         app.log.info(`Player ${playerId} automatically rejoin room ${roomId}`);
         broadcastRoomState(roomId);
-        // -----  END EDIT BY JESS ----- 
     }
     
     // Disconnect and leave room if in any
@@ -58,7 +50,6 @@ export function registerConnectionHandlers(
             app.log.info(`Stale socket disconnected for ${playerId}, ignoring.`);
             return; 
         }
-
         startGracePeriod(app, socket, playerId, broadcastRoomState);
     });
 }
@@ -70,8 +61,12 @@ function startGracePeriod(
   playerId: string,
   broadcastRoomState: (roomId: string) => void
 ) {
-    const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(async () => {
         const res = gameManager.leaveRoom(playerId);
+        
+        // Notify friends that player went offline
+        await notifyFriendsPresence(app, socket, playerId, "offline");
+        
         gameManager.removePlayerFromOnlinePlayers(playerId);
         const userName = (socket as any).userName;
         console.log(`Grace period ended for player ${userName}, removed from online players and left room if in any.`);
@@ -83,28 +78,25 @@ function startGracePeriod(
     gameManager.setPlayerTimeout(playerId, timeoutId); // Store the timeout in the Map
 }
 
+// --- Private ---
+
 // Cancel the disconnection timer
 function cancelDisconnectTimer(playerId: string) {
-
     const player = gameManager.getOnlinePlayer(playerId);
-    if (player) {
-        console.log("Cancelling disconnect timer if exists for socket:", player.userName);
-    } else {
-        console.log("Cancelling disconnect timer if exists for socket:", playerId);
-    }
+    const playerName = player ? player.userName : playerId;
+    console.log("Cancelling disconnect timer if exists for socket:", playerName);
     gameManager.clearPlayerTimeout(playerId);
 }
 
 
-// --- Private ---
 
-// EDIT BY JESS: I just uncommented this so it can be used in  line 45
-function updateRoomSocketId(playerId: string, newSocketId: string) {
-    const roomId = gameManager.getPlayerRoomId(playerId);
-    if (!roomId) return;
-    const room = gameManager.getRoomById(roomId);
-    if (!room) return;
-    const player = room.players.find(p => p.playerId === playerId);
-    if (player)
-        player.socketId = newSocketId;
-}
+// Update the socketId for a player who reconnected UNSED FOR NOW because I update socketId on the player object when they connect
+// function updateRoomSocketId(playerId: string, newSocketId: string) {
+//     const roomId = gameManager.getPlayerRoomId(playerId);
+//     if (!roomId) return;
+//     const room = gameManager.getRoomById(roomId);
+//     if (!room) return;
+//     const player = room.players.find(p => p.playerId === playerId);
+//     if (player)
+//         player.socketId = newSocketId;
+// }
