@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
 import { EventBus } from "../../events/EventBus";
 import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
-import { playCard, selectWildColor, drawCard } from "../../network/gameNetwork";
+import { playCard, selectWildColor, drawCard, passTurn } from "../../network/gameNetwork";
 
 type Position = { x: number; y: number };
 
@@ -14,6 +14,7 @@ export class GameScene extends Scene {
 
   private playerContainers = new Map<string, Phaser.GameObjects.Container>();
   private wildColorContainer: Phaser.GameObjects.Container | null = null;
+  private passTurnContainer: Phaser.GameObjects.Container | null = null;
 
   constructor() {
     super("Game");
@@ -32,15 +33,25 @@ export class GameScene extends Scene {
 
     EventBus.on("ROOM_STATE", this.onRoomState, this);
     EventBus.on("COLOR", this.onRoomState, this);
+    EventBus.on("PASS_TURN", this.onRoomState, this);
 
     EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.events.once("shutdown", () => {
       EventBus.off("ROOM_STATE", this.onRoomState, this);
       EventBus.off("COLOR", this.selectColor, this);
+      EventBus.off("PASS_TURN", this.selectColor, this);
 
       EventBus.off("SOCKET_ERROR", this.onSocketError, this);
     });
+  }
+
+  private passTurnPermission(room: FrontendRoom)
+  {
+    const observer = room.players.find(p => p.isTheObserver);
+    this.room = room;
+    if (observer)
+      this.showWildColorButtons();
   }
 
   private onRoomState(room: FrontendRoom) {
@@ -313,6 +324,57 @@ export class GameScene extends Scene {
     if (this.wildColorContainer) {
       this.wildColorContainer.destroy(true);
       this.wildColorContainer = null;
+    }
+  }
+
+  private showPassTurnButtons() {
+    // Hide existing buttons first
+    this.showPassTurnButtons();
+
+    // Create container for color buttons
+    this.passTurnContainer = this.add.container(700, 200);
+
+    const colors: Array<{
+      color: "red" | "blue" | "green" | "yellow";
+      hex: number;
+    }> = [
+      { color: "red", hex: 0xff0000 },
+    ];
+
+    const startX = -150;
+    const spacing = 100;
+
+    colors.forEach((item, index) => {
+      const x = startX + index * spacing;
+      const y = 0;
+
+      // Create button background
+      const button = this.add.rectangle(x, y, 80, 60, item.hex).setInteractive();
+      button.setStrokeStyle(3, 0xffffff);
+
+      // Create button label
+      const label = this.add.text(x, y, item.color.toUpperCase(), {
+        fontSize: "12px",
+        color: "#000",
+        align: "center",
+      });
+      label.setOrigin(0.5);
+
+      // Add click handler
+      button.on("pointerdown", () => {
+        passTurn();
+        this.hidePassTurnButtons();
+      });
+
+      // Add to container
+      this.wildColorContainer!.add([button, label]);
+    });
+  }
+
+    private hidePassTurnButtons() {
+    if (this.passTurnContainer) {
+      this.passTurnContainer.destroy(true);
+      this.passTurnContainer = null;
     }
   }
 

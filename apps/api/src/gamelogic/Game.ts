@@ -85,14 +85,8 @@ export class Game {
     return true;
   }
 
-  private setEventNext()  {
-    this.table.event = null;
-    this.table.passTurn = true;
-  }
-
   public changeColor(color: "red" | "blue" | "green" | "yellow") {
     this.table.currentColor = color;
-    this.setEventNext();
   }
 
   public passTurn(playerId: string)
@@ -100,7 +94,7 @@ export class Game {
       return this.gameMaster.advanceTurn(this.table, playerId);
   }
 
-  public checkEvent(table: Table): "uno" | "color" | "finished" | "next" | null {
+  public checkEvent(table: Table): "uno" | "color" | "finished" {
     return (table.event);
   }
 }

@@ -21,7 +21,7 @@ export class Table {
   passTurn: boolean;
 
   lastCard: Card | null;
-  event: "uno" | "color" | "finished" | "next" | null;
+  event: "uno" | "color" | "finished";
 
   // ============================================================
   //  initializer

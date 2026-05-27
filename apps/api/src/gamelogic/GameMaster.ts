@@ -152,6 +152,7 @@ export class GameMaster {
 	{
 		table.draw = 1;
 		table.passTurn = false;
+		table.event = null;
 	}
 
 	getCurrentPlayer(table: Table): Player {
