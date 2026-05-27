@@ -97,9 +97,7 @@ export class Game {
 
   public passTurn(playerId: string)
   {
-    if (!this.table.event && this.table.passTurn)
-      this.gameMaster.advanceTurn(this.table);
-    else false;
+      return this.gameMaster.advanceTurn(this.table, playerId);
   }
 
   public checkEvent(table: Table): "uno" | "color" | "finished" | "next" | null {
