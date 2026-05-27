@@ -32,7 +32,7 @@ export class GameMaster {
 
 		if (this.noCard(player))
 			table.event = "finished";
-		this.advance(table);
+		table.draw = 0;
 		return true;
 	}
 
@@ -63,9 +63,6 @@ export class GameMaster {
 		return true;
 	}
 
-	advance(table: Table): void {
-		this.advanceTurn(table);
-	}
 
 	// ============================================================
 
@@ -136,11 +133,23 @@ export class GameMaster {
 	// HELPERS & GETTERS
 	// ============================================================
 
-	private advanceTurn(table: Table): void {
+	advanceTurn(table: Table, playerId: string): boolean {
+		const player = table.players.find((p) => p.id === playerId);
+		if (!player || table.draw == 0) return false;
+
 		table.turnIndex =
 			(table.turnIndex + table.direction + table.players.length) %
 			table.players.length;
 
+		this.newTurnStats(table)
+		return true;
+	}
+
+	/**
+	* Reset the conditon for a new player
+	*/
+	newTurnStats(table: Table)
+	{
 		table.draw = 1;
 		table.passTurn = false;
 	}
