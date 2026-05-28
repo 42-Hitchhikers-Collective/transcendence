@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 14:33:19 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 15:37:02 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,31 +23,18 @@ export function registerRoomHandlers(
   broadcastRoomState: (roomId: string) => void
 ) {
 
-  // Create a new room. Enter it and leave old room if in any
+  // Create a new room
   socket.on("create_room", ({ roomName }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.createRoom(roomName);
     if (!res.success)
       return socket.emit("error", { message: res.error });
     const newRoom = res.room;
-    if (newRoom) {
-      if (gameManager.isInRoom(playerId)) {
-        const res = gameManager.leaveRoom(playerId);
-        if (!res.success) {
-          socket.emit("error", { message: res.error });
-          gameManager.deleteRoomIfEmpty(newRoom);
-          return;
-        }
-        const oldRoomId = res.roomId;
-        socket.leave(oldRoomId);
-        broadcastRoomState(oldRoomId);
-      }
-      gameManager.joinRoom(roomName, playerId);
-      socket.join(newRoom.id);
-      socket.emit("room_created", { roomName: newRoom.name });
-      systemChatMsg(playerId, socket, ChatMsgType.CREATE_ROOM);
-      broadcastRoomState(newRoom.id);
-    }
+    const oldRoomId = res.room.id;
+    broadcastRoomState(oldRoomId); // broadcast old room state
+    socket.emit("room_created", { roomName: newRoom.name });
+    systemChatMsg(playerId, socket, ChatMsgType.CREATE_ROOM);
+    broadcastRoomState(newRoom.id); // broadcast new room state
   });
 
   // Join an existing room
