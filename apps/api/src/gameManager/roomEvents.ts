@@ -35,6 +35,8 @@ export function createRoom(roomName: string): RoomResult {
 
 // Add player to room. removes player from old room
 export function joinRoom(name: string, playerId: string): RoomResult {
+  if (gm.isInRoom(playerId))
+    return { success: false, error: "Player already in a room" }; //// <--- Jess: if the player never left the room (refreshes the page, re-enters) we should stop here
   const room = gm.getRoomByName(name);
   if (!room)
     return { success: false, error: "Room not found" };

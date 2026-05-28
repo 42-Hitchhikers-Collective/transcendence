@@ -149,7 +149,7 @@ export function getOnlinePlayer(playerId: string): Player | null {
 
 // --- DEBUG ---
   export function debugState() {
-    console.log("---- GAME STATE ----");
+    console.log("---- GAME STATE ----"); // <------  JESS/INBAR: to change into a more descriptive name
 
     for (const [roomId, room] of roomsById) {
       const name = room.name ? `${room.name}` : "";

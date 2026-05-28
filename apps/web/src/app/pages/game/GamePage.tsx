@@ -4,10 +4,16 @@ import GameCanvas from "../../../gameCanvas/App";
 import { socket } from "@/socket/Socket";
 import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
 
+import { useLocation } from "react-router";
+
+
 export default function GamePage() {
   const [searchParams] = useSearchParams();
   const roomName = searchParams.get("room");
   const navigate = useNavigate();
+  
+  // const location = useLocation();
+  // const hasActiveRoom = location.state?.hasActiveRoom;
 
   // Guard: no room id means no game
   if (!roomName) return <Navigate to="/" replace />;
@@ -23,8 +29,9 @@ export default function GamePage() {
   // join_room is unchanged on the backend: if you are already a member
   // (because you are the room creator), it succeeds without side effects.
   useEffect(() => {
-    if (!socket.connected) socket.connect();
-    console.log("[GamePage] emitting join_room for", roomName);
+    
+  socket.on("active_room", handleActiveRoom);
+  socket.emit("get_room_state");
     socket.emit("join_room", { roomName });
 
     const handleError = (payload: { message?: string }) => {
@@ -37,9 +44,13 @@ export default function GamePage() {
 
     return () => {
       socket.off("error", handleError);
-      // When the page Does not auto-leave on unmount; reloads and reconnects should keep room state intact.
-      // console.log("[GamePage] leaving room", roomName);
-      // socket.emit("leave_room");
+      socket.emit("user_dropped"); // <-- tell the backend when the use leaved the page but we don't want to kick them out of the room yet
+      // Leaving the game page should remove the player from the room list.
+      console.log("[GamePage] leaving room", roomName);
+      // socket.emit("leave_room"); // <---- leaves the room
+
+
+      // on unmount we  do 
     };
   }, [navigate, roomName]);
 
@@ -55,6 +66,16 @@ export default function GamePage() {
       socket.off("chat_message", handleChatMessage);
     };
   }, []);
+
+
+   const handleActiveRoom = (data: { roomName: string }) => {
+    console.log(`[GamePage] active_room: ${data.roomName} room from url ${roomName}`);
+    if (data.roomName !== roomName) {
+      console.warn(`[GamePage] active_room mismatch! url: ${roomName} payload: ${data.roomName}`);
+       navigate("/profile", { replace: true });
+      // This can happen if the player creates a room, then tries to access the game page before the backend has processed the room creation and updated the player's active room. In this case, we can just ignore the mismatch and wait for the correct active_room event to arrive.
+    }
+  };
 
   const sendMessage = () => {
     const trimmed = chatInput.trim();
@@ -74,7 +95,7 @@ export default function GamePage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
+        {/* <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">
             Game Lobby ({roomName})
           </h1>
@@ -89,7 +110,7 @@ export default function GamePage() {
               Log out
             </Link>
           </div>
-        </div>
+        </div> */}
 
         <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
           <section className="flex flex-col gap-6 rounded-3xl bg-slate-900/70 p-6 shadow-xl">

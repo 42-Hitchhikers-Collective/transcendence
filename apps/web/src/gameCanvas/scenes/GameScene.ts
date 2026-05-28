@@ -163,8 +163,8 @@ export class GameScene extends Scene {
     this.boardContainer.add(container);
 
     const title = this.add.text(pos.x - 40, pos.y - 120, player.userName, {
-      fontSize: "24px",
-      color: "#fff",
+      fontSize: "30px",
+      color: "#ff0000",
     });
 
     container.add(title);

@@ -26,14 +26,25 @@ export function registerConnectionHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void
 ) {
-    const { playerId } = getIdentity(socket);
-    cancelDisconnectTimer(playerId);
+        const { playerId } = getIdentity(socket);
+        console.log("[connection] socket authenticated", {
+            playerId,
+            socketId: socket.id,
+            userName: (socket as any).userName,
+        });
+        cancelDisconnectTimer(playerId);
     
     // Auto-rejoin player to their room if they were in one (handles reconnections)
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
         // updateSocketId(playerId, socket.id); // is this eccessary? i update socket.id on the player object when they connect
         app.log.info(`Player ${playerId} reconnected with new socketId: ${socket.id}`);
+        console.log("[connection] player reconnected", {
+        playerId,
+        socketId: socket.id,
+        roomId,
+        userName: (socket as any).userName,
+        });
         socket.join(roomId);
         // ----- START EDIT BY JESS ----- 
         // We no longer need to call "gameManager.joinRoom(playerId, roomId)" on the gameManager here because we never remove the player
@@ -43,43 +54,80 @@ export function registerConnectionHandlers(
 
         // PlayerRooms already tracks the room; refresh the socketId stored on the room's player entry.
         updateRoomSocketId(playerId, socket.id);
-        app.log.info(`Player ${playerId} automatically rejoin room ${roomId}`);
+        console.log("[connection] player auto-joined room after reconnect", {
+            playerId,
+            socketId: socket.id,
+            roomId,
+            userName: (socket as any).userName,
+        });
         broadcastRoomState(roomId);
         // -----  END EDIT BY JESS ----- 
     }
     
     // Disconnect and leave room if in any
     socket.on("disconnect", () => {
-        app.log.info(`socket disconnected: ${playerId}`);
+                console.log("[connection] socket disconnected", {
+                    playerId,
+                    socketId: socket.id,
+                    userName: (socket as any).userName,
+                });
         
         // Prevent older stale sockets (like a closed previous tab) from triggering the grace period
         const currentPlayer = gameManager.getOnlinePlayer(playerId);
         if (currentPlayer && currentPlayer.socketId !== socket.id) {
-            app.log.info(`Stale socket disconnected for ${playerId}, ignoring.`);
+                        console.log("[connection] stale socket disconnect ignored", {
+                            playerId,
+                            socketId: socket.id,
+                            currentSocketId: currentPlayer.socketId,
+                            userName: currentPlayer.userName,
+                        });
             return; 
         }
 
-        startGracePeriod(app, socket, playerId, broadcastRoomState);
+        startGracePeriod(socket, playerId, broadcastRoomState);
     });
 }
 
 // Start grace period before removing player from their room
-function startGracePeriod(
-  app: FastifyInstance,
-  socket: Socket,
+export function startGracePeriod(
+  socket: Socket, // <--- jess: removed app as a parameter because you never used it in the function
   playerId: string,
   broadcastRoomState: (roomId: string) => void
 ) {
+        const userName = (socket as any).userName;
+        console.log("[connection] starting disconnect grace period", {
+            playerId,
+            socketId: socket.id,
+            userName,
+            gracePeriodMs: RECONNECTION_GRACE_PERIOD,
+        });
     const timeoutId = setTimeout(() => {
         const res = gameManager.leaveRoom(playerId);
         gameManager.removePlayerFromOnlinePlayers(playerId);
         const userName = (socket as any).userName;
-        console.log(`Grace period ended for player ${userName}, removed from online players and left room if in any.`);
+                    console.log("[connection] grace period ended", {
+                    playerId,
+                    socketId: socket.id,
+                    userName,
+                    leaveSuccess: res.success,
+                    roomId: res.success ? res.roomId : null,
+                });
         if (res.success) {
+            socket.leave(res.roomId); // <-- JESS: you forgot to make the player leave the room when timer ends and res is success, so i added it here
             broadcastRoomState(res.roomId);
-            app.log.info(`Player ${userName} removed after grace period`);       
+                        console.log("[connection] player removed after grace period", {
+                            playerId,
+                            socketId: socket.id,
+                            userName,
+                            roomId: res.roomId,
+                        });       
         }
     }, RECONNECTION_GRACE_PERIOD);
+        console.log("[connection] grace period timer scheduled", {
+            playerId,
+            socketId: socket.id,
+            userName,
+        });
     gameManager.setPlayerTimeout(playerId, timeoutId); // Store the timeout in the Map
 }
 
@@ -88,9 +136,16 @@ function cancelDisconnectTimer(playerId: string) {
 
     const player = gameManager.getOnlinePlayer(playerId);
     if (player) {
-        console.log("Cancelling disconnect timer if exists for socket:", player.userName);
+                console.log("[connection] cancelling disconnect timer", {
+                    playerId,
+                    userName: player.userName,
+                    socketId: player.socketId,
+                });
     } else {
-        console.log("Cancelling disconnect timer if exists for socket:", playerId);
+                console.log("[connection] cancelling disconnect timer", {
+                    playerId,
+                    userName: null,
+                });
     }
     gameManager.clearPlayerTimeout(playerId);
 }

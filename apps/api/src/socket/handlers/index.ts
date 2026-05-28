@@ -56,11 +56,17 @@ socket.on("send_msg", ({ msg }) => {
   const { playerId, userName } = getIdentity(socket);
   const res = gameManager.sendMessage(playerId, msg);
   if (!res.success) {
+    console.log("[send_msg] failed", {
+      playerId,
+      socketId: socket.id,
+      msg,
+      error: res.error,
+    });
     socket.emit("error", { message: res.error });
     return;
   }
   if (res.roomId) {
-    // console.log("Broadcasting message to room:", res.roomId);
+    console.log("[send_msg] Broadcasting message to room:", res.roomId);
     socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
   }
 });
