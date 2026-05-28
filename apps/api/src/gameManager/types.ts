@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 15:20:19 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 17:25:47 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ export const MAX_ROOM_NAME_LENGTH = 20;
 export const MAX_MSG_LENGTH = 200;
 export const MAX_MSG_HISTORY = 50;
 export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
+export const DROP_TIMER_DURATION = 30_000; // 30 seconds
 
 export type Player = {
   playerId: string;      // permanent identity (userId) used for game logic
@@ -51,6 +52,7 @@ export type FrontendPlayer = {
 // What the frontend sees for a Room
 export type FrontendRoom = {
   id: string;
+  name: string;
   state: GameState;
   players: FrontendPlayer[];
   game?: {

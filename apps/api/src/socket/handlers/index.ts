@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 14:28:28 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 15:39:46 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
-import registerFriendHandlers from "./friend.handlers";
+// import registerFriendHandlers from "./friend.handlers";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 
 
@@ -43,7 +43,7 @@ export function registerSocketHandlers(
   registerRoomHandlers(socket, broadcastRoomState);
   registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
   registerConnectionHandlers(app, socket, broadcastRoomState);
-  registerFriendHandlers(app, socket);
+  // registerFriendHandlers(app, socket);
     
   // ---> Msg Events ---
   socket.on("send_msg", ({ msg }) => {

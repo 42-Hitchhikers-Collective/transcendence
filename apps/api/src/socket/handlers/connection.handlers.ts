@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 15:50:48 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 17:18:00 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
-import { notifyFriendsPresence } from "./friend.handlers";
+// import { notifyFriendsPresence } from "./friend.handlers";
 import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
 
@@ -65,7 +65,7 @@ function startGracePeriod(
         const res = gameManager.leaveRoom(playerId);
         
         // Notify friends that player went offline
-        await notifyFriendsPresence(app, socket, playerId, "offline");
+        // await notifyFriendsPresence(app, socket, playerId, "offline");
         
         gameManager.removePlayerFromOnlinePlayers(playerId);
         const userName = (socket as any).userName;
@@ -86,6 +86,8 @@ function cancelDisconnectTimer(playerId: string) {
     const playerName = player ? player.userName : playerId;
     console.log("Cancelling disconnect timer if exists for socket:", playerName);
     gameManager.clearPlayerTimeout(playerId);
+    // If the user comes back (new socket), also cancel the room-page drop timer ??
+    // gameManager.cancelDropTimer(playerId); 
 }
 
 

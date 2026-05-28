@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/22 14:51:08 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 15:41:23 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
   // 2. Return the filtered room object
   return {
     id: room.id,
+    name: room.name,
     state: room.state,
     players: frontendPlayers,
     game: room.game ? {

@@ -6,12 +6,12 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 15:13:07 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 17:45:56 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
-import { Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH } from "./types";
+import { Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH, DROP_TIMER_DURATION } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
 // import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
@@ -43,7 +43,7 @@ export function joinRoom(name: string, playerId: string): RoomResult {
   const roomId = room.id;
   if (gm.getPlayerRoomId(playerId) === roomId) // Already in same room
     // return rejoinRoom(playerId, room); // socket reassigning is being made in the connection handler
-    return { success: true, room: room };
+    return { success: false, error: "Player already in room" };
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
     return { success: false, error: "Room is full" };
   if (room.state !== "waiting")
@@ -73,7 +73,41 @@ export function leaveRoom(playerId: string): RoomIdResult {
   gm.deleteRoomIfEmpty(room);
   return { success: true, roomId: currentRoomId };
 }
+
+
+// --- User Drop Handling ---
+
+type DropTimerExpiredCallback = (info: { playerId: string; roomId: string }) => void;
+
+// Starts a drop timer when player navigates away from room webpage
+// Socket-layer actions (emit/leave/broadcast) are done via the callback.
+export function startDropTimer(playerId: string, onExpired?: DropTimerExpiredCallback) {
+  if (gm.getDropTimeouts().has(playerId)) return;
   
+  const timer = setTimeout(() => {
+    gm.getDropTimeouts().delete(playerId);
+    const roomId = gm.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const res = leaveRoom(playerId);
+    if (res.success) onExpired?.({ playerId, roomId }); // invoke callback to handle socket actions after player is removed from room
+    console.log("[drop-timer] expired for", playerId);
+  }, DROP_TIMER_DURATION);
+  
+  gm.getDropTimeouts().set(playerId, timer);
+  console.log("[drop-timer] started for", playerId);
+}
+
+
+export function cancelDropTimer(playerId: string) {
+  const timer = gm.getDropTimeouts().get(playerId);
+  if (timer) {
+    clearTimeout(timer);
+    gm.getDropTimeouts().delete(playerId);
+    console.log("[drop-timer] cancelled for", playerId);
+  }
+}
+
+
 // --- Helpers ---
 
 // Returns true if player is in a room, false otherwise

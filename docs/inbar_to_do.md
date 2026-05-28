@@ -11,3 +11,21 @@ Action: Agree with Gabriel on a mechanism for knowing the game is over. Should p
 
 
 
+
+- create room - no leave and no join
+- join room: if already in the same room return false
+
+
+- listen to "user_drop" - waiting for the user to come back to the room page
+- a function for a timeout of 30s. when its 0 emit "leave_room"
+- cancel drop timer on socket.join room
+
+
+- socket on "room_state" / "player_state"
+
+- send "game_state" to gabriel which will contain only the game state of players
+
+
+
+
+

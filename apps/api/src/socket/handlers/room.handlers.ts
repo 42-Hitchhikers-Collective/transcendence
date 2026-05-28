@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/28 15:37:02 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/28 17:44:53 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ export function registerRoomHandlers(
     if (!res.success)
       return socket.emit("error", { message: res.error });
     const newRoom = res.room;
-    const oldRoomId = res.room.id;
-    broadcastRoomState(oldRoomId); // broadcast old room state
     socket.emit("room_created", { roomName: newRoom.name });
     systemChatMsg(playerId, socket, ChatMsgType.CREATE_ROOM);
     broadcastRoomState(newRoom.id); // broadcast new room state
@@ -47,6 +45,8 @@ export function registerRoomHandlers(
     }
     const roomId = res.room.id;
     socket.join(roomId);
+    // Cancel room-page drop timer if player rejoined in time
+    gameManager.cancelDropTimer(playerId);
     socket.emit("room_joined", { roomName });
     systemChatMsg(playerId, socket, ChatMsgType.JOIN_ROOM);
     socket.emit("chatHistory", res.room.chatHistory); // Send chat history to player when they join the room
@@ -61,9 +61,21 @@ export function registerRoomHandlers(
       socket.emit("error", { message: res.error });
       return;
     }
+    // Clear any pending drop timer since they're intentionally leaving
+    gameManager.cancelDropTimer(playerId);
     systemChatMsg(playerId, socket, ChatMsgType.LEFT_ROOM);
     socket.leave(res.roomId);
     broadcastRoomState(res.roomId);
   });
 
+
+  socket.on("user_dropped", () => {
+    const { playerId } = getIdentity(socket);
+    gameManager.startDropTimer(playerId, ({ roomId }) => { // paranthasis will run only after drop timer expires
+    socket.leave(roomId);
+    socket.emit("leave_room");
+    systemChatMsg(playerId, socket, ChatMsgType.LEFT_ROOM);
+    //broadcast room state
+      });
+  });
 }
