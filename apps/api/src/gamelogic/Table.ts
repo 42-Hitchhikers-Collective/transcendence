@@ -19,9 +19,10 @@ export class Table {
 
   currentColor: null | "red" | "blue" | "green" | "yellow";
   passTurn: boolean;
+  played: boolean;
 
   lastCard: Card | null;
-  event: "uno" | "color" | "finished";
+  event: "uno" | "color" | "finished" | null;
 
   // ============================================================
   //  initializer
@@ -51,6 +52,7 @@ export class Table {
     this.passTurn = false;
     this.event = null;
 
+    this.played = false;
     this.currentColor = null;
 
     this.dealCards();

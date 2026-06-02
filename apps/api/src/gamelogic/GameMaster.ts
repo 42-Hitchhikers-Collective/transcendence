@@ -33,6 +33,7 @@ export class GameMaster {
 		if (this.noCard(player))
 			table.event = "finished";
 		table.draw = 0;
+		
 		return true;
 	}
 
