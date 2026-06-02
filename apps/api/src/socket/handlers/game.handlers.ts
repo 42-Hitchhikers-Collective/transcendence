@@ -80,8 +80,10 @@ export function registerGameHandlers(
         const res = gameManager.startGameButton(playerId);
         if (!res.success) {
             socket.emit("error", { message: res.error });
+            socket.emit("game_start_failed", { message: res.error }); // frontend needs this to know if it should show error window
             return;
         }
+        socket.emit("game_start_success", { roomId: res.room.id });  // frontend needs this to know if it should show the game window
         console.log(`Game started manually in room ${res.room.id}`);
         broadcastRoomState(res.room.id);
     });
