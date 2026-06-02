@@ -21,10 +21,14 @@ Action: Agree with Gabriel on a mechanism for knowing the game is over. Should p
 - cancel drop timer on socket.join room
 
 
-- socket on "room_state" / "player_state"
+- socket on "room_state" / "player_state"  
+room_state:
+
 
 - send "game_state" to gabriel which will contain only the game state of players
 
+
+- start game emit about if game started or not
 
 
 

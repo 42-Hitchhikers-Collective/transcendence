@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 14:51:01 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 16:10:51 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,27 +58,7 @@ export function registerGameHandlers(
     
     // --- Start Game Events ---
 
-    // Set player ready to play, if set ready checks if game can be started and starts it.
-    socket.on("set_ready", ({ isReady }: { isReady: boolean }) => {
-        const { playerId } = getIdentity(socket);
-        const res = gameManager.setReady(playerId, isReady);
-        if (!res.success) {
-            socket.emit("error", { message: res.error });
-            return;
-        }
-        // broadcastPlayerState(playerId); instead of room?
-        broadcastRoomState(res.roomId);
-        if (isReady) {
-            const gameStartRes = gameManager.startGameAuto(playerId);
-            if (gameStartRes.success) {
-                broadcastRoomState(gameStartRes.room.id);
-                console.log(`Game started automatically in room ${gameStartRes.room.id} as all players are ready.`);
-            }
-        }
-    });
-
-
-    // Start the game. This version allows starting the game by pressing a button.
+    // Start the game by pressing a button.
     socket.on("start_game", () => {
         const { playerId } = getIdentity(socket);
         const res = gameManager.startGameButton(playerId);
@@ -87,6 +67,7 @@ export function registerGameHandlers(
             return;
         }
         console.log(`Game started manually in room ${res.room.id}`);
+        socket.nsp.to(res.room.id).emit("game_started", { roomId: res.room.id });
         systemChatMsg(playerId, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
     });

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/28 15:39:46 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 16:11:16 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ export function registerSocketHandlers(
   socket: Socket
 ) {
 
- // Broadcast room state to everyone includingthe sender
+ // Broadcast room state to everyone including the sender
   function broadcastRoomState(roomId: string) {
     const room = gameManager.getRoomById(roomId);
     if (!room) return;

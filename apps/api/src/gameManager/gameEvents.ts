@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:59:32 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 16:12:32 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,42 +74,6 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
 
 
 //  --- Start Game Events ---
-
-
-// Set isReady for given player true or false.
-export function setReady(playerId: string, isReady: boolean): RoomIdResult {
-  const roomId = gm.getPlayerRoomId(playerId);
-  if (!roomId)
-    return { success: false, error: "Player is not in a room" };
-  const room = gm.getRoomsByIdMap().get(roomId);
-  if (!room)
-    return { success: false, error: "Room not found" };
-  const player = room.players.find(p => p.playerId === playerId);
-  if (!player)
-    return { success: false, error: "Player not found in room" };
-  player.isReady = isReady;
-  return { success: true, roomId: roomId };
-}
-
-// Start the game automatically if MAX_PLAYERS_PER_ROOM players are ready, and all conditions are met
-export function startGameAuto(playerId: string): RoomResult {
-  const roomId = gm.getPlayerRoomId(playerId);
-  if (!roomId)
-    return {success: false, error: "Player is not in a room"};
-  const room = gm.getRoomById(roomId);
-  if (!room)
-    return {success: false, error: "Room not found"};
-  const allPlayersReady = room.players.every(player => player.isReady);
-  if (room.players.length == MAX_PLAYERS_PER_ROOM && allPlayersReady) {
-    if (startGameCondition(room)) {
-        room.state = "playing";
-        const playersMap = mapPlayersForGame(room.players);
-        room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
-        return {success: true, room};
-    }
-  }
-  return {success: false, error: "Start conditions aren't met"};;
-}
 
 
 //  Start the game manually if start button was pressed, and all condition are met  
