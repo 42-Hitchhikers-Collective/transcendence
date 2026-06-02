@@ -36,10 +36,23 @@ export function registerSocketHandlers(
     });
     gameManager.debugState();
   }
+  
+  function broadcastRoomStart(roomId: string) {
+    const room = gameManager.getRoomById(roomId);
+    if (!room) return;
+    room.players.forEach((player) => {
+      const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
+      // socket.emit("game_start_success", { roomId: roomId });
+      socket.nsp.to(player.socketId).emit("game_start_success",  { roomId: roomId });
+      // socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
+      console.log(`🎉🎉🎉🎉🎉Game start for ${player.userName} in ${roomId}`)
+    });
+    gameManager.debugState();
+  }
 
   // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
+  registerGameHandlers(socket, broadcastRoomState, broadcastRoomStart /*broadcastPlayerState*/);
   registerConnectionHandlers(app, socket, broadcastRoomState);
 
 

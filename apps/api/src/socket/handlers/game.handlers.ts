@@ -22,6 +22,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 export function registerGameHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void,
+  broadcastRoomStart: (roomId: string) => void,
 //   broadcastPlayerState: (playerId: string) => void
 ) {
 
@@ -87,7 +88,9 @@ export function registerGameHandlers(
             socket.emit("game_start_failed", { message: res.error }); // frontend needs this to know if it should show error window
             return;
         }
-        socket.emit("game_start_success", { roomId: res.room.id });  // frontend needs this to know if it should show the game window
+        console.log("⚠️⚠️⚠️⚠️BROADCASTTTTTTTT")
+        broadcastRoomStart(res.room.id)
+          // frontend needs this to know if it should show the game window
         console.log(`Game started manually in room ${res.room.id}`);
         systemMsg(playerId, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
