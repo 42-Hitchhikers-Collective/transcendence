@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:15:32 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 17:22:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ export function registerGameHandlers(
         const res = gameManager.startGameButton(playerId);
         if (!res.success) {
             socket.emit("error", { message: res.error });
+            socket.emit("game_start_error", { message: res.error });
             return;
         }
         console.log(`Game started in room ${res.room.id}`);

@@ -6,11 +6,10 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:39:39 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 17:16:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from ".";

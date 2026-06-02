@@ -51,5 +51,7 @@ export function setupSocket(app: FastifyInstance) {
     registerSocketHandlers(app, socket);
   });
 
+
+
   return io;
 }

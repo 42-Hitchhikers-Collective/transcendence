@@ -4,10 +4,17 @@ import GameCanvas from "../../../gameCanvas/App";
 import { socket } from "@/socket/Socket";
 import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
 
+import { useLocation } from "react-router";
+
 export default function GamePage() {
   const [searchParams] = useSearchParams();
   const roomName = searchParams.get("room");
   const navigate = useNavigate();
+  const [gameStarted, setGameStarted] = useState(false); 
+  const [canvasError, setCanvasError] = useState<string | null>(null); // game
+
+  // const location = useLocation();
+  // const hasActiveRoom = location.state?.hasActiveRoom;
 
   // Guard: no room id means no game
   if (!roomName) return <Navigate to="/" replace />;
@@ -23,38 +30,62 @@ export default function GamePage() {
   // join_room is unchanged on the backend: if you are already a member
   // (because you are the room creator), it succeeds without side effects.
   useEffect(() => {
-    if (!socket.connected) socket.connect();
-    console.log("[GamePage] emitting join_room for", roomName);
+    socket.on("active_room", handleActiveRoom);
+    socket.emit("get_room_state");
     socket.emit("join_room", { roomName });
-
-    const handleError = (payload: { message?: string }) => {
-      if (payload?.message === "Room not found") {
-        navigate("/profile", { replace: true });
-      }
-    };
-
     socket.on("error", handleError);
-
+    
+    // --------- CANVAS START HANDLERS NEEDED FROM BACKEND ---------
+    socket.on("game_start_success", ({ roomId }) => {
+      console.log(`[GamePage] game_start_success received for room ${roomId}`);
+      setGameStarted(true);
+    });
+    socket.on("game_start_failed", ({ message }) => {
+      console.log(`[GamePage] game_start_failed received: ${message}`);
+      setCanvasError(message);
+      // Optionally show an error message to the user here
+    });
+    
     return () => {
       socket.off("error", handleError);
-      // When the page Does not auto-leave on unmount; reloads and reconnects should keep room state intact.
+      socket.emit("user_dropped"); // <-- tell the backend when the use leaved the page but we don't want to kick them out of the room yet
+      // Leaving the game page should remove the player from the room list.
       // console.log("[GamePage] leaving room", roomName);
-      // socket.emit("leave_room");
     };
   }, [navigate, roomName]);
-
+  
   useEffect(() => {
     const handleChatMessage = (data: { msg: string; senderId?: string }) => {
       const prefix = data.senderId ? `${data.senderId}: ` : "";
       setMessages((prev) => [...prev, `${prefix}${data.msg}`]);
     };
-
+    
     socket.on("chat_message", handleChatMessage);
-
+    
     return () => {
       socket.off("chat_message", handleChatMessage);
     };
   }, []);
+  
+  // TO CHECK - WHAT IS THIS FOR??
+  const handleError = (payload: { message?: string }) => {
+    if (payload?.message === "Room not found") {
+      navigate("/profile", { replace: true });
+    }
+  };
+
+  const handleActiveRoom = (data: { roomName: string }) => {
+    console.log(
+      `[GamePage] active_room: ${data.roomName} room from url ${roomName}`,
+    );
+    if (data.roomName !== roomName) {
+      console.warn(
+        `[GamePage] active_room mismatch! url: ${roomName} payload: ${data.roomName}`,
+      );
+      navigate("/profile", { replace: true });
+      // This can happen if the player creates a room, then tries to access the game page before the backend has processed the room creation and updated the player's active room. In this case, we can just ignore the mismatch and wait for the correct active_room event to arrive.
+    }
+  };
 
   const sendMessage = () => {
     const trimmed = chatInput.trim();
@@ -63,18 +94,15 @@ export default function GamePage() {
     setChatInput("");
   };
 
-  const toggleReady = (playerId: string) => {
-    const player = players.find((p) => p.id === playerId);
-    if (!player) return;
-    // Only let the observer toggle their OWN ready state
-    if (!player.isTheObserver) return;
-    socket.emit("set_ready", { isReady: !player.isReady });
-  };
+
+  const mountGameCanvas = () => {{
+    socket.emit("start_game"); // frontend should receive info if start_game returned success or failure
+  }};
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
+        {/* <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">
             Game Lobby ({roomName})
           </h1>
@@ -89,7 +117,7 @@ export default function GamePage() {
               Log out
             </Link>
           </div>
-        </div>
+        </div> */}
 
         <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
           <section className="flex flex-col gap-6 rounded-3xl bg-slate-900/70 p-6 shadow-xl">
@@ -110,7 +138,7 @@ export default function GamePage() {
                       </p>
                       <p className="text-xs text-slate-400">Ready to start</p>
                     </div>
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => toggleReady(player.id)}
                       disabled={!player.isTheObserver}
@@ -121,7 +149,7 @@ export default function GamePage() {
                       }`}
                     >
                       {player.isReady ? "Ready" : "Not ready"}
-                    </button>
+                    </button> */}
                   </div>
                 ))}
                 {players.length === 0 && (
@@ -134,7 +162,7 @@ export default function GamePage() {
 
             <div className="flex flex-1 flex-col">
               <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">
-                Lobby Chat
+                Chat
               </h2>
               <div className="mt-4 flex flex-1 flex-col rounded-2xl border border-slate-800 bg-slate-950/60">
                 <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3 text-sm">
@@ -166,7 +194,30 @@ export default function GamePage() {
             </div>
           </section>
 
-          <GameCanvas />
+          {/*  preview before canvas is started */}
+          {gameStarted ? <GameCanvas /> : 
+          ( <div className="relative h-full overflow-hidden rounded-2xl border bg-linear-to-br from-rose-50 via-white to-amber-50 p-12">
+          {/* <style>{styles}</style> */}
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-2xl" />
+          <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
+
+          <div className="relative flex h-full flex-col items-center justify-center gap-8 p-24">
+            
+              <button
+                type="button"
+                onClick={mountGameCanvas}
+                // disabled={isCreating || !roomNameInput.trim()}
+                className="h-14 rounded-lg bg-rose-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Start the game for everyone
+                {/* {isCreating ? "Loading room..." : "Create room"} */}
+              </button>
+              {canvasError && <p className="text-sm text-rose-600">{canvasError}</p>}
+
+          </div>
+        </div>)
+          
+          }
         </div>
       </div>
     </div>

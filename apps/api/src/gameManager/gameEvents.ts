@@ -131,8 +131,9 @@ function startGameCondition(room: Room): boolean {
         return false;
     if (room.players.length < MIN_PLAYERS_TO_START)
         return false;
+    // REMOVED WITH INBAR - delete comments once sure code is tested/works
     // const allPlayersReady = room.players.every(player => player.isReady);
     // if (!allPlayersReady)
-        // return false;
+    //     return false;
     return true;
   }
