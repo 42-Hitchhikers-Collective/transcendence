@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:10:00 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 16:38:09 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,5 +116,27 @@ export function registerRoomHandlers(
       broadcastRoomState(roomId);
       console.log("[room:user_dropped] timer expired, player removed from room", { playerId, roomId });
     });
+  });
+
+
+
+// --- Helpers ---
+  
+  // Check if the room with the given name exists, returns room name and exists boolean true or false
+  socket.on("is_room_exists", ({ roomName }) => {
+    const exists = gameManager.getRoomsByNameMap().has(roomName);
+    socket.emit("room_exists_response", { roomName, exists });
+  });
+
+  // Check if player is part of the room with the given name, returns room name and isPart boolean true or false
+  socket.on("is_part_of_room", ({ roomName }) => {
+    const { playerId } = getIdentity(socket);
+    const potentialRoom = gameManager.getRoomByName(roomName);
+    if (!potentialRoom) {
+      return socket.emit("part_of_room_response", { roomName, isPart: false });
+    }
+    const playerRoomId = gameManager.getPlayerRoomId(playerId);
+    const isPart = playerRoomId === potentialRoom.id;
+    socket.emit("part_of_room_response", { roomName, isPart });
   });
 }

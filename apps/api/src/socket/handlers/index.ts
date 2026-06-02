@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:11:16 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 16:17:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,17 @@ export function registerSocketHandlers(
     const { playerId, userName } = getIdentity(socket);
     const res = gameManager.prepareChatMsg(playerId, msg);
     if (!res.success) {
+      console.log("[send_msg] failed", {
+      playerId,
+      socketId: socket.id,
+      msg,
+      error: res.error,
+    });
       socket.emit("error", { message: res.error });
       return;
     }
-    if (res.roomId) {
-      socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
-    }
+    console.log("[send_msg] Broadcasting message to room:", res.roomId);
+    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
   });
 
 

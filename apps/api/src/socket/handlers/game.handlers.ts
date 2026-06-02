@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:10:51 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 16:15:32 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ export function registerGameHandlers(
             socket.emit("error", { message: res.error });
             return;
         }
-        console.log(`Game started manually in room ${res.room.id}`);
+        console.log(`Game started in room ${res.room.id}`);
         socket.nsp.to(res.room.id).emit("game_started", { roomId: res.room.id });
         systemChatMsg(playerId, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
