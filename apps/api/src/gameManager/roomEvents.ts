@@ -6,13 +6,14 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 16:07:43 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:59:15 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
-import { Player, Room, RoomResult, RoomIdResult } from "./types";
+import { Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
+import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 // --- Room Events ---
 
@@ -24,6 +25,7 @@ export function createRoom(roomName: string): RoomResult {
     name: roomName,
     players: [],
     state: "waiting",
+    chatHistory: []
   };
   const validation = validateRoomName(roomName);
   if (!validation.success)
@@ -111,8 +113,8 @@ function validateRoomName(name: string): RoomResult {
     return {success: false, error: "Room name cannot be empty"};
   if (gm.getRoomsByNameMap().has(name))
     return {success: false, error: "Room name already exists"};
-  if (name.length > 10)
-    return {success: false, error: "Room name cannot exceed 10 characters"};
+  if (name.length > MAX_ROOM_NAME_LENGTH)
+    return {success: false, error: `Room name cannot exceed ${MAX_ROOM_NAME_LENGTH} characters`};
   const regex = /^[a-zA-Z0-9\-_!?.]+$/;
   if (!regex.test(name))
     return { success: false, error: "Room name contains invalid characters"};

@@ -6,20 +6,23 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 13:14:51 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:45:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
+import { systemMsg } from "./index";
+import { ChatMsgType } from "../../gameManager/chatEvents";
+
 
 // --- Game Events ---
 
 export function registerGameHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void,
-  broadcastPlayerState: (playerId: string) => void
+//   broadcastPlayerState: (playerId: string) => void
 ) {
 
     // Play a card
@@ -63,7 +66,8 @@ export function registerGameHandlers(
             socket.emit("error", { message: res.error });
             return;
         }
-        broadcastPlayerState(playerId);
+        // broadcastPlayerState(playerId); instead of room?
+        broadcastRoomState(res.roomId);
         if (isReady) {
             const gameStartRes = gameManager.startGameAuto(playerId);
             if (gameStartRes.success) {
@@ -85,6 +89,7 @@ export function registerGameHandlers(
         }
         socket.emit("game_start_success", { roomId: res.room.id });  // frontend needs this to know if it should show the game window
         console.log(`Game started manually in room ${res.room.id}`);
+        systemMsg(playerId, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
     });
-};
+}

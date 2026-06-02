@@ -6,11 +6,15 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 14:30:29 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:13:46 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export const MAX_PLAYERS_PER_ROOM = 4;
+export const MIN_PLAYERS_TO_START = 2;
+export const MAX_ROOM_NAME_LENGTH = 20;
+export const MAX_MSG_LENGTH = 200;
+export const MAX_MSG_HISTORY = 50;
 export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
 
 export type Player = {
@@ -31,7 +35,8 @@ export type Room = {
   name: string;
   players: Player[];
   state: GameState;
-  game?: Game; // This will hold the actual Gabriel's game instance when the game starts
+  chatHistory: Array<{ username: string; msg: string }>;
+  game?: Game;
 };
 
 // What the frontend sees for "other" players

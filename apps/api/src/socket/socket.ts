@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   socket.ts                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/22 13:28:26 by ilazar            #+#    #+#             */
+/*   Updated: 2026/05/22 14:48:55 by ilazar           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 import { Server as SocketIOServer } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { registerSocketHandlers } from "./handlers";
@@ -25,12 +37,14 @@ export function setupSocket(app: FastifyInstance) {
     if (existingPlayer) {
       app.log.info(`Player ${playerId} already online, updating socketId to ${socket.id}`);
       existingPlayer.socketId = socket.id;
-      io.emit("playerUpdate", existingPlayer); // TODO: optimize to only emit to the room the player is in
-    } else {
-      app.log.info(`Adding new online player: ${playerId} (${userName})`);
-      const newPlayer: Player = { playerId, socketId: socket.id, userName, isReady: false };
-      gameManager.addPlayerToOnlinePlayers(newPlayer);
-      io.emit("playerUpdate", newPlayer); // TODO: optimize to only emit to the room the player is in?
+      const roomId = gameManager.getPlayerRoomId(playerId);
+      if (roomId)
+        io.to(roomId).emit("playerUpdate", existingPlayer);
+      } else {
+        app.log.info(`Adding new online player: ${playerId} (${userName})`);
+        const newPlayer: Player = { playerId, socketId: socket.id, userName, isReady: false };
+        gameManager.addPlayerToOnlinePlayers(newPlayer);
+        socket.emit("playerUpdate", newPlayer);
     }
 
     // Game room handlers (create_room, join_room, leave_room, start_game, play_card, draw_card)

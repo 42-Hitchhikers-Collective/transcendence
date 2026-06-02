@@ -6,13 +6,15 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 16:08:25 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:58:08 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
+import { systemMsg } from ".";
+import { ChatMsgType } from "../../gameManager/chatEvents";
 import { startGracePeriod } from "./connection.handlers"; // <-- JESS: used in the "user_dropped" event that i need on the frontend
 
 // --- Room Events ---

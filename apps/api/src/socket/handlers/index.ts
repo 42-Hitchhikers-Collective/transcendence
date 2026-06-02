@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 13:13:54 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/05/26 16:54:08 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
+import { ChatMsgType } from "../../gameManager/chatEvents";
 
 
 export function registerSocketHandlers(
@@ -27,27 +28,18 @@ export function registerSocketHandlers(
 
  // Broadcast room state to everyone includingthe sender
   function broadcastRoomState(roomId: string) {
-  const room = gameManager.getRoomById(roomId);
-  if (!room) return;
-  room.players.forEach((player) => {
-    const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
-    socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
-  });
-  gameManager.debugState();
-}
-
-
-function broadcastPlayerState(playerId: string) {
-  const player = gameManager.getOnlinePlayer(playerId);
-  if (!player) return;
-  const roomId = gameManager.getPlayerRoomId(playerId);
-  if (!roomId) return;
-  socket.nsp.to(roomId).emit("player_state", player);
-}
+    const room = gameManager.getRoomById(roomId);
+    if (!room) return;
+    room.players.forEach((player) => {
+      const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
+      socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
+    });
+    gameManager.debugState();
+  }
 
   // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState, broadcastPlayerState);
+  registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
   registerConnectionHandlers(app, socket, broadcastRoomState);
 
 
@@ -71,10 +63,23 @@ socket.on("send_msg", ({ msg }) => {
   }
 });
 
-// ---> DEBUG <---
+  // ---> DEBUG <---
 
-socket.on("debug", () => {
-  gameManager.debugState();
-});
+  socket.on("debug", () => {
+    gameManager.debugState();
+  });
 
+}
+
+
+/// Helper function to send system messages to the room chat (like player joined, left, game started, etc)
+export function systemMsg(playerId: string, socket: Socket,msgType: ChatMsgType) {
+  const res = gameManager.prepareStrChatMsg(playerId, msgType);
+  if (!res.success) {
+    console.error(`Failed to send system message: ${res.error}`);
+    return;
+  }
+  if (res.roomId) {
+    socket.nsp.to(res.roomId).emit("chat_message", { msg: msgType, senderId: "System" });
+  }
 }
