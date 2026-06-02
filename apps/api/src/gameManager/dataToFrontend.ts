@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/28 15:41:23 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 18:23:13 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
       id: p.playerId,
       userName: p.userName,
       isTheObserver: isMe,
-      isReady: p.isReady,
       // Everyone sees the count
       cardCount: room.game?.table.getCardCount(p.playerId) || 0,
       // ONLY the observer sees their own actual cards

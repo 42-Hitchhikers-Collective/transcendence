@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:07:24 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 18:21:26 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ export function createRoom(roomName: string): RoomResult {
   const validation = validateRoomName(roomName);
   if (!validation.success)
     return {success: false, error: validation.error};
+  // if player is already in a room - fail
   gm.getRoomsByIdMap().set(roomId, room);
   gm.getRoomsByNameMap().set(roomName, room);
   return { success: true, room: room };

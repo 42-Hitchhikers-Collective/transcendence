@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/28 16:53:04 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 18:24:17 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,7 @@ export function getDropTimeouts(): Map<string, ReturnType<typeof setTimeout>> {
     for (const [roomId, room] of roomsById) {
       const name = room.name ? `${room.name}` : "";
       console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
-      console.log("Players:", room.players.map(p => `${p.userName} , isReady: ${p.isReady}`).join(", \n"));
+      console.log("Players:", room.players.map(p => `${p.userName}`).join(", \n"));
     }
     console.log("Online players:\n");
     if (onlinePlayers.size === 0) {

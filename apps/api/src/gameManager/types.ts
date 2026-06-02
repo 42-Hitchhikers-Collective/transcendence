@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/28 17:25:47 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 18:23:23 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ export type FrontendPlayer = {
   id: string;
   userName: string;
   isTheObserver: boolean; // true if this is the player themselves, false for other players
-  isReady: boolean;
   cardCount: number;
   cards?: { color: string; value: string | number }[];
 };

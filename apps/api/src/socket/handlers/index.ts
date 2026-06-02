@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 17:15:22 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 18:22:33 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ export function registerSocketHandlers(
   // registerFriendHandlers(app, socket);
     
   // ---> Msg Events ---
-  socket.on("send_msg", ({ msg }) => {
+  socket.on("send_message", ({ msg }) => {
     const { playerId, userName } = getIdentity(socket);
     const res = gameManager.prepareChatMsg(playerId, msg);
     if (!res.success) {

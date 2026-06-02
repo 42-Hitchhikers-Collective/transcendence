@@ -107,3 +107,26 @@ mv /goinfre/goinfre/Perso/<username>/docker ~/.local/share/docker
 systemctl --user start docker
 ```
 
+
+
+Did you already relocate and it broke again?
+
+# stop docker
+systemctl --user stop docker
+
+# check what ~/.local/share/docker is right now
+ls -la ~/.local/share/docker
+
+# ensure target exists (use YOUR goinfre path)
+mkdir -p /goinfre/goinfre/Perso/<username>/docker
+
+# remove the bad path and re-link
+rm -rf ~/.local/share/docker
+ln -s /goinfre/goinfre/Perso/<username>/docker ~/.local/share/docker
+
+# start docker
+systemctl --user start docker
+sleep 2
+docker info --format '{{.DockerRootDir}}'
+
+If docker info shows /goinfre/goinfre/Perso/<username>/docker, the daemon is good again.

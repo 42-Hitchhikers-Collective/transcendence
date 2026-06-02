@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 17:16:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/02 18:25:32 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,9 @@ export function registerRoomHandlers(
       console.log("[room:user_dropped] timer expired, player removed from room", { playerId, roomId });
     });
   });
+
+
+
 
 
 

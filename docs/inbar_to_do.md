@@ -11,6 +11,9 @@ Action: Agree with Gabriel on a mechanism for knowing the game is over. Should p
 
 
 
+edge case - player cant create or join a room if already in a room
+
+
 
 - create room - no leave and no join
 - join room: if already in the same room return false
