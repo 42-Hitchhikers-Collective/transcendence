@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 15:44:41 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:53:48 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,12 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
 export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
     const roomId = getPlayerRoomId(playerId);
     if (!roomId)
-        return {success: false, error: "Player is not in room"};
+        return {success: false, roomId: "undefined", error: "Player is not in room"};
     const room = getRoomById(roomId);
     if (!room)
-        return {success: false, error: "Room not found"};
+        return {success: false, roomId: "undefined", error: "Room not found"};
     if (msg.length === 0 || msg.length > MAX_MSG_LENGTH)
-        return {success: false, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
+        return {success: false, roomId: roomId, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
     const username = getUsername(playerId) || "Unknown";
     addMsgToChatHistory(room, username, msg);
     return {success: true, roomId: roomId};

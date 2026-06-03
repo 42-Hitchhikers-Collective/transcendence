@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:16:30 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 17:12:54 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@ import { MAX_PLAYERS_PER_ROOM } from "./types";
 
 // Create a new room and return it
 export function createRoom(roomName: string, playerId: string): RoomResult {
-  if (gm.getPlayerRoomId(playerId))
-    return { success: false, error: "Player already in a room" };
+  const currentRoomId = gm.getPlayerRoomId(playerId);
+  if (currentRoomId)
+    return { success: false, roomId: currentRoomId, error: "Player already in a room" };
   const roomId = generateRoomId();
   const room: Room = {
     id: roomId,
@@ -31,7 +32,7 @@ export function createRoom(roomName: string, playerId: string): RoomResult {
   };
   const validation = validateRoomName(roomName);
   if (!validation.success)
-    return {success: false, error: validation.error};
+    return {success: false, roomId: "undefined", error: validation.error};
   gm.getRoomsByIdMap().set(roomId, room);
   gm.getRoomsByNameMap().set(roomName, room);
   return { success: true, room: room };
@@ -39,22 +40,23 @@ export function createRoom(roomName: string, playerId: string): RoomResult {
 
 // Add player to room. removes player from old room
 export function joinRoom(name: string, playerId: string): RoomResult {
-  if (gm.isInRoom(playerId))
-    return { success: false, error: "Player already in a room" }; //// <--- Jess: if the player never left the room (refreshes the page, re-enters) we should stop here
+  const currentRoomId = gm.getPlayerRoomId(playerId);
+  if (currentRoomId)
+    return { success: false, roomId: currentRoomId, error: "Player already in a room" };
   const room = gm.getRoomByName(name);
   if (!room)
-    return { success: false, error: "Room not found" };
+    return { success: false, roomId: "undefined", error: "Room not found" };
   const roomId = room.id;
   if (gm.getPlayerRoomId(playerId) === roomId) // Already in same room
-    return { success: false, error: "Player already in room (Dropped)" };
+    return { success: false, roomId: roomId, error: "Player already in room (Dropped)" };
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
-    return { success: false, error: "Room is full" };
+    return { success: false, roomId: roomId, error: "Room is full" };
   if (room.state !== "waiting")
-    return { success: false, error: "Game already begun" };
+    return { success: false, roomId: roomId, error: "Game already begun" };
   leaveRoom(playerId);
   const player = gm.getOnlinePlayer(playerId);
   if (!player)
-    return { success: false, error: "Player not found" };
+    return { success: false, roomId: "undefined", error: "Player not found" };
   room.players.push(player);
   gm.addToPlayerRoom(playerId, roomId); // add to playerRooms
   return { success: true, room: room };;
@@ -65,13 +67,13 @@ export function joinRoom(name: string, playerId: string): RoomResult {
 export function leaveRoom(playerId: string): RoomIdResult {
   const currentRoomId = gm.getPlayerRoomId(playerId);
   if (currentRoomId == null) 
-    return {success: false, error: "Player not in room"};
+    return {success: false, roomId: "undefined", error: "Player not in room"};
   const room = gm.getRoomsByIdMap().get(currentRoomId);
   if (!room)
-    return { success: false, error: "Room object not found" };
+    return { success: false, roomId: "undefined", error: "Room object not found" };
   const removed = gm.removePlayerFromPlayersArray(room.players, playerId);
   if (!removed)
-    return { success: false, error: "Player not in room array" };
+    return { success: false, roomId: "undefined", error: "Player not in room array" };
   gm.getPlayerRoomsMap().delete(playerId);
   gm.deleteRoomIfEmpty(room);
   return { success: true, roomId: currentRoomId };
@@ -135,14 +137,14 @@ do {
 // Check for room name rules and duplicates. Returns true or false with an error message.
 function validateRoomName(name: string): RoomResult {
   if (!name || name.trim().length === 0)
-    return {success: false, error: "Room name cannot be empty"};
+    return {success: false, roomId: "undefined", error: "Room name cannot be empty"};
   if (gm.getRoomsByNameMap().has(name))
-    return {success: false, error: "Room name already exists"};
+    return {success: false, roomId: "undefined", error: "Room name already exists"};
   if (name.length > MAX_ROOM_NAME_LENGTH)
-    return {success: false, error: `Room name cannot exceed ${MAX_ROOM_NAME_LENGTH} characters`};
+    return {success: false, roomId: "undefined", error: `Room name cannot exceed ${MAX_ROOM_NAME_LENGTH} characters`};
   const regex = /^[a-zA-Z0-9\-_!?.]+$/;
   if (!regex.test(name))
-    return { success: false, error: "Room name contains invalid characters"};
+    return { success: false, roomId: "undefined", error: "Room name contains invalid characters"};
   return { success: true, room: null as any };
 }
 

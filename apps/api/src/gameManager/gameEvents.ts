@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 16:12:32 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:55:54 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,21 +23,21 @@ import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 export function playCard(playerId: string, cardIndex: number): RoomIdResult {
   const roomId = gm.getPlayerRoomId(playerId);
   if (!roomId)
-    return {success: false, error: "Player is not in room"};
+    return {success: false, roomId: "undefined", error: "Player is not in room"};
   const room = gm.getRoomById(roomId);
   if (!room || room.state !== "playing" || !room.game)
-    return {success: false, error: "No active game found"};
+    return {success: false, roomId: roomId, error: "No active game found"};
   
   // Convert cardIndex to Card
   const card = getCardFromIndex(playerId, cardIndex);
   if (!card)
-    return {success: false, error: "Invalid card index"};
+    return {success: false, roomId: roomId, error: "Invalid card index"};
   
   // Call the game's playCard with the Card object
   const res = room.game.playCard(playerId, card);
   
   if (!res)
-    return {success: false, error: "Card play failed"};
+    return {success: false, roomId: roomId, error: "Card play failed"};
   return {success: true, roomId: roomId};
 };
 
@@ -46,16 +46,16 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
 export function drawCard(playerId: string): RoomIdResult {
   const roomId = gm.getPlayerRoomId(playerId);
   if (!roomId)
-    return {success: false, error: "Player is not in room"};
+    return {success: false, roomId: "undefined", error: "Player is not in room"};
   const room = gm.getRoomById(roomId);
   if (!room || room.state !== "playing" || !room.game)
-    return {success: false, error: "No active game found"};
+    return {success: false, roomId: roomId, error: "No active game found"};
   
   // call the method defined in the Interface!
   const success = room.game.drawCard(playerId);
   
   if (!success)
-    return {success: false, error: "Game logic error: invalid move"};
+    return {success: false, roomId: roomId, error: "Game logic error: invalid move"};
   return {success: true, roomId: roomId};
 }
 
@@ -64,10 +64,10 @@ export function drawCard(playerId: string): RoomIdResult {
 export function selectWildColor(playerId: string, color: "red" | "blue" | "green" | "yellow"): RoomIdResult {
     const roomId = gm.getPlayerRoomId(playerId);
     if (!roomId)
-      return {success: false, error: "Player is not in room"};
+      return {success: false, roomId: "undefined", error: "Player is not in room"};
     const room = gm.getRoomById(roomId);
     if (!room || room.state !== "playing" || !room.game)
-      return {success: false, error: "No active game found"};
+      return {success: false, roomId: roomId, error: "No active game found"};
     room.game.table.changeColor(color);
     return {success: true, roomId: roomId};
 }
@@ -80,17 +80,17 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
 export function startGameButton(playerId: string): RoomResult {
   const roomId = gm.getPlayerRoomId(playerId);
   if (!roomId)
-    return {success: false, error: "Player is not in a room"};
+    return {success: false, roomId: "undefined", error: "Player is not in a room"};
   const room = gm.getRoomById(roomId);
   if (!room)
-    return {success: false, error: "Room not found"};
+    return {success: false, roomId: roomId, error: "Room not found"};
   if (startGameCondition(room)) {
       room.state = "playing";
       const playersMap = mapPlayersForGame(room.players);
       room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
       return {success: true, room};
   }
-  return {success: false, error: "Start conditions aren't met"};;
+  return {success: false, roomId: roomId, error: "Start conditions aren't met"};;
 }
 
 

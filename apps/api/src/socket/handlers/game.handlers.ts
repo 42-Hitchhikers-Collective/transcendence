@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:02:00 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:58:16 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,30 +29,27 @@ export function registerGameHandlers(
     socket.on("play_card", ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.playCard(playerId, cardIndex);
-    if (res.success)
-        broadcastRoomState(res.roomId); 
-    else
+    if (!res.success)
         socket.emit("error", { message: res.error });
-    });
+    broadcastRoomState(res.roomId);
+});
 
     // Draw a card
     socket.on("draw_card", () => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.drawCard(playerId);
-    if (res.success)
-        broadcastRoomState(res.roomId);
-    else
+    if (!res.success)
         socket.emit("error", { message: res.error });
+    broadcastRoomState(res.roomId);
     })
 
     // Select color for wild card
     socket.on("select_wild_color", ({ color }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.selectWildColor(playerId, color);
-    if (res.success)
-        broadcastRoomState(res.roomId);
-    else
+    if (!res.success)
         socket.emit("error", { message: res.error });
+    broadcastRoomState(res.roomId);
     });
 
     

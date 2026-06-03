@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:23:23 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:55:34 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,12 @@ export type FrontendRoom = {
 
 export type RoomResult =
   | { success: true; room: Room }
-  | { success: false; error: string | undefined};
+  | { success: false; roomId: string, error: string | undefined};
 
 
 export type RoomIdResult = 
   | { success: true; roomId: string }
-  | { success: false; error: string | undefined};
+  | { success: false; roomId: string, error: string | undefined};
 
 
 export type msgResult =

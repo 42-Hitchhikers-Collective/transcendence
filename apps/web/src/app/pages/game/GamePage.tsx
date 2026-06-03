@@ -48,6 +48,7 @@ export default function GamePage() {
     
     return () => {
       socket.off("error", handleError);
+      console.log("frontend:user_dropped emitted for room", roomName);
       socket.emit("user_dropped"); // <-- tell the backend when the use leaved the page but we don't want to kick them out of the room yet
       // Leaving the game page should remove the player from the room list.
       // console.log("[GamePage] leaving room", roomName);
