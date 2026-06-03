@@ -34,6 +34,7 @@ export default function GamePage() {
     socket.emit("get_room_state");
     socket.emit("join_room", { roomName });
     socket.on("error", handleError);
+    socket.on("leave_room", () => {  navigate("/profile", { replace: true })});
     
     // --------- CANVAS START HANDLERS NEEDED FROM BACKEND ---------
     socket.on("game_start_success", ({ roomId }) => {
@@ -48,7 +49,7 @@ export default function GamePage() {
     
     return () => {
       socket.off("error", handleError);
-      console.log("frontend:user_dropped emitted for room", roomName);
+      console.log("🦄🦄Fronted: emitted user_dropped");
       socket.emit("user_dropped"); // <-- tell the backend when the use leaved the page but we don't want to kick them out of the room yet
       // Leaving the game page should remove the player from the room list.
       // console.log("[GamePage] leaving room", roomName);
