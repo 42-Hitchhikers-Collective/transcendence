@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:21:26 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:16:30 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ import { MAX_PLAYERS_PER_ROOM } from "./types";
 // --- Room Events ---
 
 // Create a new room and return it
-export function createRoom(roomName: string): RoomResult {
+export function createRoom(roomName: string, playerId: string): RoomResult {
+  if (gm.getPlayerRoomId(playerId))
+    return { success: false, error: "Player already in a room" };
   const roomId = generateRoomId();
   const room: Room = {
     id: roomId,
@@ -30,7 +32,6 @@ export function createRoom(roomName: string): RoomResult {
   const validation = validateRoomName(roomName);
   if (!validation.success)
     return {success: false, error: validation.error};
-  // if player is already in a room - fail
   gm.getRoomsByIdMap().set(roomId, room);
   gm.getRoomsByNameMap().set(roomName, room);
   return { success: true, room: room };
@@ -45,8 +46,7 @@ export function joinRoom(name: string, playerId: string): RoomResult {
     return { success: false, error: "Room not found" };
   const roomId = room.id;
   if (gm.getPlayerRoomId(playerId) === roomId) // Already in same room
-    // return rejoinRoom(playerId, room); // socket reassigning is being made in the connection handler
-    return { success: false, error: "Player already in room" };
+    return { success: false, error: "Player already in room (Dropped)" };
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
     return { success: false, error: "Room is full" };
   if (room.state !== "waiting")
@@ -86,6 +86,7 @@ type DropTimerExpiredCallback = (info: { playerId: string; roomId: string }) => 
 // Socket-layer actions (emit/leave/broadcast) are done via the callback.
 export function startDropTimer(playerId: string, onExpired?: DropTimerExpiredCallback) {
   if (gm.getDropTimeouts().has(playerId)) return;
+  const username = gm.getOnlinePlayer(playerId)?.userName || "Unknown";
   
   const timer = setTimeout(() => {
     gm.getDropTimeouts().delete(playerId);
@@ -93,20 +94,21 @@ export function startDropTimer(playerId: string, onExpired?: DropTimerExpiredCal
     if (!roomId) return;
     const res = leaveRoom(playerId);
     if (res.success) onExpired?.({ playerId, roomId }); // invoke callback to handle socket actions after player is removed from room
-    console.log("[drop-timer] expired for", playerId);
+    console.log("[drop-timer] expired for", username);
   }, DROP_TIMER_DURATION);
   
   gm.getDropTimeouts().set(playerId, timer);
-  console.log("[drop-timer] started for", playerId);
+  console.log("[drop-timer] started for", username);
 }
 
 
 export function cancelDropTimer(playerId: string) {
   const timer = gm.getDropTimeouts().get(playerId);
+  const username = gm.getOnlinePlayer(playerId)?.userName || "Unknown";
   if (timer) {
     clearTimeout(timer);
     gm.getDropTimeouts().delete(playerId);
-    console.log("[drop-timer] cancelled for", playerId);
+    console.log("[drop-timer] cancelled for", username);
   }
 }
 

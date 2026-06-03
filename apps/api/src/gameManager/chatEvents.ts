@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 14:31:38 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 15:44:41 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,7 @@ export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
 }
 
 // Helper to create predefined system messages like join/leave/start/win. and add it to chat history
-export function prepareStrChatMsg(playerId: string, msgType: ChatMsgType): msgResult {
-  const roomId = getPlayerRoomId(playerId);
+export function prepareStrChatMsg(playerId: string, roomId: string, msgType: ChatMsgType): msgResult {
   if (!roomId)
     return {success: false, error: "Player is not in room"};
   const room = getRoomById(roomId);

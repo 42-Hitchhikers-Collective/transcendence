@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:24:17 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:38:59 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ export function getRoomById(roomId: string): Room | null  {
 
 export function getRoomByName(roomName: string): Room | null {
   const room = roomsByName.get(roomName);
-  console.log(`Looking up room by name: ${roomName} - Found: ${!!room}`);
+  // console.log(`Looking up room by name: ${roomName} - Found: ${!!room}`);
   return room ?? null;
 }
 
@@ -155,20 +155,20 @@ export function getDropTimeouts(): Map<string, ReturnType<typeof setTimeout>> {
 
 // --- DEBUG ---
   export function debugState() {
-    console.log("---- GAME STATE ----"); // <------  JESS/INBAR: to change into a more descriptive name
+    console.log("---- PLAYER STATE ----");
 
-    for (const [roomId, room] of roomsById) {
-      const name = room.name ? `${room.name}` : "";
-      console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
-      console.log("Players:", room.players.map(p => `${p.userName}`).join(", \n"));
-    }
-    console.log("Online players:\n");
+    // for (const [roomId, room] of roomsById) {
+    //   const name = room.name ? `${room.name}` : "";
+    //   console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
+    //   console.log("Players:", room.players.map(p => `${p.userName}`).join(", \n"));
+    // }
+    console.log("Online players:");
     if (onlinePlayers.size === 0) {
       console.log("No online players");
     } else {
       for (const [playerId, player] of onlinePlayers) {
         const username = player.userName ? `${player.userName}` : "No Username";
-        console.log(`Player: ${username} - Room: ${getPlayerRoomId(playerId)}`);
+        console.log(`Player: ${username} - Room: ${getPlayerRoomId(playerId)}\n`);
       }
     }
   }

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:25:32 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:37:30 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,12 @@ export function registerRoomHandlers(
 
   // Create a new room
   socket.on("create_room", ({ roomName }) => {
-    const { playerId } = getIdentity(socket);
-    const res = gameManager.createRoom(roomName);
+    const { playerId, userName } = getIdentity(socket);
+    const res = gameManager.createRoom(roomName, playerId);
     if (!res.success) {
       console.log("[room:create_room] failed", {
             playerId,
-            socketId: socket.id,
+            username: userName,
             roomName: roomName,
             error: res.error,
           });
@@ -37,11 +37,11 @@ export function registerRoomHandlers(
     }
     const newRoom = res.room;
     socket.emit("room_created", { roomName: newRoom.name });
-    systemChatMsg(playerId, socket, ChatMsgType.CREATE_ROOM);
+    // systemChatMsg(playerId, socket, ChatMsgType.CREATE_ROOM);
     broadcastRoomState(newRoom.id);
     console.log("[room:create_room] created", {
         playerId,
-        socketId: socket.id,
+        username: userName,
         roomId: newRoom.id,
         roomName: newRoom.name,
       });
@@ -49,16 +49,16 @@ export function registerRoomHandlers(
 
   // Join an existing room
   socket.on("join_room", ({ roomName }) => {
-    const { playerId } = getIdentity(socket);
+    const { playerId, userName } = getIdentity(socket);
     const res = gameManager.joinRoom(roomName, playerId);
     if (!res.success) {
       console.log("[room:join_room] failed", {
         playerId,
-        socketId: socket.id,
+        username: userName,
         roomName,
         error: res.error,
       });
-      socket.emit("error", { message: res.error });
+      socket.emit("error", { message: res.error }); 
       return;
     }
     const roomId = res.room.id;
@@ -66,13 +66,13 @@ export function registerRoomHandlers(
     // Cancel room-page drop timer if player rejoined in time
     gameManager.cancelDropTimer(playerId);
     socket.emit("room_joined", { roomName });
-    systemChatMsg(playerId, socket, ChatMsgType.JOIN_ROOM);
+    systemChatMsg(playerId, roomId, socket, ChatMsgType.JOIN_ROOM);
     socket.emit("chatHistory", res.room.chatHistory); // Send chat history to player when they join the room
     broadcastRoomState(roomId);
     
-    console.log("[room:join_room] success. emitted room_joined and joined socket room", {
+    console.log("[room:join_room] success", {
       playerId,
-      socketId: socket.id,
+      username: userName,
       roomId,
       roomName,
     });
@@ -80,12 +80,12 @@ export function registerRoomHandlers(
 
   // Leave room
   socket.on("leave_room", () => {
-    const { playerId } = getIdentity(socket);
+    const { playerId, userName } = getIdentity(socket);
     const res = gameManager.leaveRoom(playerId);
     if (!res.success) {
       console.log("[room:leave_room] failed", {
         playerId,
-        socketId: socket.id,
+        username: userName,
         error: res.error,
       });
       socket.emit("error", { message: res.error });
@@ -94,26 +94,36 @@ export function registerRoomHandlers(
     // Clear any pending drop timer since they're intentionally leaving
     gameManager.cancelDropTimer(playerId);
     console.log("[room:user_dropped] timer cancelled for", playerId);
-    systemChatMsg(playerId, socket, ChatMsgType.LEFT_ROOM);
+    systemChatMsg(playerId, res.roomId, socket, ChatMsgType.LEFT_ROOM);
     socket.leave(res.roomId);
     broadcastRoomState(res.roomId);
     console.log("[room:leave_room] success", {
       playerId,
-      socketId: socket.id,
+      username: socket.name,
       roomId: res.roomId,
     });
   });
 
 
   socket.on("user_dropped", () => {
-    const { playerId } = getIdentity(socket);
-    console.log("[room:user_dropped] starting 30s drop timer", { playerId, socketId: socket.id });
+    const { playerId, userName } = getIdentity(socket);
+    console.log("[room:user_dropped] starting 30s drop timer", { username: userName });
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) {
+      console.log("[room:user_dropped] player not in any room", { username: userName });
+      return;
+    }
+    const room = gameManager.getRoomById(roomId);
+    if (room) {
+      socket.emit("active_room", { roomName: room.name }); // inform client about the active room so they can show a "rejoin" option
+      console.log("[room:user_dropped] player dropped from room", { username: userName, roomId });
+    }
     gameManager.startDropTimer(playerId, ({ roomId }) => { // paranthasis will run only after drop timer expires
       socket.leave(roomId);
       socket.emit("leave_room");
-      systemChatMsg(playerId, socket, ChatMsgType.LEFT_ROOM);
+      systemChatMsg(playerId, roomId, socket, ChatMsgType.LEFT_ROOM);
+      console.log("[room:user_dropped] timer expired, player removed from room", { userName, roomId });
       broadcastRoomState(roomId);
-      console.log("[room:user_dropped] timer expired, player removed from room", { playerId, roomId });
     });
   });
 

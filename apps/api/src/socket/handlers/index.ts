@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:22:33 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:01:35 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,13 +46,13 @@ export function registerSocketHandlers(
   // registerFriendHandlers(app, socket);
     
   // ---> Msg Events ---
-  socket.on("send_message", ({ msg }) => {
+  socket.on("send_msg", ({ msg }) => {
     const { playerId, userName } = getIdentity(socket);
     const res = gameManager.prepareChatMsg(playerId, msg);
     if (!res.success) {
       console.log("[send_msg] failed", {
       playerId,
-      socketId: socket.id,
+      username: userName,
       msg,
       error: res.error,
     });
@@ -74,13 +74,12 @@ export function registerSocketHandlers(
 
 
 /// Helper function to send system messages to the room chat (like player joined, left, game started, etc)
-export function systemChatMsg(playerId: string, socket: Socket,msgType: ChatMsgType) {
-  const res = gameManager.prepareStrChatMsg(playerId, msgType);
+export function systemChatMsg(playerId: string, roomId: string, socket: Socket,msgType: ChatMsgType) {
+  const res = gameManager.prepareStrChatMsg(playerId, roomId, msgType);
   if (!res.success) {
     console.error(`Failed to send system message: ${res.error}`);
     return;
   }
-  const roomId = gameManager.getPlayerRoomId(playerId);
   if (roomId) {
     socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: "System" });
   }

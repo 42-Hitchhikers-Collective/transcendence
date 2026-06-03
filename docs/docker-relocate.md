@@ -109,7 +109,7 @@ systemctl --user start docker
 
 
 
-Did you already relocate and it broke again?
+Did you already relocate and it broke again or are you using a different computer?
 
 # stop docker
 systemctl --user stop docker

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 17:22:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:02:00 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ export function registerGameHandlers(
         }
         console.log(`Game started in room ${res.room.id}`);
         socket.nsp.to(res.room.id).emit("game_started", { roomId: res.room.id });
-        systemChatMsg(playerId, socket, ChatMsgType.STARTED_GAME);
+        systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
     });
 }
