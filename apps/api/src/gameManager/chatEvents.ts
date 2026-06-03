@@ -6,11 +6,11 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:50:38 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:53:48 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { Room, RoomIdResult } from "./types";
+import { Room, RoomIdResult, msgResult } from "./types";
 import { getPlayerRoomId, getRoomById, getUsername } from "./gameManager";
 import { MAX_MSG_LENGTH, MAX_MSG_HISTORY } from "./types";
 
@@ -20,6 +20,7 @@ import { MAX_MSG_LENGTH, MAX_MSG_HISTORY } from "./types";
 // Chat message types for predefined system messages
 export enum ChatMsgType {
   JOIN_ROOM = "JOIN_ROOM",
+  CREATE_ROOM = "CREATE_ROOM",
   LEFT_ROOM = "LEFT_ROOM",
   STARTED_GAME = "STARTED_GAME",
   WON_GAME = "WON_GAME"
@@ -28,6 +29,7 @@ export enum ChatMsgType {
 // Map enum to actual message text
 const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
   [ChatMsgType.JOIN_ROOM]: "has joined the room.",
+  [ChatMsgType.CREATE_ROOM]: "has created the room.",
   [ChatMsgType.LEFT_ROOM]: "has left the room.",
   [ChatMsgType.STARTED_GAME]: "started the game.",
   [ChatMsgType.WON_GAME]: "won the game!"
@@ -37,20 +39,19 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
 export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
     const roomId = getPlayerRoomId(playerId);
     if (!roomId)
-        return {success: false, error: "Player is not in room"};
+        return {success: false, roomId: "undefined", error: "Player is not in room"};
     const room = getRoomById(roomId);
     if (!room)
-        return {success: false, error: "Room not found"};
+        return {success: false, roomId: "undefined", error: "Room not found"};
     if (msg.length === 0 || msg.length > MAX_MSG_LENGTH)
-        return {success: false, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
+        return {success: false, roomId: roomId, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
     const username = getUsername(playerId) || "Unknown";
     addMsgToChatHistory(room, username, msg);
     return {success: true, roomId: roomId};
 }
 
 // Helper to create predefined system messages like join/leave/start/win. and add it to chat history
-export function prepareStrChatMsg(playerId: string, msgType: ChatMsgType): RoomIdResult {
-  const roomId = getPlayerRoomId(playerId);
+export function prepareStrChatMsg(playerId: string, roomId: string, msgType: ChatMsgType): msgResult {
   if (!roomId)
     return {success: false, error: "Player is not in room"};
   const room = getRoomById(roomId);
@@ -60,7 +61,7 @@ export function prepareStrChatMsg(playerId: string, msgType: ChatMsgType): RoomI
   const msgText = CHAT_MESSAGE_TEXT[msgType];
   const fullMessage = `${username} ${msgText}`;
   addMsgToChatHistory(room, "System", fullMessage);
-  return {success: true, roomId: roomId};
+  return {success: true, msg: fullMessage};
 }
 
 

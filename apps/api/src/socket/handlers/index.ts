@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/26 16:54:08 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:01:35 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
+// import registerFriendHandlers from "./friend.handlers";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 
 
@@ -26,55 +27,42 @@ export function registerSocketHandlers(
   socket: Socket
 ) {
 
- // Broadcast room state to everyone includingthe sender
+ // Broadcast room state to everyone including the sender
   function broadcastRoomState(roomId: string) {
     const room = gameManager.getRoomById(roomId);
     if (!room) return;
     room.players.forEach((player) => {
-      const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
+      if (!player.socketId) return; // skip players without an active socket
+      const frontendRoomData = utils.getFrontendRoom(room, player.playerId);
       socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
-    });
-    gameManager.debugState();
-  }
-  
-  function broadcastRoomStart(roomId: string) {
-    const room = gameManager.getRoomById(roomId);
-    if (!room) return;
-    room.players.forEach((player) => {
-      const frontendRoomData = utils.getFrontendRoom(room, player.playerId); 
-      // socket.emit("game_start_success", { roomId: roomId });
-      socket.nsp.to(player.socketId).emit("game_start_success",  { roomId: roomId });
-      // socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
-      console.log(`🎉🎉🎉🎉🎉Game start for ${player.userName} in ${roomId}`)
     });
     gameManager.debugState();
   }
 
   // Register related event handlers
   registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState, broadcastRoomStart /*broadcastPlayerState*/);
+  registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
   registerConnectionHandlers(app, socket, broadcastRoomState);
-
-
-// ---> Msg Events ---
-socket.on("send_msg", ({ msg }) => {
-  const { playerId, userName } = getIdentity(socket);
-  const res = gameManager.sendMessage(playerId, msg);
-  if (!res.success) {
-    console.log("[send_msg] failed", {
+  // registerFriendHandlers(app, socket);
+    
+  // ---> Msg Events ---
+  socket.on("send_msg", ({ msg }) => {
+    const { playerId, userName } = getIdentity(socket);
+    const res = gameManager.prepareChatMsg(playerId, msg);
+    if (!res.success) {
+      console.log("[send_msg] failed", {
       playerId,
-      socketId: socket.id,
+      username: userName,
       msg,
       error: res.error,
     });
-    socket.emit("error", { message: res.error });
-    return;
-  }
-  if (res.roomId) {
+      socket.emit("error", { message: res.error });
+      return;
+    }
     console.log("[send_msg] Broadcasting message to room:", res.roomId);
     socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
-  }
-});
+  });
+
 
   // ---> DEBUG <---
 
@@ -86,13 +74,13 @@ socket.on("send_msg", ({ msg }) => {
 
 
 /// Helper function to send system messages to the room chat (like player joined, left, game started, etc)
-export function systemMsg(playerId: string, socket: Socket,msgType: ChatMsgType) {
-  const res = gameManager.prepareStrChatMsg(playerId, msgType);
+export function systemChatMsg(playerId: string, roomId: string, socket: Socket,msgType: ChatMsgType) {
+  const res = gameManager.prepareStrChatMsg(playerId, roomId, msgType);
   if (!res.success) {
     console.error(`Failed to send system message: ${res.error}`);
     return;
   }
-  if (res.roomId) {
-    socket.nsp.to(res.roomId).emit("chat_message", { msg: msgType, senderId: "System" });
+  if (roomId) {
+    socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: "System" });
   }
 }

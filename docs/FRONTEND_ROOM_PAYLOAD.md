@@ -24,6 +24,7 @@ When `room.state === "waiting"`, the `game` object is `undefined`.
 ```json
 {
   "id": "room_abc123",
+  "name": "best_room",
   "state": "waiting",
   "players": [
     {
@@ -60,6 +61,7 @@ When `room.state === "waiting"`, the `game` object is `undefined`.
 ```json
 {
   "id": "room_abc123",
+  "name": "best_room",
   "state": "waiting",
   "players": [
     {
@@ -109,6 +111,7 @@ When `room.state === "playing"`, the `game` object is populated with live game s
 ```json
 {
   "id": "room_abc123",
+  "name": "best_room",
   "state": "playing",
   "players": [
     {
@@ -160,6 +163,7 @@ When `room.state === "playing"`, the `game` object is populated with live game s
 ```json
 {
   "id": "room_abc123",
+  "name": "best_room",
   "state": "playing",
   "players": [
     {
@@ -291,6 +295,7 @@ export type FrontendPlayer = {
 
 export type FrontendRoom = {
   id: string;
+  name: string;
   state: "waiting" | "playing" | "finished";
   players: FrontendPlayer[];
   game?: {
