@@ -48,25 +48,21 @@ export function CreateGameCard() {
   const { timeLeft, isRunning, start, reset } = useTimeout(30_000);
   
   useEffect(() => {
-  console.log(
-    `[🦄USEFFECC!!] useEffect on mount, registering socket listeners for room_created and error. Socket id: ${socket.id}`,
-  );
-
   socket.on("leave_room", () => {
-    console.log("[🦄SOCKET] leave_room event received, clearing active room state");
+    console.log("Leave_room event received on CreateGameCard");
     setHasActiveRoom(null);
   });
   socket.on("error", handleError);
   socket.on("room_created", navigateToGameRoom);
   socket.on("active_room", handleActiveRoom);
   socket.emit("get_room_state");
-  console.log(`--> GAMECARD: id: ${socket.id} \n`);
 
   return () => {
-    console.log("Unmounting createGame card - removing socket listeners");
+    console.log("Unmounting CreateGameCard - removing socket listeners for error, room_created, active_room, leave_room");
     socket.off("error", handleError);
     socket.off("room_created", navigateToGameRoom);
     socket.off("active_room", handleActiveRoom);
+    socket.off("leave_room"); // unsure
   };
 }, []);
 
