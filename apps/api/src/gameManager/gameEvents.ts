@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 15:42:39 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 16:02:58 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@ import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_START } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
-import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 
  // --- Game Events ---
@@ -42,7 +41,7 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
 };
 
 
-// pass turn
+// Pass the turn to the next player
 export function passTurn(playerId: string, roomId: string): RoomIdResult {
   const room = gm.getRoomById(roomId);
   if (room && room.game) {

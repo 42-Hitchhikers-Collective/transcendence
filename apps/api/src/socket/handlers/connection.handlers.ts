@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:24:56 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 17:54:28 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ export function registerConnectionHandlers(
     if (roomId) {
         app.log.info(`Player ${playerId} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId);
+        gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page
         // updateRoomSocketId(playerId, socket.id); -- NOT NEEDED ANYMORE because I update socketId on the player object when they connect
         app.log.info(`Player ${playerId} automatically rejoin room ${roomId}`);
         broadcastRoomState(roomId);
@@ -61,6 +62,8 @@ function startGracePeriod(
   playerId: string,
   broadcastRoomState: (roomId: string) => void
 ) {
+    const userName = (socket as any).userName;
+    console.log(`[Grace period] starting for: ${userName} `);
     const timeoutId = setTimeout(async () => {
         const res = gameManager.leaveRoom(playerId);
         
@@ -69,7 +72,7 @@ function startGracePeriod(
         
         gameManager.removePlayerFromOnlinePlayers(playerId);
         const userName = (socket as any).userName;
-        console.log(`Grace period ended for player ${userName}, removed from online players and left room if in any.`);
+        console.log(`[Grace period] ended for player ${userName}, removed from online players and left room if in any.`);
         if (res.success) {
             broadcastRoomState(res.roomId);
             app.log.info(`Player ${userName} removed after grace period`);       
@@ -84,7 +87,7 @@ function startGracePeriod(
 function cancelDisconnectTimer(playerId: string) {
     const player = gameManager.getOnlinePlayer(playerId);
     const playerName = player ? player.userName : playerId;
-    console.log("Cancelling disconnect timer if exists for socket:", playerName);
+    // console.log("[Grace period] check if to cancel for:", playerName);
     gameManager.clearPlayerTimeout(playerId);
     // If the user comes back (new socket), also cancel the room-page drop timer ??
     // gameManager.cancelDropTimer(playerId); 
