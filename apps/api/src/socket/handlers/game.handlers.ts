@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:58:16 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 15:08:46 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ export function registerGameHandlers(
     if (!res.success)
         socket.emit("error", { message: res.error });
     broadcastRoomState(res.roomId);
+    //call event
 });
 
     // Draw a card
