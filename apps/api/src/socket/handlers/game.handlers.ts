@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 15:08:46 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 15:44:37 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,22 @@ export function registerGameHandlers(
     if (!res.success)
         socket.emit("error", { message: res.error });
     broadcastRoomState(res.roomId);
-    //call event
-});
+    const event = gameManager.checkGameEvent(res.roomId);
+    console.log(`[play_card] event: ${event} in room ${res.roomId}`);
+    if (event == "color"){
+        socket.emit("show_colors", { roomId: res.roomId });
+        return;
+    }
+    else if (event == "finished") {
+        socket.nsp.to(res.roomId).emit("game_finished", { roomId: res.roomId });
+        return ;
+    }
+    else if (event == "uno") {
+        socket.nsp.to(res.roomId).emit("uno", { playerId });    
+    }
+    console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
+    gameManager.passTurn(playerId, res.roomId);
+    });
 
     // Draw a card
     socket.on("draw_card", () => {
@@ -44,7 +58,7 @@ export function registerGameHandlers(
     broadcastRoomState(res.roomId);
     })
 
-    // Select color for wild card
+    // Select color for wild card. When a player selects a color
     socket.on("select_wild_color", ({ color }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.selectWildColor(playerId, color);

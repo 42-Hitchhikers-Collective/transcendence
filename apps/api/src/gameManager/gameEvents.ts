@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:55:54 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 15:42:39 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,17 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
 };
 
 
+// pass turn
+export function passTurn(playerId: string, roomId: string): RoomIdResult {
+  const room = gm.getRoomById(roomId);
+  if (room && room.game) {
+    room.game.passTurn(playerId);
+    return { success: true, roomId };
+  }
+  return { success: false, roomId: roomId, error: "Room or game not found" };
+}
+
+
 // Draw a card
 export function drawCard(playerId: string): RoomIdResult {
   const roomId = gm.getPlayerRoomId(playerId);
@@ -72,6 +83,17 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
     return {success: true, roomId: roomId};
 }
 
+
+export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | null {
+  const room = gm.getRoomById(roomId);
+  if (room) {
+    if (room.game) {
+      const event = room.game.checkEvent();
+        return event;
+    }
+  }
+  return null;
+}
 
 //  --- Start Game Events ---
 
