@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 15:44:37 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 16:41:52 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ export function registerGameHandlers(
             return;
         }
         console.log(`Game started in room ${res.room.id}`);
-        socket.nsp.to(res.room.id).emit("game_started", { roomId: res.room.id });
+        socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
         systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
     });
