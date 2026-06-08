@@ -21,19 +21,36 @@ export class RenderManager {
   render(room: FrontendRoom) {
     this.clearPlayers();
 
-    const orderedPlayers = this.reorderPlayersWithObserverAtBottom(room.players);
+    const orderedPlayers = this.reorderPlayersWithObserverAtBottom(
+      room.players,
+    );
     const positions = this.getPlayerPositions(orderedPlayers.length);
 
     orderedPlayers.forEach((player, i) => {
       this.renderPlayer(player, positions[i]);
     });
+
+    this.renderPile(room);
   }
 
-  private reorderPlayersWithObserverAtBottom(players: FrontendPlayer[]): FrontendPlayer[] {
-    const observer = players.find(p => p.isTheObserver);
+  private renderPile(room: FrontendRoom) {
+    const sprite = this.scene.add.image(
+      300,
+      300,
+      `${room.game?.discardTopCard.value}_${room.game?.discardTopCard.color}`,
+    );
+
+    sprite.setScale(0.3);
+    sprite.setInteractive();
+  }
+
+  private reorderPlayersWithObserverAtBottom(
+    players: FrontendPlayer[],
+  ): FrontendPlayer[] {
+    const observer = players.find((p) => p.isTheObserver);
     if (!observer) return players;
 
-    const others = players.filter(p => !p.isTheObserver);
+    const others = players.filter((p) => !p.isTheObserver);
     return [...others, observer];
   }
 
@@ -43,10 +60,15 @@ export class RenderManager {
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    const title = this.scene.add.text(pos.x - 40, pos.y - 120, player.userName, {
-      fontSize: "24px",
-      color: "#fff",
-    });
+    const title = this.scene.add.text(
+      pos.x - 40,
+      pos.y - 120,
+      player.userName,
+      {
+        fontSize: "24px",
+        color: "#fff",
+      },
+    );
 
     container.add(title);
 
@@ -58,7 +80,7 @@ export class RenderManager {
         const sprite = this.scene.add.image(
           pos.x + offsetX,
           pos.y,
-          `${card.color}_${card.value}`,
+          `${card.value}_${card.color}`,
         );
 
         sprite.setScale(0.3);
@@ -71,13 +93,13 @@ export class RenderManager {
         offsetX += 40;
       });
     } else {
-      const cardCountText = this.scene.add.text(pos.x, pos.y + 30, `🎴 ${player.cardCount}`, {
-        fontSize: "16px",
-        color: "#fff",
-        align: "center",
-      });
-      cardCountText.setOrigin(0.5);
-      container.add(cardCountText);
+      let offsetX = -(player.cardCount * 20);
+      for (let i = 0; i < player.cardCount; i++) {
+        const sprite = this.scene.add.image(pos.x + offsetX, pos.y, `back`);
+        sprite.setScale(0.3);
+        container.add(sprite);
+        offsetX += 40;
+      }
     }
   }
 

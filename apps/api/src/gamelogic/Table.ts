@@ -17,7 +17,7 @@ export class Table {
   drawPile: Card[];
   discardPile: Card[];
 
-  currentColor: null | "red" | "blue" | "green" | "yellow";
+  currentColor: "red" | "blue" | "green" | "yellow" | "wild" | null;
   passTurn: boolean;
   played: boolean;
 
@@ -49,8 +49,11 @@ export class Table {
 
     this.drawPile = deck.cards;
     this.discardPile = [];
+    this.discardPile.push(this.drawPile.pop());
     this.passTurn = false;
     this.event = null;
+
+    this.currentColor = this.discardPile[this.discardPile.length - 1].color;
 
     this.played = false;
     this.currentColor = null;
