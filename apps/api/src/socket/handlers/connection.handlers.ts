@@ -51,7 +51,7 @@ export function registerConnectionHandlers(
             app.log.info(`Stale socket disconnected for ${playerId}, ignoring.`);
             return; 
         }
-        startGracePeriod(app, socket, playerId, broadcastRoomState);
+        // startGracePeriod(app, socket, playerId, broadcastRoomState);
     });
 }
 
