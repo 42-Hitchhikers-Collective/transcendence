@@ -6,19 +6,23 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 14:30:29 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/03 16:55:34 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export const MAX_PLAYERS_PER_ROOM = 4;
+export const MIN_PLAYERS_TO_START = 2;
+export const MAX_ROOM_NAME_LENGTH = 20;
+export const MAX_MSG_LENGTH = 200;
+export const MAX_MSG_HISTORY = 50;
 export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
+export const DROP_TIMER_DURATION = 30_000; // 30 seconds
 
 export type Player = {
   playerId: string;      // permanent identity (userId) used for game logic
   socketId: string;      // current connection used for networking
   userName: string;      // display name for UI/chat
   isReady:  boolean;
-  timeout?: NodeJS.Timeout; // for handling disconnection grace period
 };
 
 export type GameState = "waiting" | "playing" | "finished";
@@ -31,7 +35,8 @@ export type Room = {
   name: string;
   players: Player[];
   state: GameState;
-  game?: Game; // This will hold the actual Gabriel's game instance when the game starts
+  chatHistory: Array<{ username: string; msg: string }>;
+  game?: Game;
 };
 
 // What the frontend sees for "other" players
@@ -39,7 +44,6 @@ export type FrontendPlayer = {
   id: string;
   userName: string;
   isTheObserver: boolean; // true if this is the player themselves, false for other players
-  isReady: boolean;
   cardCount: number;
   cards?: { color: string; value: string | number }[];
 };
@@ -47,6 +51,7 @@ export type FrontendPlayer = {
 // What the frontend sees for a Room
 export type FrontendRoom = {
   id: string;
+  name: string;
   state: GameState;
   players: FrontendPlayer[];
   game?: {
@@ -58,14 +63,14 @@ export type FrontendRoom = {
 
 export type RoomResult =
   | { success: true; room: Room }
-  | { success: false; error: string | undefined};
+  | { success: false; roomId: string, error: string | undefined};
 
 
 export type RoomIdResult = 
   | { success: true; roomId: string }
-  | { success: false; error: string | undefined};
+  | { success: false; roomId: string, error: string | undefined};
 
 
-// export type Result =
-//   | { success: true }
-//   | { success: false; error: string | undefined };
+export type msgResult =
+  | { success: true ; msg: string }
+  | { success: false; error: string | undefined };

@@ -6,28 +6,33 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/20 16:07:43 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 17:53:38 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
-import { Player, Room, RoomResult, RoomIdResult } from "./types";
+import { Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH, DROP_TIMER_DURATION } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
+// import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 // --- Room Events ---
 
 // Create a new room and return it
-export function createRoom(roomName: string): RoomResult {
+export function createRoom(roomName: string, playerId: string): RoomResult {
+  const currentRoomId = gm.getPlayerRoomId(playerId);
+  if (currentRoomId)
+    return { success: false, roomId: currentRoomId, error: "Player already in a room" };
   const roomId = generateRoomId();
   const room: Room = {
     id: roomId,
     name: roomName,
     players: [],
     state: "waiting",
+    chatHistory: []
   };
   const validation = validateRoomName(roomName);
   if (!validation.success)
-    return {success: false, error: validation.error};
+    return {success: false, roomId: "undefined", error: validation.error};
   gm.getRoomsByIdMap().set(roomId, room);
   gm.getRoomsByNameMap().set(roomName, room);
   return { success: true, room: room };
@@ -35,34 +40,30 @@ export function createRoom(roomName: string): RoomResult {
 
 // Add player to room. removes player from old room
 export function joinRoom(name: string, playerId: string): RoomResult {
-  const room = gm.getRoomByName(name);
+  const room = gm.getRoomByName(name); // does the room they ask to join exist?
   if (!room)
-    return { success: false, error: "Room not found" };
+    return { success: false, roomId: "undefined", error: "Requested room not found" };
+  
+  const currentRoomId = gm.getPlayerRoomId(playerId);
   const roomId = room.id;
-  if (gm.getPlayerRoomId(playerId) === roomId) { // Already in same room
-    // START EDIT BY JESS
-    // Added this code to avoid losing the player's socket id
-    // when the player tries to refresh the game room 
-    const onlinePlayer = gm.getOnlinePlayer(playerId); 
-    if (onlinePlayer) {
-      const existing = room.players.find(p => p.playerId === playerId); 
-      // if the playerIs is found as part of the room's player array, update the socketId to the current one from the onlinePlayers map
-      if (existing) {
-        existing.socketId = onlinePlayer.socketId;
-      }
+  if (currentRoomId) { // player is already in a room - is it the same room or a different one?
+    
+    if (gm.getPlayerRoomId(playerId) === roomId) { // player is already in the same room he requests to join
+      cancelDropTimer(playerId); // Cancel drop timer if rejoining the same room
+      return { success: false, roomId: roomId, error: "Player already in room (Dropped)" };
     }
-    // FINISH EDIT BY JESS
-    return { success: true, room: room };
-  }
+    
+    return { success: false, roomId: currentRoomId, error: "Player already in a different room" };
+  } 
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
-    return { success: false, error: "Room is full" };
+    return { success: false, roomId: roomId, error: "Room is full" };
   if (room.state !== "waiting")
-    return { success: false, error: "Game already begun" };
+    return { success: false, roomId: roomId, error: "Game already begun" };
   leaveRoom(playerId);
   const player = gm.getOnlinePlayer(playerId);
   if (!player)
-    return { success: false, error: "Player not found" };
-  room.players.push({ playerId, socketId: player.socketId, userName: player.userName, isReady: false });
+    return { success: false, roomId: "undefined", error: "Player not found" };
+  room.players.push(player);
   gm.addToPlayerRoom(playerId, roomId); // add to playerRooms
   return { success: true, room: room };;
 }
@@ -72,18 +73,55 @@ export function joinRoom(name: string, playerId: string): RoomResult {
 export function leaveRoom(playerId: string): RoomIdResult {
   const currentRoomId = gm.getPlayerRoomId(playerId);
   if (currentRoomId == null) 
-    return {success: false, error: "Player not in room"};
+    return {success: false, roomId: "undefined", error: "Player not in room"};
   const room = gm.getRoomsByIdMap().get(currentRoomId);
   if (!room)
-    return { success: false, error: "Room object not found" };
+    return { success: false, roomId: "undefined", error: "Room object not found" };
   const removed = gm.removePlayerFromPlayersArray(room.players, playerId);
   if (!removed)
-    return { success: false, error: "Player not in room array" };
+    return { success: false, roomId: "undefined", error: "Player not in room array" };
   gm.getPlayerRoomsMap().delete(playerId);
   gm.deleteRoomIfEmpty(room);
   return { success: true, roomId: currentRoomId };
 }
+
+
+// --- User Drop Handling ---
+
+type DropTimerExpiredCallback = (info: { playerId: string; roomId: string }) => void;
+
+// Starts a drop timer when player navigates away from room webpage
+// Socket-layer actions (emit/leave/broadcast) are done via the callback.
+export function startDropTimer(playerId: string, onExpired?: DropTimerExpiredCallback) {
+  if (gm.getDropTimeouts().has(playerId)) return;
+  const username = gm.getOnlinePlayer(playerId)?.userName || "Unknown";
   
+  const timer = setTimeout(() => {
+    gm.getDropTimeouts().delete(playerId);
+    const roomId = gm.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const res = leaveRoom(playerId);
+    if (res.success) onExpired?.({ playerId, roomId }); // invoke callback to handle socket actions after player is removed from room
+    console.log("[drop-timer] expired for", username);
+  }, DROP_TIMER_DURATION);
+  
+  gm.getDropTimeouts().set(playerId, timer);
+  console.log("[drop-timer] started for", username);
+}
+
+
+export function cancelDropTimer(playerId: string) {
+  const timer = gm.getDropTimeouts().get(playerId);
+  const username = gm.getOnlinePlayer(playerId)?.userName || "Unknown";
+  // console.log("[drop-timer] check if to cancel for", username);
+  if (timer) {
+    clearTimeout(timer);
+    gm.getDropTimeouts().delete(playerId);
+    console.log("[drop-timer] cancelled for", username);
+  }
+}
+
+
 // --- Helpers ---
 
 // Returns true if player is in a room, false otherwise
@@ -106,13 +144,26 @@ do {
 // Check for room name rules and duplicates. Returns true or false with an error message.
 function validateRoomName(name: string): RoomResult {
   if (!name || name.trim().length === 0)
-    return {success: false, error: "Room name cannot be empty"};
+    return {success: false, roomId: "undefined", error: "Room name cannot be empty"};
   if (gm.getRoomsByNameMap().has(name))
-    return {success: false, error: "Room name already exists"};
-  if (name.length > 10)
-    return {success: false, error: "Room name cannot exceed 10 characters"};
+    return {success: false, roomId: "undefined", error: "Room name already exists"};
+  if (name.length > MAX_ROOM_NAME_LENGTH)
+    return {success: false, roomId: "undefined", error: `Room name cannot exceed ${MAX_ROOM_NAME_LENGTH} characters`};
   const regex = /^[a-zA-Z0-9\-_!?.]+$/;
   if (!regex.test(name))
-    return { success: false, error: "Room name contains invalid characters"};
+    return { success: false, roomId: "undefined", error: "Room name contains invalid characters"};
   return { success: true, room: null as any };
-  }
+}
+
+// socket reassigning is being made in the connection handler
+// When a player joins a room they are already in, reassign the socket id to avoid losing connection
+// function rejoinRoom(playerId: string, room: Room): RoomResult {
+//   const onlinePlayer = gm.getOnlinePlayer(playerId); 
+//   if (onlinePlayer) {
+//     const existing = room.players.find(p => p.playerId === playerId); 
+//     if (existing)
+//       existing.socketId = onlinePlayer.socketId;
+//     return { success: true, room: room };
+//   }
+//   return { success: false, error: "Player is in room but not in online players" };
+// }

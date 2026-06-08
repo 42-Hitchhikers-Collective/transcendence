@@ -1,113 +1,234 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket"; // adjust path if different
 import cardBack from "@/assets/icons/uno_card_back.png";
+import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
+
+function useTimeout(durationMs: number) {
+  const [timeLeft, setTimeLeft] = useState<number>(durationMs);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const start = () => setIsRunning(true);
+  const reset = () => {
+    setIsRunning(false);
+    setTimeLeft(durationMs);
+  };
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1000) {
+          clearInterval(intervalRef.current!);
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current!);
+  }, [isRunning]);
+
+  return { timeLeft, isRunning, start, reset };
+}
 
 export function CreateGameCard() {
   const [isCreating, setIsCreating] = useState(false);
   const [roomNameInput, setRoomNameInput] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [hasActiveRoom, setHasActiveRoom] = useState<string | null>(null);
   const navigate = useNavigate();
+  useRoomState(); // keep room state subscription for active-room updates
 
-useEffect(() => {
-  const onCreated = (data: { roomName: string }) => {
-    console.log("[CreateGame] room_created received from server:", data);
+  const { timeLeft, isRunning, start, reset } = useTimeout(30_000);
+
+  useEffect(() => {
+    // This code runs as soon as the CreateGameCard component mounts.
+    // Socket listeners and emittters should be set up here
+    // listens for lea
+    socket.on("leave_room", () => {
+      console.log("Leave_room event received on CreateGameCard");
+      setHasActiveRoom(null);
+    });
+    socket.on("error", handleError);
+    socket.on("room_created", navigateToGameRoom);
+    socket.emit("player_info_request"); 
+    socket.on("player_info_response", handlePlayerInfo);
+
+    console.warn(`User ${hasActiveRoom}`);
+
+    return () => {
+      // This code runs when the CreateGameCard component unmounts
+      // which happens when the user navigates away from the profile page.
+      // Socket listeners have to be cleane up here to prevent memory leaks and unintended behavior.
+      socket.off("leave_room"); // unsure
+      socket.off("error", handleError);
+      socket.off("room_created", navigateToGameRoom);
+      // socket.off("active_room", handleActiveRoom);
+      socket.off("player_info_request");
+    };
+  }, []);
+
+  useEffect(() => {}, []); // placeholder to avoid "defined but not used" warnings for now; we will use these in the ProfileSection component
+
+  const handlePlayerInfo = (data: any) => {
+    // prints json data in a readable format without needing to remember the structure of the data object
+    console.log(
+      `Player info received:\n` +
+        Object.entries(data)
+          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+          .join("\n"),
+    );
+
+    if (data.activeRoom) {
+      setHasActiveRoom(data.activeRoom.roomName);
+    }
+  };
+
+  // const handleActiveRoom = (data: { roomName: string }) => {
+  //   console.error(
+  //     `[SOCKET] active_room event received with data: ${JSON.stringify(data)}`,
+  //   );
+  //   setHasActiveRoom(data.roomName);
+  // };
+
+  const handleError = (err: { message: string }) => {
+    /* UNACCEPTABLE ERROR HANDLING */
+    // if(err.message == "Player already in a room")
+    //   setHasActiveRoom("ACTIVER ROOM");
+
+    console.log(`GAMECREATE SOCKET_ERROR: ${err.message}`);
+    setError(err.message);
     setIsCreating(false);
-    console.log("[CreateGame] navigating to /game?room=" + data.roomName);
+  };
+
+  const navigateToGameRoom = (data: { roomName: string }) => {
+    setIsCreating(false);
+    setError(null);
     navigate(`/game?room=${encodeURIComponent(data.roomName)}`);
   };
-  const onError = (data: { message: string }) => {
-    console.warn("[CreateGame] error event from server:", data);
-    setIsCreating(false);
-    setError(data.message);
+
+  // Triggered by clicking "Start a room" button.
+  const handleCreateRoom = () => {
+    const name = roomNameInput.trim();
+    if (!/^[\w-]{1,20}$/.test(name) || !name) {
+      setError(
+        "Invalid room name. Only letters allowed with a max length of 20",
+      );
+      return;
+    }
+    setError(null);
+    setIsCreating(true);
+    socket.emit("create_room", { roomName: name }); // emits signal to create room
   };
 
-  console.log("[CreateGame] mounting, registering socket listeners");
-  socket.on("room_created", onCreated);
-  socket.on("error", onError);
-
-  return () => {
-    console.log("[CreateGame] unmounting, removing socket listeners");
-    socket.off("room_created", onCreated);
-    socket.off("error", onError);
+  const handleLeaveRoom = () => {
+    socket.emit("leave_room");
+    setHasActiveRoom(null);
   };
-}, [navigate]);
 
-const handleCreate = () => {
-  const name = roomNameInput.trim();
-  console.log("[CreateGame] handleCreate clicked, input:", JSON.stringify(roomNameInput), "→ trimmed:", JSON.stringify(name));
-
-  if (!name) {
-    console.warn("[CreateGame] empty name, aborting");
-    setError("Room name required");
-    return;
-  }
-
-  setError(null);
-  setIsCreating(true);
-
-  if (!socket.connected) {
-    console.log("[CreateGame] socket not connected, calling socket.connect()");
-    socket.connect();
-  } else {
-    console.log("[CreateGame] socket already connected, id:", socket.id);
-  }
-
-  console.log("[CreateGame] emitting create_room with roomName:", name);
-  socket.emit("create_room", { roomName: name });
-};
   return (
-    <div className="relative h-full overflow-hidden rounded-2xl border bg-gradient-to-br from-rose-50 via-white to-amber-50 p-12">
-      <style>{styles}</style>
-      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-2xl" />
-      <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
-
-      <div className="relative flex h-full flex-col items-center justify-center gap-8 p-24">
+    <>
+      {hasActiveRoom ? (
         <div
-          className={`fan-wrapper${isHovered ? " is-active" : ""}`}
-          style={{ "--card-back": `url(${cardBack})` } as React.CSSProperties}
-          aria-hidden="true"
+          ref={(el) => {
+            if (el && !isRunning) start();
+          }}
+          className="relative h-full overflow-hidden rounded-2xl border border-rose-200 bg-linear-to-br from-rose-50 via-white to-amber-50 p-12 shadow-sm"
         >
-          {Array.from({ length: 7 }, (_, i) => (
-            <div key={i} className={`fan-card fan-card-${i + 1}`} />
-          ))}
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-2xl" />
+          <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
+
+          <div className="relative flex h-full flex-col items-center justify-center gap-6 text-center">
+            <div className="space-y-3">
+              <h3 className="text-4xl font-extrabold tracking-tight text-slate-900">
+                Aren't you forgetting something?
+              </h3>
+              <p>{timeLeft / 1000}s</p>
+              <p className="mx-auto max-w-xl text-lg text-slate-600">
+                Your friends are waiting for you in room "
+                <span className="text-rose-500">{hasActiveRoom}</span>" ! <br />
+                You won&apos;t be able to join or create a new room until you
+                leave this one for good, decide wisely...
+              </p>
+            </div>
+
+            <div className="flex flex-row items-center justify-center gap-4 py-10">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/game?room=${encodeURIComponent(hasActiveRoom)}`)
+                }
+                className="h-12 rounded-lg bg-emerald-500 px-8 text-lg font-semibold text-white hover:opacity-90"
+              >
+                Rejoin room
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLeaveRoom()}
+                className="h-12 rounded-lg bg-rose-500 px-8 text-lg font-semibold text-white hover:opacity-90"
+              >
+                Leave room
+              </button>
+            </div>
+          </div>
         </div>
+      ) : (
+        <div className="relative h-full overflow-hidden rounded-2xl border bg-linear-to-br from-rose-50 via-white to-amber-50 p-12">
+          <style>{styles}</style>
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-2xl" />
+          <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
 
-        <div className="space-y-3 text-center">
-          <h3 className="text-5xl font-extrabold tracking-tight text-slate-900">
-            Start playing now
-          </h3>
-          <p className="max-w-xl text-lg text-slate-600">
-            Pick a room name and share the link with a friend.
-          </p>
+          <div className="relative flex h-full flex-col items-center justify-center gap-8 p-24">
+            <div
+              className={`fan-wrapper${isCreating ? " is-active" : ""}`}
+              style={
+                { "--card-back": `url(${cardBack})` } as React.CSSProperties
+              }
+              aria-hidden="true"
+            >
+              {Array.from({ length: 7 }, (_, i) => (
+                <div key={i} className={`fan-card fan-card-${i + 1}`} />
+              ))}
+            </div>
+
+            <div className="space-y-3 text-center">
+              <h3 className="text-5xl font-extrabold tracking-tight text-slate-900">
+                Start playing now
+              </h3>
+              <p className="max-w-xl text-lg text-slate-600">
+                Pick a room name and share the link with a friend.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <input
+                type="text"
+                value={roomNameInput}
+                onChange={(e) => setRoomNameInput(e.target.value)}
+                placeholder="Room name"
+                disabled={isCreating}
+                className="h-12 w-72 rounded-lg border border-slate-300 px-4 text-lg"
+              />
+
+              <button
+                type="button"
+                onClick={handleCreateRoom}
+                disabled={isCreating || !roomNameInput.trim()}
+                className="h-14 rounded-lg bg-rose-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isCreating ? "Loading room..." : "Create room"}
+              </button>
+
+              {error && <p className="text-sm text-rose-600">{error}</p>}
+            </div>
+          </div>
         </div>
-
-        <div className="flex flex-col items-center gap-3">
-          <input
-            type="text"
-            value={roomNameInput}
-            onChange={(e) => setRoomNameInput(e.target.value)}
-            placeholder="Room name"
-            disabled={isCreating}
-            className="h-12 w-72 rounded-lg border border-slate-300 px-4 text-lg"
-          />
-
-          <button
-            type="button"
-            onClick={handleCreate}
-            disabled={isCreating || !roomNameInput.trim()}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className="h-14 rounded-lg bg-rose-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isCreating ? "Creating..." : "Start a room"}
-          </button>
-
-          {error && <p className="text-sm text-rose-600">{error}</p>}
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
 

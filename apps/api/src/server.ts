@@ -13,7 +13,7 @@ import { gameManager } from "./gameManager";
 
 dotenv.config();
 
-const app = Fastify({ logger: true, trustProxy: true });
+const app = Fastify({ logger: false, trustProxy: true });
 
 app.setErrorHandler((err, req, reply) => {
   req.log.error(err);

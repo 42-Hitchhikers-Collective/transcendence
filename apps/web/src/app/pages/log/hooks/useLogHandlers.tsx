@@ -46,15 +46,15 @@ export function useLogHandlers() {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("Auth UI: submit login", {
-        email: data.email,
-        username: data.username,
-      });
+      // console.log("Auth UI: submit login", {
+      //   email: data.email,
+      //   username: data.username,
+      // });
       await login(data.email ?? data.username, data.password);
-      console.log("Auth UI: login ok, navigating to /");
+      // console.log("Auth UI: login ok, navigating to /");
       navigate("/"); // HomePage will render ProfilePage
     } catch (e: any) {
-      console.log("Auth UI: login failed", e);
+      // console.log("Auth UI: login failed", e);
       setError(e?.message ?? "login failed");
     } finally {
       setIsLoading(false);
@@ -65,15 +65,15 @@ export function useLogHandlers() {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("Auth UI: submit signup", {
-        email: data.email,
-        username: data.username,
-      });
+      // console.log("Auth UI: submit signup", {
+      //   email: data.email,
+      //   username: data.username,
+      // });
       await signup(data.email, data.password, data.username);
-      console.log("Auth UI: signup ok, navigating to /");
+      // console.log("Auth UI: signup ok, navigating to /");
       navigate("/");
     } catch (e: any) {
-      console.log("Auth UI: signup failed", e);
+      // console.log("Auth UI: signup failed", e);
       setError(e?.message ?? "signup failed");
     } finally {
       setIsLoading(false);

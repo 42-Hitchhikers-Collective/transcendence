@@ -4,7 +4,7 @@ In case memory space isn't enough to build the containers.
 This document explains how to stop the rootless Docker daemon, clean up Docker data, move your Docker data directory to your local `goinfre` storage, and relink it so Docker uses that location. 
 
 `/goinfre/goinfre/Perso/<username>/docker`
-FYI: from notion page:
+FYI from notion page:
 "The goinfre folder uses local storage. On the computer itself. When the computer has less than 20% storage space available it will delete the contents of the entire goinfre folder. This is checked every monday"
 
 
@@ -107,3 +107,26 @@ mv /goinfre/goinfre/Perso/<username>/docker ~/.local/share/docker
 systemctl --user start docker
 ```
 
+
+
+Did you already relocate and it broke again or are you using a different computer?
+
+# stop docker
+systemctl --user stop docker
+
+# check what ~/.local/share/docker is right now
+ls -la ~/.local/share/docker
+
+# ensure target exists (use YOUR goinfre path)
+mkdir -p /goinfre/goinfre/Perso/<username>/docker
+
+# remove the bad path and re-link
+rm -rf ~/.local/share/docker
+ln -s /goinfre/goinfre/Perso/<username>/docker ~/.local/share/docker
+
+# start docker
+systemctl --user start docker
+sleep 2
+docker info --format '{{.DockerRootDir}}'
+
+If docker info shows /goinfre/goinfre/Perso/<username>/docker, the daemon is good again.
