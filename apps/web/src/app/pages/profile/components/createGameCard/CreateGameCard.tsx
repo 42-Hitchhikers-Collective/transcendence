@@ -4,7 +4,6 @@ import { socket } from "@/socket/Socket"; // adjust path if different
 import cardBack from "@/assets/icons/uno_card_back.png";
 import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
 
-
 function useTimeout(durationMs: number) {
   const [timeLeft, setTimeLeft] = useState<number>(durationMs);
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -36,7 +35,6 @@ function useTimeout(durationMs: number) {
   return { timeLeft, isRunning, start, reset };
 }
 
-
 export function CreateGameCard() {
   const [isCreating, setIsCreating] = useState(false);
   const [roomNameInput, setRoomNameInput] = useState("");
@@ -46,49 +44,72 @@ export function CreateGameCard() {
   useRoomState(); // keep room state subscription for active-room updates
 
   const { timeLeft, isRunning, start, reset } = useTimeout(30_000);
-  
-  useEffect(() => {
-  socket.on("leave_room", () => {
-    console.log("Leave_room event received on CreateGameCard");
-    setHasActiveRoom(null);
-  });
-  socket.on("error", handleError);
-  socket.on("room_created", navigateToGameRoom);
-  socket.on("active_room", handleActiveRoom);
-  socket.emit("get_room_state");
 
-  return () => {
-    console.log("Unmounting CreateGameCard - removing socket listeners for error, room_created, active_room, leave_room");
-    socket.off("error", handleError);
-    socket.off("room_created", navigateToGameRoom);
-    socket.off("active_room", handleActiveRoom);
-    socket.off("leave_room"); // unsure
+  useEffect(() => {
+    // This code runs as soon as the CreateGameCard component mounts.
+    // Socket listeners and emittters should be set up here
+    // listens for lea
+    socket.on("leave_room", () => {
+      console.log("Leave_room event received on CreateGameCard");
+      setHasActiveRoom(null);
+    });
+    socket.on("error", handleError);
+    socket.on("room_created", navigateToGameRoom);
+    socket.emit("player_info_request"); 
+    socket.on("player_info_response", handlePlayerInfo);
+
+    console.warn(`User ${hasActiveRoom}`);
+
+    return () => {
+      // This code runs when the CreateGameCard component unmounts
+      // which happens when the user navigates away from the profile page.
+      // Socket listeners have to be cleane up here to prevent memory leaks and unintended behavior.
+      socket.off("leave_room"); // unsure
+      socket.off("error", handleError);
+      socket.off("room_created", navigateToGameRoom);
+      // socket.off("active_room", handleActiveRoom);
+      socket.off("player_info_request");
+    };
+  }, []);
+
+  useEffect(() => {}, []); // placeholder to avoid "defined but not used" warnings for now; we will use these in the ProfileSection component
+
+  const handlePlayerInfo = (data: any) => {
+    // prints json data in a readable format without needing to remember the structure of the data object
+    console.log(
+      `Player info received:\n` +
+        Object.entries(data)
+          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+          .join("\n"),
+    );
+
+    if (data.activeRoom) {
+      setHasActiveRoom(data.activeRoom.roomName);
+    }
   };
-}, []);
 
-  useEffect(() => {
+  // const handleActiveRoom = (data: { roomName: string }) => {
+  //   console.error(
+  //     `[SOCKET] active_room event received with data: ${JSON.stringify(data)}`,
+  //   );
+  //   setHasActiveRoom(data.roomName);
+  // };
 
-    
-  }, []); // placeholder to avoid "defined but not used" warnings for now; we will use these in the ProfileSection component
+  const handleError = (err: { message: string }) => {
+    /* UNACCEPTABLE ERROR HANDLING */
+    // if(err.message == "Player already in a room")
+    //   setHasActiveRoom("ACTIVER ROOM");
 
+    console.log(`GAMECREATE SOCKET_ERROR: ${err.message}`);
+    setError(err.message);
+    setIsCreating(false);
+  };
 
-
-const handleActiveRoom = (data: { roomName: string }) => {
-  console.log(`[🦄SOCKET] active_room event received with data: ${JSON.stringify(data)}`);
-  setHasActiveRoom(data.roomName);
-};
-
-const handleError = (err: { message: string }) => {
-  console.log(`GAMECREATE SOCKET_ERROR: ${err.message}`);
-  setError(err.message);
-  setIsCreating(false);
-};
-
-const navigateToGameRoom = (data: { roomName: string }) => {
-  setIsCreating(false);
-  setError(null);
-  navigate(`/game?room=${encodeURIComponent(data.roomName)}`);
-};
+  const navigateToGameRoom = (data: { roomName: string }) => {
+    setIsCreating(false);
+    setError(null);
+    navigate(`/game?room=${encodeURIComponent(data.roomName)}`);
+  };
 
   // Triggered by clicking "Start a room" button.
   const handleCreateRoom = () => {
@@ -107,34 +128,40 @@ const navigateToGameRoom = (data: { roomName: string }) => {
   const handleLeaveRoom = () => {
     socket.emit("leave_room");
     setHasActiveRoom(null);
-  }
+  };
 
   return (
     <>
       {hasActiveRoom ? (
-    
-        <div 
-        ref={(el) => { if (el && !isRunning) start(); }}
-        className="relative h-full overflow-hidden rounded-2xl border border-rose-200 bg-linear-to-br from-rose-50 via-white to-amber-50 p-12 shadow-sm">
+        <div
+          ref={(el) => {
+            if (el && !isRunning) start();
+          }}
+          className="relative h-full overflow-hidden rounded-2xl border border-rose-200 bg-linear-to-br from-rose-50 via-white to-amber-50 p-12 shadow-sm"
+        >
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-2xl" />
           <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
 
           <div className="relative flex h-full flex-col items-center justify-center gap-6 text-center">
             <div className="space-y-3">
               <h3 className="text-4xl font-extrabold tracking-tight text-slate-900">
-               Aren't you forgetting something?
+                Aren't you forgetting something?
               </h3>
-             <p>{timeLeft / 1000}s</p>
+              <p>{timeLeft / 1000}s</p>
               <p className="mx-auto max-w-xl text-lg text-slate-600">
-                Your friends are waiting for you in room "<span className="text-rose-500">{hasActiveRoom}</span>" ! <br/>
-                You won&apos;t be able to join or create a new room until you leave this one for good, decide wisely...
+                Your friends are waiting for you in room "
+                <span className="text-rose-500">{hasActiveRoom}</span>" ! <br />
+                You won&apos;t be able to join or create a new room until you
+                leave this one for good, decide wisely...
               </p>
             </div>
 
             <div className="flex flex-row items-center justify-center gap-4 py-10">
               <button
                 type="button"
-                onClick={() => navigate(`/game?room=${encodeURIComponent(hasActiveRoom)}`)}
+                onClick={() =>
+                  navigate(`/game?room=${encodeURIComponent(hasActiveRoom)}`)
+                }
                 className="h-12 rounded-lg bg-emerald-500 px-8 text-lg font-semibold text-white hover:opacity-90"
               >
                 Rejoin room
