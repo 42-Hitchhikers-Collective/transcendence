@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:38:59 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 17:53:57 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ export function setPlayerTimeout(playerId: string, timeout: NodeJS.Timeout) {
 export function clearPlayerTimeout(playerId: string) {
   const timeout = timeouts.get(playerId);
   if (timeout) {
+    console.log(`[Grace period] Cancelling for: ${getUsername(playerId)}`);
     clearTimeout(timeout);
     timeouts.delete(playerId);
   }
@@ -168,7 +169,7 @@ export function getDropTimeouts(): Map<string, ReturnType<typeof setTimeout>> {
     } else {
       for (const [playerId, player] of onlinePlayers) {
         const username = player.userName ? `${player.userName}` : "No Username";
-        console.log(`Player: ${username} - Room: ${getPlayerRoomId(playerId)}\n`);
+        console.log(`Player: ${username} - Room: ${getPlayerRoomId(playerId)}`);
       }
     }
   }

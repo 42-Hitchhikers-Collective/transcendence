@@ -24,7 +24,7 @@ export function ProfileSection({
   stats: { wins: number; losses: number };
   onLogout?: () => void;
 } & React.ComponentProps<"div">) {
-  console.log("User data was loaded:", user);
+  // console.log("User data was loaded:", user);
 
   const username = user?.profile?.username ?? user?.username ?? "Player";
   const avatar = user?.profile?.avatarUrl ?? undefined; // if avatar is null or undefined, we pass undefined to the UploadAvatarButton to use the default avatar. If it's a string (even an empty one), we pass it as is.

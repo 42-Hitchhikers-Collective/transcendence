@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 17:12:54 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 17:53:38 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,15 +40,21 @@ export function createRoom(roomName: string, playerId: string): RoomResult {
 
 // Add player to room. removes player from old room
 export function joinRoom(name: string, playerId: string): RoomResult {
-  const currentRoomId = gm.getPlayerRoomId(playerId);
-  if (currentRoomId)
-    return { success: false, roomId: currentRoomId, error: "Player already in a room" };
-  const room = gm.getRoomByName(name);
+  const room = gm.getRoomByName(name); // does the room they ask to join exist?
   if (!room)
-    return { success: false, roomId: "undefined", error: "Room not found" };
+    return { success: false, roomId: "undefined", error: "Requested room not found" };
+  
+  const currentRoomId = gm.getPlayerRoomId(playerId);
   const roomId = room.id;
-  if (gm.getPlayerRoomId(playerId) === roomId) // Already in same room
-    return { success: false, roomId: roomId, error: "Player already in room (Dropped)" };
+  if (currentRoomId) { // player is already in a room - is it the same room or a different one?
+    
+    if (gm.getPlayerRoomId(playerId) === roomId) { // player is already in the same room he requests to join
+      cancelDropTimer(playerId); // Cancel drop timer if rejoining the same room
+      return { success: false, roomId: roomId, error: "Player already in room (Dropped)" };
+    }
+    
+    return { success: false, roomId: currentRoomId, error: "Player already in a different room" };
+  } 
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
     return { success: false, roomId: roomId, error: "Room is full" };
   if (room.state !== "waiting")
@@ -107,6 +113,7 @@ export function startDropTimer(playerId: string, onExpired?: DropTimerExpiredCal
 export function cancelDropTimer(playerId: string) {
   const timer = gm.getDropTimeouts().get(playerId);
   const username = gm.getOnlinePlayer(playerId)?.userName || "Unknown";
+  // console.log("[drop-timer] check if to cancel for", username);
   if (timer) {
     clearTimeout(timer);
     gm.getDropTimeouts().delete(playerId);

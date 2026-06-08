@@ -8,10 +8,11 @@ Also super important -> we need to make sure the socket opens the connection bef
 */
 export const socket = io({
   path: "/socket.io",
-  // autoConnect: false, // it is needed to enforce when we want to connect or the socket will always try to connect
+  autoConnect: false, // it is needed to enforce when we want to connect or the socket will always try to connect
   auth: (cb) => cb({ token: localStorage.getItem("auth_token") ?? "" }), //  reading from localStorage could be a bit brittle and break things if we have BE changes, JESS will change thie later
 });
 
+// connection starts at login (check AuthContext.tsx)
 socket.on("connect", () => {
   console.log(
     `[socket] connected \n
@@ -24,6 +25,7 @@ socket.on("connect_error", (err) => {
   console.warn(`[socket] connect_error \n Error Message ${err.message}`);
 });
 
+// disconnection happens in logout (check AuthContext.tsx)
 socket.on("disconnect", (message) => {
   console.warn(`[socket] disconnect \n Disconnect Message: ${message}`);
 });

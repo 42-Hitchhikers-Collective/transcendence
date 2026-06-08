@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 16:41:52 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/08 15:32:23 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,4 +84,27 @@ export function registerGameHandlers(
         systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
         broadcastRoomState(res.room.id);
     });
+
+
+socket.on("player_info_request", () => {
+    const { playerId, userName } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    const room = roomId ? gameManager.getRoomById(roomId) : null;
+
+socket.emit("player_info_response", {
+playerId,
+userName,
+// TODO 7: This could be nice to have but not a priority for now
+// userState: no_room, in_room, dropped
+activeRoom: room
+      ? {
+          roomId: room.id,
+          roomName: room.name,
+        }
+      : null,
+    // TODO 8: I need to know if the game has started in the room so that the frontend
+    // can load the page correctly when refreshed or when user tries to rejoin
+    // gameStarted: true or false
+  });
+});
 }
