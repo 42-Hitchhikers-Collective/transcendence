@@ -36,6 +36,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { socket } from "@/socket/Socket";
 
 type User = {
   id: string;
@@ -70,28 +71,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetches user whenever token changes; self-clean on failure
   useEffect(() => {
     if (!token) {
-      console.log("AuthContext: no token, clearing user");
+      // console.warn("AuthContext: no token found, clearing user");  
+      if (socket.connected) {
+        socket.disconnect();
+      }
+      // should the leave room or waiting show here?
       setUser(null);
       return;
     }
-    console.log("AuthContext: token present, fetching /api/users/me");
+
+    socket.auth = { token };
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    console.info("Auth[token] - token present, fetching /api/users/me");
     fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
-        console.log("AuthContext: /api/users/me status", res.status);
         const rawText = await res.text();
-        console.log("AuthContext: /api/users/me raw body", rawText);
+        // console.log("Auth[token] - /api/users/me raw body", rawText);
         if (!res.ok) throw new Error("invalid token");
         const data = rawText ? JSON.parse(rawText) : null;
         return data;
       })
       .then((data) => {
-        console.log("AuthContext: /api/users/me payload", data);
+        console.log("Auth[token] - /api/users/me payload", data);
         if (data) setUser(data.user ?? data);
       })
       .catch(() => {
-        console.log("AuthContext: /api/users/me failed, clearing token");
+        console.warn("Auth[token] - /api/users/me failed, clearing token");
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setUser(null);
@@ -99,42 +109,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    console.log("AuthContext: login start", { email });
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ email, password }),
     });
-    console.log("AuthContext: /api/auth/login status", res.status);
+    // console.log("LOGIN - /api/auth/login status", res.status);
     const loginRawText = await res.text();
-    console.log("AuthContext: /api/auth/login raw body", loginRawText);
+    console.log("LOGIN - /api/auth/login token created", loginRawText);
     if (!res.ok) {
       const err = loginRawText ? JSON.parse(loginRawText) : null;
-      console.log("AuthContext: /api/auth/login error payload", err);
+      console.log("LOGIN - /api/auth/login error payload", err);
       throw new Error(err?.error ?? err?.message ?? "login failed");
     }
     const parsed = loginRawText ? JSON.parse(loginRawText) : null;
     const newToken = parsed?.token ?? null;
-    console.log("AuthContext: /api/auth/login token present", !!newToken);
+    console.log("LOGIN - /api/auth/login token present", !!newToken);
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
   };
 
   const signup = async (email: string, password: string, username: string) => {
-    console.log("AuthContext: signup start", { email, username });
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ email, password, username }),
     });
-    console.log("AuthContext: /api/auth/register status", res.status);
+    console.log("SIGNUP - /api/auth/register status", res.status);
     const signupRawText = await res.text();
-    console.log("AuthContext: /api/auth/register raw body", signupRawText);
+    console.log("SIGNUP - /api/auth/register raw body", signupRawText);
     if (!res.ok) {
       const err = signupRawText ? JSON.parse(signupRawText) : null;
-      console.log("AuthContext: /api/auth/register error payload", err);
+      console.log("SIGNUP - /api/auth/register error payload", err);
       throw new Error(err?.error ?? err?.message ?? "signup failed");
     }
     // Backend /register doesn't return a token; so we call auto-login on register success
@@ -142,19 +150,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    console.log("AuthContext: logout start");
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });
     } catch {
-      // Ignore network errors; clear client state regardless
+      // Ignoring network errors; clear client state regardless
     }
-    console.log("AuthContext: logout complete, clearing state");
-    localStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-    setUser(null);
+    if(socket.connected) // need to ensure we disconnect socket on LOGOUT TO SOLVE BUG
+      { 
+        console.warn("Logout - token disconnected");
+        socket.disconnect();
+      }
+      localStorage.removeItem(TOKEN_KEY);
+      setToken(null);
+      setUser(null);
+      console.info("Logout success");
   };
 
   return (
