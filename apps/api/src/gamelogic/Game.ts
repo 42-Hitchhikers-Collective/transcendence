@@ -94,7 +94,7 @@ export class Game {
       return this.gameMaster.advanceTurn(this.table, playerId);
   }
 
-  public checkEvent(table: Table): "uno" | "color" | "finished" {
-    return (table.event);
+  public checkEvent(): "uno" | "color" | "finished" | null {
+    return (this.table.event);
   }
 }

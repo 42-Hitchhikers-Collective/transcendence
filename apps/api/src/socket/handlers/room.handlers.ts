@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 17:13:21 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 13:40:23 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,10 +55,11 @@ export function registerRoomHandlers(
       console.log("[room:join_room] failed", {
         playerId,
         username: userName,
+        socketId: socket.id,
         roomName,
         error: res.error,
       });
-      socket.emit("error", { message: res.error }); 
+      socket.emit("error", { message: res.error });
       return;
     }
     const roomId = res.room.id;
@@ -73,6 +74,7 @@ export function registerRoomHandlers(
     console.log("[room:join_room] success", {
       playerId,
       username: userName,
+      socketId: socket.id,
       roomId,
       roomName,
     });
@@ -107,16 +109,23 @@ export function registerRoomHandlers(
 
   socket.on("user_dropped", () => {
     const { playerId, userName } = getIdentity(socket);
-    console.log("[room:user_dropped] starting 30s drop timer", { username: userName });
+    console.log("[room:user_dropped] will start 30s drop timer", { 
+      username: userName,
+      socketId: socket.id,
+    });
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (!roomId) {
-      console.log("[room:user_dropped] player not in any room", { username: userName });
+      console.log("[room:user_dropped] fail to start 30s timer: player not in any room", { username: userName });
       return;
     }
     const room = gameManager.getRoomById(roomId);
     if (room) {
-      socket.emit("active_room", { roomName: room.name }); // inform client about the active room so they can show a "rejoin" option
-      console.log("[room:user_dropped] player dropped from room", { username: userName, roomId });
+      // socket.emit("active_room", { roomName: room.name }); // inform client about the active room so they can show a "rejoin" option
+      console.log("[room:user_dropped] player dropped from room", { 
+      username: userName,
+      roomId,
+      socketId: socket.id, 
+      });
     }
     gameManager.startDropTimer(playerId, ({ roomId }) => { // paranthasis will run only after drop timer expires
       socket.leave(roomId);

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 13:28:26 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/27 14:56:08 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 17:24:13 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ export function setupSocket(app: FastifyInstance) {
       const roomId = gameManager.getPlayerRoomId(playerId);
       if (roomId)
         io.to(roomId).emit("playerUpdate", existingPlayer); // emiting that player is now online again to the room - neccessary?
-      } else {
+    } else {
         app.log.info(`Adding new online player: ${playerId} (${userName})`);
         const newPlayer: Player = { playerId, socketId: socket.id, userName, isReady: false };
         gameManager.addPlayerToOnlinePlayers(newPlayer);

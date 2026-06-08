@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:55:54 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/04 16:02:58 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@ import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_START } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
-import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 
  // --- Game Events ---
@@ -40,6 +39,17 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
     return {success: false, roomId: roomId, error: "Card play failed"};
   return {success: true, roomId: roomId};
 };
+
+
+// Pass the turn to the next player
+export function passTurn(playerId: string, roomId: string): RoomIdResult {
+  const room = gm.getRoomById(roomId);
+  if (room && room.game) {
+    room.game.passTurn(playerId);
+    return { success: true, roomId };
+  }
+  return { success: false, roomId: roomId, error: "Room or game not found" };
+}
 
 
 // Draw a card
@@ -72,6 +82,17 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
     return {success: true, roomId: roomId};
 }
 
+
+export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | null {
+  const room = gm.getRoomById(roomId);
+  if (room) {
+    if (room.game) {
+      const event = room.game.checkEvent();
+        return event;
+    }
+  }
+  return null;
+}
 
 //  --- Start Game Events ---
 
