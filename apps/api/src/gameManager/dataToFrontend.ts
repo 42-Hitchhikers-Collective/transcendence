@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 16:30:00 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 17:13:16 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
 }
 
 
-// get a player object for the frontend with only the relevant info
+// get a player object for the frontend with only the relevant info NEW FOR JESS
 export function getFrontedPlayerData(playerId: string, userName: string, room: Room | null) {
   return {
     playerId,

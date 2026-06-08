@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 16:31:10 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 17:11:04 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ export function registerSocketHandlers(
     const room = roomId ? gameManager.getRoomById(roomId) : null;
     
     const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
-    socket.emit("player_info_response", frontedPlayerData);
+    socket.emit("player_info_response", frontedPlayerData); //the new version
 
     // old version:  
     socket.emit("player_info_response", {
@@ -64,9 +64,9 @@ export function registerSocketHandlers(
     ? {
     roomId: room.id,
     roomName: room.name,
+    gameState: room.state, // waiting, playing, finished
     }
     : null,
-    // gameStarted: true or false
     });
   });
 
