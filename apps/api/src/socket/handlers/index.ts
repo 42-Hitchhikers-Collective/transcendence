@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:01:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 17:11:04 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
 // import registerFriendHandlers from "./friend.handlers";
 import { ChatMsgType } from "../../gameManager/chatEvents";
+import { SYSTEM_SENDER_NAME } from "../../gameManager/types";
 
 
 export function registerSocketHandlers(
@@ -40,11 +41,36 @@ export function registerSocketHandlers(
   }
 
   // Register related event handlers
+  registerConnectionHandlers(app, socket, broadcastRoomState);
   registerRoomHandlers(socket, broadcastRoomState);
   registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
-  registerConnectionHandlers(app, socket, broadcastRoomState);
   // registerFriendHandlers(app, socket);
+
+
+  socket.on("player_info_request", () => {
+    const { playerId, userName } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    const room = roomId ? gameManager.getRoomById(roomId) : null;
     
+    const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
+    socket.emit("player_info_response", frontedPlayerData); //the new version
+
+    // old version:  
+    socket.emit("player_info_response", {
+    playerId,
+    userName,
+    // userState: no_room, in_room, dropped
+    activeRoom: room
+    ? {
+    roomId: room.id,
+    roomName: room.name,
+    gameState: room.state, // waiting, playing, finished
+    }
+    : null,
+    });
+  });
+
+  
   // ---> Msg Events ---
   socket.on("send_msg", ({ msg }) => {
     const { playerId, userName } = getIdentity(socket);
@@ -81,6 +107,6 @@ export function systemChatMsg(playerId: string, roomId: string, socket: Socket,m
     return;
   }
   if (roomId) {
-    socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: "System" });
+    socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: SYSTEM_SENDER_NAME });
   }
 }
