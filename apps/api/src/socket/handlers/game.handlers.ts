@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 13:37:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 17:06:11 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,29 +82,17 @@ export function registerGameHandlers(
         console.log(`Game started in room ${res.room.id}`);
         socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
         systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
-        broadcastRoomState(res.room.id);
+        broadcastRoomState(res.room.id); // if gbriel recieves this too late - i can wait for a signal from jess and only then send this
     });
 
-
-socket.on("player_info_request", () => {
-    const { playerId, userName } = getIdentity(socket);
-    const roomId = gameManager.getPlayerRoomId(playerId);
-    const room = roomId ? gameManager.getRoomById(roomId) : null;
-
-socket.emit("player_info_response", {
-playerId,
-userName,
-// TODO 7: This could be nice to have but not a priority for now
-// userState: no_room, in_room, dropped
-activeRoom: room
-      ? {
-          roomId: room.id,
-          roomName: room.name,
-        }
-      : null,
-    // TODO 8: I need to know if the game has started in the room so that the frontend
-    // can load the page correctly when refreshed or when user tries to rejoin
-    // gameStarted: true or false
-  });
-});
+    // When the game canvas is ready on the frontend, send the initial game state
+    socket.on("canvas_ready", () => {
+        const { playerId } = getIdentity(socket);
+        const roomId = gameManager.getPlayerRoomId(playerId);
+        if (!roomId) {
+            socket.emit("error", { message: "Player is not in a room" });
+            return;
+        }
+        broadcastRoomState(roomId);
+    });
 }
