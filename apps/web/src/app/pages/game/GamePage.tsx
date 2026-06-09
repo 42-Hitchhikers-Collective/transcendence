@@ -4,6 +4,8 @@ import Chat from "./components/Chat";
 import { useGamePage } from "./hooks/useGamePage";
 import GameWindow from "./components/GameWindow";
 import { useEffect } from "react";
+import PhaserGame from "@/gameCanvas/PhaserGame";
+
 
 
 export default function GamePage() {
@@ -53,12 +55,21 @@ function GamePageContent({ roomName }: { roomName: string }) {
             </div>
 
             <Chat />
+         <button
+            onClick={startGame}
+            disabled={gameStarted}
+            className="mb-4 rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white disabled:bg-gray-400"
+          >
+            Start Game
+          </button>
           </section>
-          <GameWindow
+          <PhaserGame />
+          
+          {/* <GameWindow
             gameStarted={gameStarted}
             onStart={startGame}
             error={canvasError}
-          />
+          /> */}
         </div>
       </div>
     </div>
