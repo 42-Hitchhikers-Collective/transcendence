@@ -39,7 +39,7 @@ export class GameScene extends Scene {
 
     // Setup event listeners
     EventBus.on("ROOM_STATE", this.onRoomState, this);
-    EventBus.on("COLOR", this.onRoomState, this);
+    EventBus.on("SHOW_COLORS", this.onRoomState, this);
     EventBus.on("PASS_TURN", this.onRoomState, this);
     EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
@@ -63,22 +63,11 @@ export class GameScene extends Scene {
       }
     }
 
-    if (room.game && room.game.discardTopCard.color === "wild") {
-      this.uiManager.showPassTurnButtons();
-    } else {
-      this.uiManager.hidePassTurnButtons();
-    }
-
     this.renderManager.render(room);
   }
 
-  private selectColor(room: FrontendRoom) {
-    const observer = room.players.find(p => p.isTheObserver);
-    this.room = room;
-    this.renderManager.render(room);
-    if (observer) {
+  private selectColor() {
       this.uiManager.showWildColorButtons();
-    }
   }
 
   private onSocketError(err: { message: string }) {

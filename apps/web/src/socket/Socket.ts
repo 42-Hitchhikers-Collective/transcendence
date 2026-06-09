@@ -47,3 +47,4 @@ socket.on("error", (err) => {
   console.log(`[EventBus] SOCKET_ERROR \n Error Message: ${err.message}`);
   EventBus.emit("SOCKET_ERROR", err);
 });
+
