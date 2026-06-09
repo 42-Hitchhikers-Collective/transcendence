@@ -52,8 +52,10 @@ export function registerSocketHandlers(
     const roomId = gameManager.getPlayerRoomId(playerId);
     const room = roomId ? gameManager.getRoomById(roomId) : null;
     
-    const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
-    socket.emit("player_info_response", frontedPlayerData); //the new version
+
+    // JESS WILL UNCOMMENT THIS ONCE I KNOW THE OLD VERSION WORKS
+    // const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
+    // socket.emit("player_info_response", frontedPlayerData); //the new version
 
     // old version:  
     socket.emit("player_info_response", {
