@@ -38,15 +38,15 @@ export class GameScene extends Scene {
     this.inputManager.setup();
 
     // Setup event listeners
-    EventBus.on("ROOM_STATE", this.onRoomState, this);
-    EventBus.on("SHOW_COLORS", this.onRoomState, this);
-    EventBus.on("PASS_TURN", this.onRoomState, this);
+    EventBus.on("room_state", this.onRoomState, this);
+    EventBus.on("show_colors", this.selectColor, this);
+    //EventBus.on("PASS_TURN", this.onRoomState, this);
     EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.events.once("shutdown", () => {
-      EventBus.off("ROOM_STATE", this.onRoomState, this);
-      EventBus.off("COLOR", this.selectColor, this);
-      EventBus.off("PASS_TURN", this.selectColor, this);
+      EventBus.off("room_state", this.onRoomState, this);
+      EventBus.off("SHOW_COLORS", this.selectColor, this);
+      //EventBus.off("PASS_TURN", this.selectColor, this);
       EventBus.off("SOCKET_ERROR", this.onSocketError, this);
       this.uiManager.hideAll();
     });
@@ -70,6 +70,10 @@ export class GameScene extends Scene {
       this.uiManager.showWildColorButtons();
   }
 
+  //private passTurn()
+  //{
+  //  this.
+  //}
   private onSocketError(err: { message: string }) {
     console.error(err.message);
   }
