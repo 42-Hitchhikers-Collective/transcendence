@@ -10,10 +10,10 @@ export function useRoomState() {
       setRoom(newRoom);
     };
 
-    EventBus.on("ROOM_STATE", handleRoomState);
+    EventBus.on("room_state", handleRoomState);
 
     return () => {
-      EventBus.off("ROOM_STATE", handleRoomState);
+      EventBus.off("room_state", handleRoomState);
     };
   }, []);
 
