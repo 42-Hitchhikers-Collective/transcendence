@@ -14,6 +14,8 @@ export class Table {
 
   drawPile: Card[];
   discardPile: Card[];
+  
+  playerPlayed: boolean;
 
   currentColor: "red" | "blue" | "green" | "yellow" | "wild" | null;
 
@@ -31,6 +33,8 @@ export class Table {
     this.pendingDraw = 0;
 
     this.draw = 1;
+
+    this.playerPlayed = false;
 
     const deck = new Deck();
 
@@ -67,5 +71,8 @@ export class Table {
   changeColor(color: "red" | "blue" | "green" | "yellow") {
     this.currentColor = color;
   }
+
+  getPlayerPlayed()
+  { return this.playerPlayed }
 }
 
