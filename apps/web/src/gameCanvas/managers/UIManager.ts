@@ -58,8 +58,6 @@ export class UIManager {
     }
 
     showPassTurnButtons() {
-        this.hidePassTurnButtons();
-
         this.passTurnContainer = this.scene.add.container(700, 200);
 
         const button = this.scene.add

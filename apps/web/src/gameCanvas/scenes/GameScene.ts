@@ -47,7 +47,7 @@ export class GameScene extends Scene {
     // Setup event listeners
     EventBus.on("room_state", this.onRoomState, this);
     EventBus.on("show_colors", this.selectColor, this);
-    EventBus.on("display_pass_button", this.onRoomState, this);
+    EventBus.on("display_pass_button", this.passTurn, this);
     //EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.events.once("shutdown", () => {
@@ -79,6 +79,7 @@ export class GameScene extends Scene {
 
   private passTurn()
   {
+    console.log("passTurn Button")
     this.uiManager.showPassTurnButtons();
   }
   private onSocketError(err: { message: string }) {
