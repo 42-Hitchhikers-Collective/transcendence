@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 17:06:11 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 13:01:24 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 
 export function registerGameHandlers(
   socket: Socket,
-  broadcastRoomState: (roomId: string) => void,
-//   broadcastPlayerState: (playerId: string) => void
+  broadcastGameCanvas: (roomId: string) => void,
 ) {
 
     // Play a card
@@ -31,7 +30,7 @@ export function registerGameHandlers(
     const res = gameManager.playCard(playerId, cardIndex);
     if (!res.success)
         socket.emit("error", { message: res.error });
-    broadcastRoomState(res.roomId);
+    broadcastGameCanvas(res.roomId);
     const event = gameManager.checkGameEvent(res.roomId);
     console.log(`[play_card] event: ${event} in room ${res.roomId}`);
     if (event == "color"){
@@ -55,7 +54,7 @@ export function registerGameHandlers(
     const res = gameManager.drawCard(playerId);
     if (!res.success)
         socket.emit("error", { message: res.error });
-    broadcastRoomState(res.roomId);
+    broadcastGameCanvas(res.roomId);
     })
 
     // Select color for wild card. When a player selects a color
@@ -64,7 +63,7 @@ export function registerGameHandlers(
     const res = gameManager.selectWildColor(playerId, color);
     if (!res.success)
         socket.emit("error", { message: res.error });
-    broadcastRoomState(res.roomId);
+    broadcastGameCanvas(res.roomId);
     });
 
     
@@ -82,17 +81,6 @@ export function registerGameHandlers(
         console.log(`Game started in room ${res.room.id}`);
         socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
         systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
-        broadcastRoomState(res.room.id); // if gbriel recieves this too late - i can wait for a signal from jess and only then send this
-    });
-
-    // When the game canvas is ready on the frontend, send the initial game state
-    socket.on("canvas_ready", () => {
-        const { playerId } = getIdentity(socket);
-        const roomId = gameManager.getPlayerRoomId(playerId);
-        if (!roomId) {
-            socket.emit("error", { message: "Player is not in a room" });
-            return;
-        }
-        broadcastRoomState(roomId);
+        broadcastGameCanvas(res.room.id);
     });
 }
