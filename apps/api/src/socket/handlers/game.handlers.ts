@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 14:21:08 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 15:40:14 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ export function registerGameHandlers(
         return;
     }
     else if (event == "finished") {
-        socket.nsp.to(res.roomId).emit("game_finished", { roomId: res.roomId });
+        //finish the game and announce the winner
+        endGame(res.roomId, socket);
         return ;
     }
     else if (event == "uno") {
@@ -56,7 +57,7 @@ export function registerGameHandlers(
         socket.emit("error", { message: res.error });
     socket.emit("display_pass_button");
     broadcastGameCanvas(res.roomId);
-    })
+    });
 
     // Select color for wild card. When a player selects a color
     socket.on("select_wild_color", ({ color }) => {
@@ -84,4 +85,28 @@ export function registerGameHandlers(
         systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
         broadcastGameCanvas(res.room.id);
     });
+
+
+    // --- Finish Game Events ---
+
+    function endGame(roomId: string, socket: Socket) {
+        const res = gameManager.endGame(roomId);
+        if (res.success && res.gameData) {
+            // Update Game record
+            await prisma.game.update({
+                where: { id: roomId },
+                data: {
+                status: "FINISHED",
+                endedAt: new Date()
+                }
+            });
+
+            // Update each GamePlayer with placement (1 = winner)
+            await prisma.gamePlayer.update({
+                where: { gameId_userId: { gameId: roomId, userId: res.gameData.winner } },
+                data: { placement: 1 } // or 2, 3, etc.
+            });
+        socket.nsp.to(roomId).emit("game_finished", { roomId: roomId });
+        return;
+    };
 }

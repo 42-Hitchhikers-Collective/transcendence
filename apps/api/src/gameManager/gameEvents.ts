@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 11:59:39 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/10 15:39:29 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | n
   return null;
 }
 
-//  --- Start Game Events ---
+//  --- Start/End Game Events ---
 
 
 //  Start the game manually if start button was pressed, and all condition are met  
@@ -116,6 +116,18 @@ export function startGameButton(playerId: string): RoomResult {
   return {success: false, roomId: roomId, error: "Start conditions aren't met"};;
 }
 
+
+export function endGame(roomId: string) {
+  const room = gm.getRoomById(roomId);
+  if (!room || !room.game)
+    return {success: false, roomId: roomId, error: "Room or game not found"};
+  room.state = "finished";
+    return {
+    success: true,
+    winner: room.game.winner,
+    roomId: roomId
+  };
+}
 
 
 // --- Helpers ---
