@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 11:59:39 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/10 14:51:10 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,6 +144,23 @@ function mapPlayersForGame(players: { playerId: string; userName: string }[]): M
       userMap.set(player.playerId, player.userName);
       return userMap;
   });
+}
+
+// Players pressed Pass Turn Button
+export function passTurnButton(playerId: string): RoomIdResult {
+  const roomId = gm.getPlayerRoomId(playerId);
+  if (!roomId)
+    return {success: false, roomId: "undefined", error: "Player is not in room"};
+  const room = gm.getRoomById(roomId);
+  if (!room || room.state !== "playing" || !room.game)
+    return {success: false, roomId: roomId, error: "No active game found"};
+  
+  // call the method defined in the Interface!
+  const success = room.game.playerPassBotton(playerId);
+  
+  if (!success)
+    return {success: false, roomId: roomId, error: "Game logic error: invalid move"};
+  return {success: true, roomId: roomId};
 }
 
 // Returns true only if game is in waiting mode, at least 2 players in the room, and all players are ready

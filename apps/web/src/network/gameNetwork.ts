@@ -17,5 +17,5 @@ export function selectWildColor(color: "red" | "blue" | "green" | "yellow") {
 }
 
 export function passTurn() {
-  socket.emit("pass_turn");
+  socket.emit("on_press_pass_button");
 }

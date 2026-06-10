@@ -23,8 +23,7 @@ export class GameScene extends Scene {
   // INIT
   // =========================
 
-  init() {
-  }
+  init() {}
 
   create() {
     // Initialize managers
@@ -40,9 +39,9 @@ export class GameScene extends Scene {
     // Zoom camera so game content fills the canvas
     // Game content occupies roughly a 600x500 area centered at (500, 400)
     // Canvas is 1200x900, so zoom = min(1200/600, 900/500) ≈ 1.8
-    this.cameras.main.setZoom(1.5);        // try 1.5–2.0
+    this.cameras.main.setZoom(1.5); // try 1.5–2.0
     this.cameras.main.centerOn(500, 400);
-    this.cameras.main.setBackgroundColor('#1e293b'); // slate-800
+    this.cameras.main.setBackgroundColor("#1e293b"); // slate-800
 
     // Setup event listeners
     EventBus.on("room_state", this.onRoomState, this);
@@ -63,24 +62,27 @@ export class GameScene extends Scene {
     this.room = room;
 
     if (!this.myPlayerId) {
-      const observer = room.players.find(p => p.isTheObserver);
+      const observer = room.players.find((p) => p.isTheObserver);
       if (observer) {
         this.myPlayerId = observer.id;
         this.renderManager.setMyPlayerId(observer.id);
       }
     }
 
+    if (this.myPlayerId !== room.current_turn) {
+      this.uiManager.hidePassTurnButtons();
+    }
+
     this.renderManager.render(room);
   }
 
   private selectColor() {
-      this.uiManager.showWildColorButtons();
+    this.uiManager.showWildColorButtons();
   }
 
-  private passTurn()
-  {
-    console.log("passTurn Button")
-    this.uiManager.showPassTurnButtons();
+  private passTurn() {
+    if (this.myPlayerId == this.room.current_turn)
+      this.uiManager.showPassTurnButtons();
   }
   private onSocketError(err: { message: string }) {
     console.error(err.message);
