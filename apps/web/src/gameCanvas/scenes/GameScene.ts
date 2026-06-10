@@ -48,7 +48,7 @@ export class GameScene extends Scene {
     EventBus.on("room_state", this.onRoomState, this);
     EventBus.on("show_colors", this.selectColor, this);
     //EventBus.on("PASS_TURN", this.onRoomState, this);
-    EventBus.on("SOCKET_ERROR", this.onSocketError, this);
+    //EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.events.once("shutdown", () => {
       EventBus.off("room_state", this.onRoomState, this);

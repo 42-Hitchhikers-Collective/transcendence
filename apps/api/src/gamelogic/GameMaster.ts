@@ -62,7 +62,10 @@ export class GameMaster {
   // ============================================================
 
   public applyEffect(table: Table, card: Card): void {
-    if (card.color != "wild") table.currentColor = card.color;
+    if (card.color == "wild")
+       table.event = "color";
+    else
+      table.currentColor = card.color;
 
     switch (card.value) {
       case "reverse":
@@ -78,7 +81,6 @@ export class GameMaster {
         table.pendingDraw += 4;
         break;
     }
-    if (card.color == "wild") table.event = "color";
   }
 
   private reverse(table: Table): void {
@@ -150,10 +152,10 @@ export class GameMaster {
     return true;
   }
 
-  /**
+  /*
    * Reset the conditon for a new player
-   */
-  newTurnStats(table: Table) {
+   * */
+  private newTurnStats(table: Table) {
     table.draw = 1;
     table.event = null;
   }
@@ -167,11 +169,11 @@ export class GameMaster {
     else if (player.hand.length === 0) table.event = "finished";
   }
 
-  /**
+  /* *
    * When there are no more cards in the draw pile,
    * it keeps the last one from discard pile,
    * shuffle the rest and use them as draw pile.
-   */
+   * */
   private reuseDiscardPile(table: Table) {
     if (table.discardPile.length <= 1) return;
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 16:02:58 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 11:59:39 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,9 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
     const room = gm.getRoomById(roomId);
     if (!room || room.state !== "playing" || !room.game)
       return {success: false, roomId: roomId, error: "No active game found"};
+    console.log(`Color recived: ${color}`)
     room.game.table.changeColor(color);
+    room.game.passTurn(playerId);
     return {success: true, roomId: roomId};
 }
 
