@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 17:11:04 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 14:15:45 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,30 +29,29 @@ export function registerSocketHandlers(
 ) {
 
  // Broadcast room state to everyone including the sender
-  function broadcastRoomState(roomId: string) {
+  function broadcastGameCanvas(roomId: string) {
     const room = gameManager.getRoomById(roomId);
     if (!room) return;
     room.players.forEach((player) => {
       if (!player.socketId) return; // skip players without an active socket
-      const frontendRoomData = utils.getFrontendRoom(room, player.playerId);
-      socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
+      const gameCanvasRoom = utils.getGameCanvasRoom(room, player.playerId);
+      socket.nsp.to(player.socketId).emit("room_state", gameCanvasRoom);
     });
     gameManager.debugState();
   }
 
   // Register related event handlers
-  registerConnectionHandlers(app, socket, broadcastRoomState);
-  registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
+  registerConnectionHandlers(app, socket, broadcastGameCanvas);
+  registerRoomHandlers(socket, broadcastGameCanvas);
+  registerGameHandlers(socket, broadcastGameCanvas, /*broadcastPlayerState*/);
   // registerFriendHandlers(app, socket);
 
 
+  // Emits an object of the current player state
   socket.on("player_info_request", () => {
     const { playerId, userName } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
     const room = roomId ? gameManager.getRoomById(roomId) : null;
-    
-
     // JESS WILL UNCOMMENT THIS ONCE I KNOW THE OLD VERSION WORKS
     // const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
     // socket.emit("player_info_response", frontedPlayerData); //the new version
@@ -70,6 +69,16 @@ export function registerSocketHandlers(
     }
     : null,
     });
+  });
+
+  // Emits an object of the current room state or null
+  socket.on("room_info_request", () => {
+    const { playerId, userName } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    let frontedRoomInfo = null;
+    if (roomId)
+      frontedRoomInfo = utils.getFrontedRoomInfo(roomId);
+    socket.emit("room_info_response", frontedRoomInfo);
   });
 
   
