@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:39:29 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 15:49:56 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,19 @@ function mapPlayersForGame(players: { playerId: string; userName: string }[]): M
   });
 }
 
+// Players pressed Pass Turn Button
+export function passTurnButton(playerId: string): RoomIdResult {
+  const roomId = gm.getPlayerRoomId(playerId);
+  if (!roomId)
+    return {success: false, roomId: "undefined", error: "Player is not in room"};
+  const room = gm.getRoomById(roomId);
+  if (!room || room.state !== "playing" || !room.game)
+    return {success: false, roomId: roomId, error: "No active game found"};
+  if (room.game.playerPassBotton(playerId))
+    return {success: false, roomId: roomId, error: "Game logic error: invalid move"};
+  return {success: true, roomId: roomId};
+}
+
 // Returns true only if game is in waiting mode, at least 2 players in the room, and all players are ready
 function startGameCondition(room: Room): boolean {
     if (!room)
@@ -166,9 +179,5 @@ function startGameCondition(room: Room): boolean {
         return false;
     if (room.players.length < MIN_PLAYERS_TO_START)
         return false;
-    // REMOVED WITH INBAR - delete comments once sure code is tested/works
-    // const allPlayersReady = room.players.every(player => player.isReady);
-    // if (!allPlayersReady)
-    //     return false;
     return true;
   }

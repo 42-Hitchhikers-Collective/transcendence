@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   types.ts                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 12:57:33 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 15:27:32 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ export type GameCanvasRoom = {
   id: string;
   name: string;
   state: GameState;
+  current_turn: string;
   players: GameCanvasPlayer[];
   game?: {
     currentPlayerId: string;
