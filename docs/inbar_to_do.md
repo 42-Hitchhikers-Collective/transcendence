@@ -18,18 +18,7 @@ send db finish game details
 which details?
 
 
-socket.on("room_info_response"){
-return {
-    roomId: string;
-    roomName: string;
-    roomState: "waiting" | "playing" | "finished";
-    // array of players entered in the room, player shows name and status in room
-    players: {
-    userName: string;
-    dropped - true/false;
-  }[];
-  };
-}
+player draws a card - pass turn
 
 
 when a player is in a room, then leaves the website, the drop timer will start and -- ? 

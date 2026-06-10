@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 13:14:27 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 14:08:22 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ export function registerSocketHandlers(
   // registerFriendHandlers(app, socket);
 
 
-  // when fronted asks for the current player state
+  // Emits an object of the current player state
   socket.on("player_info_request", () => {
     const { playerId, userName } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);

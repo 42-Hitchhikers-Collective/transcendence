@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 13:00:41 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 14:08:57 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,6 @@ export function registerRoomHandlers(
     }
     const room = gameManager.getRoomById(roomId);
     if (room) {
-      // socket.emit("active_room", { roomName: room.name }); // inform client about the active room so they can show a "rejoin" option
       console.log("[room:user_dropped] player dropped from room", { 
       username: userName,
       roomId,
