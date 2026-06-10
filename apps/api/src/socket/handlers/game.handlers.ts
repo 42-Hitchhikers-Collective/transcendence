@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:52:52 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 16:37:55 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,27 +92,32 @@ export function registerGameHandlers(
     });
 
 
-    // --- Finish Game Events ---
+// --- Finish Game Events ---
 
-    function endGame(roomId: string, socket: Socket) {
-        const res = gameManager.endGame(roomId);
-        if (res.success) {
-            // Update Game record
-            await prisma.game.update({
-                where: { id: roomId }, // GameId is the same as RoomId
-                data: {
-                status: "FINISHED",
-                endedAt: new Date()
-                }
-            });
+    // Send finished game data to the Database and announce the finished game
+    async function endGame(roomId: string, socket: Socket) {
+    const res = gameManager.endGame(roomId);
+    if (res.success) {
+        
+        
+        // Update Game record
+        await prisma.game.update({
+            where: { id: roomId }, // GameId is the same as RoomId
+            data: {
+            // RoomName to be added
+            status: "FINISHED",
+            endedAt: new Date()
+            }
+        });
 
-            // Consider to change to placement to 1 winner
-            await prisma.gamePlayer.update({
-                where: { gameId_userId: { gameId: roomId, userId: res.winner } },
-                data: { placement: 1 } // or 2, 3, etc.
-            });
-        socket.nsp.to(roomId).emit("game_finished", { roomId: roomId });
-        return;
-    };
+        // Consider to change to placement to 1 winner
+        await prisma.gamePlayer.update({
+            where: { gameId_userId: { gameId: roomId, userId: res.winnerId } },
+            data: { placement: 1 }
+        });
+    }
+    socket.nsp.to(roomId).emit("game_finished", { roomId: roomId });
+    return;
+};
 }
 }

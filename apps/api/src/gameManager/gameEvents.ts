@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:49:56 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 16:28:27 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ export function endGame(roomId: string) {
   room.state = "finished";
     return {
     success: true,
-    winner: room.game.winner,
+    winnerId: room.game.winner?.id || "undefined",
     roomId: roomId
   };
 }
