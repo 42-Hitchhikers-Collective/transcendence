@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:45:54 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 15:51:22 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ export function getGameCanvasRoom(room: Room, observerPlayerId: string): GameCan
     id: room.id,
     name: room.name,
     state: room.state,
-    current_turn: room.game?.table.players[room.game?.table.turnIndex].id,
+    current_turn: room.game?.table.players[room.game?.table.turnIndex].id || "",
     players: gameCanvasPlayers,
     game: room.game ? {
       currentPlayerId: room.game.table.players[room.game.table.turnIndex]?.id || "",

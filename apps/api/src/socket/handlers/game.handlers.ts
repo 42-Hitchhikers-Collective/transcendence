@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:48:40 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 15:52:52 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,19 +96,19 @@ export function registerGameHandlers(
 
     function endGame(roomId: string, socket: Socket) {
         const res = gameManager.endGame(roomId);
-        if (res.success && res.gameData) {
+        if (res.success) {
             // Update Game record
             await prisma.game.update({
-                where: { id: roomId },
+                where: { id: roomId }, // GameId is the same as RoomId
                 data: {
                 status: "FINISHED",
                 endedAt: new Date()
                 }
             });
 
-            // Update each GamePlayer with placement (1 = winner)
+            // Consider to change to placement to 1 winner
             await prisma.gamePlayer.update({
-                where: { gameId_userId: { gameId: roomId, userId: res.gameData.winner } },
+                where: { gameId_userId: { gameId: roomId, userId: res.winner } },
                 data: { placement: 1 } // or 2, 3, etc.
             });
         socket.nsp.to(roomId).emit("game_finished", { roomId: roomId });
