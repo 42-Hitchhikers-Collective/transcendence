@@ -54,8 +54,8 @@ export function CreateGameCard() {
       setHasActiveRoom(null);
     });
     socket.on("error", handleError);
-    socket.on("room_created", navigateToGameRoom);
-    socket.emit("player_info_request"); 
+    // socket.on("room_created", navigateToGameRoom);
+    socket.emit("player_info_request");
     socket.on("player_info_response", handlePlayerInfo);
 
     console.warn(`User ${hasActiveRoom}`);
@@ -66,7 +66,7 @@ export function CreateGameCard() {
       // Socket listeners have to be cleane up here to prevent memory leaks and unintended behavior.
       socket.off("leave_room"); // unsure
       socket.off("error", handleError);
-      socket.off("room_created", navigateToGameRoom);
+      // socket.off("room_created", navigateToGameRoom);
       // socket.off("active_room", handleActiveRoom);
       socket.off("player_info_request");
     };
@@ -111,7 +111,15 @@ export function CreateGameCard() {
     navigate(`/game?room=${encodeURIComponent(data.roomName)}`);
   };
 
-  // Triggered by clicking "Start a room" button.
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   const handleCreateRoom = () => {
     const name = roomNameInput.trim();
     if (!/^[\w-]{1,20}$/.test(name) || !name) {
@@ -120,9 +128,13 @@ export function CreateGameCard() {
       );
       return;
     }
-    setError(null);
+    socket.emit("create_room", { roomName: name });
     setIsCreating(true);
-    socket.emit("create_room", { roomName: name }); // emits signal to create room
+    // Delay used to ensure backend has time to process room creation to load
+    timeoutRef.current = setTimeout(() => {
+      navigateToGameRoom({ roomName: name });
+      timeoutRef.current = null;
+    }, 5000);
   };
 
   const handleLeaveRoom = () => {
@@ -159,9 +171,13 @@ export function CreateGameCard() {
             <div className="flex flex-row items-center justify-center gap-4 py-10">
               <button
                 type="button"
-                onClick={() =>
-                  navigate(`/game?room=${encodeURIComponent(hasActiveRoom)}`)
-                }
+                onClick={() => {
+                  // socket.emit("join_room", { roomName: hasActiveRoom });
+                  // timeoutRef.current = setTimeout(() => {
+                    navigate(`/game?room=${encodeURIComponent(hasActiveRoom)}`);
+                  //   timeoutRef.current = null;
+                  // }, 5000);
+                }}
                 className="h-12 rounded-lg bg-emerald-500 px-8 text-lg font-semibold text-white hover:opacity-90"
               >
                 Rejoin room

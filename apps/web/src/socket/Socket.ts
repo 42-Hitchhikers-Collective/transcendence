@@ -14,11 +14,12 @@ export const socket = io({
 
 // connection starts at login (check AuthContext.tsx)
 socket.on("connect", () => {
-  console.log(
-    `[socket] connected \n
-    id: ${socket.id} \n
-    transport: ${socket.io.engine.transport.name}`,
-  );
+  // we dont need this as we get this info on the authcontext (jess' code for login)
+  // console.log(
+  //   `[socket] connected \n
+  //   id: ${socket.id} \n
+  //   transport: ${socket.io.engine.transport.name}`,
+  // );
 });
 
 socket.on("connect_error", (err) => {

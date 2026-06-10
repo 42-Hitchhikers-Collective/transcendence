@@ -6,14 +6,13 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/02 18:23:13 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 17:13:16 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
+import { getDropTimeouts } from "./gameManager";
 import { Room, FrontendRoom, FrontendPlayer } from "./types";
-
-//ADD ROOM CHAT HISTORY
 
 // Get a filtered room version for the frontend that doesn't show cards of other players except the observer
 export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendRoom {
@@ -42,5 +41,22 @@ export function getFrontendRoom(room: Room, observerPlayerId: string): FrontendR
       discardTopCard: room.game.table.discardPile[room.game.table.discardPile.length - 1] || null,
       drawPileCount: room.game.table.drawPile.length || 0,
     } : undefined
+  };
+}
+
+
+// get a player object for the frontend with only the relevant info NEW FOR JESS
+export function getFrontedPlayerData(playerId: string, userName: string, room: Room | null) {
+  return {
+    playerId,
+    userName,
+    duringDrop: getDropTimeouts().has(playerId), // true if player is currently in drop timer grace period
+    activeRoom: room? 
+      {
+        roomId: room.id,
+        roomName: room.name,
+        roomState: room.state, // "waiting", "playing", or "finished"
+      }
+    : null,
   };
 }

@@ -14,8 +14,27 @@ check logs:
 docker compose logs -f api | cat -n
 
 
+when a player is in a room, then leaves the website, the drop timer will start and -- ? 
+check if player returns to room in time / doesnt
+
+
+player in room
+leaves web
+returns to web
+---> counter ends in 0, player would be removed from room but UI stays on drop msg
+
+
+player in room
+leaves web
+stays out of web
+---> timer expires and user kicks out of room - good
+*but doesnt clear from online players - not good
+
+
 
 DONE
+
+polish frontend data "user request"~
 
 edge case - player cant create or join a room if already in a room
 

@@ -6,11 +6,11 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:53:48 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 14:25:11 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { Room, RoomIdResult, msgResult } from "./types";
+import { Room, RoomIdResult, SYSTEM_SENDER_NAME, msgResult } from "./types";
 import { getPlayerRoomId, getRoomById, getUsername } from "./gameManager";
 import { MAX_MSG_LENGTH, MAX_MSG_HISTORY } from "./types";
 
@@ -60,7 +60,7 @@ export function prepareStrChatMsg(playerId: string, roomId: string, msgType: Cha
   const username = getUsername(playerId) || "Unknown";
   const msgText = CHAT_MESSAGE_TEXT[msgType];
   const fullMessage = `${username} ${msgText}`;
-  addMsgToChatHistory(room, "System", fullMessage);
+  addMsgToChatHistory(room, SYSTEM_SENDER_NAME, fullMessage);
   return {success: true, msg: fullMessage};
 }
 
