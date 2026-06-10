@@ -37,16 +37,23 @@ export class GameScene extends Scene {
 
     this.inputManager.setup();
 
+    // Zoom camera so game content fills the canvas
+    // Game content occupies roughly a 600x500 area centered at (500, 400)
+    // Canvas is 1200x900, so zoom = min(1200/600, 900/500) ≈ 1.8
+    this.cameras.main.setZoom(1.5);        // try 1.5–2.0
+    this.cameras.main.centerOn(500, 400);
+    this.cameras.main.setBackgroundColor('#1e293b'); // slate-800
+
     // Setup event listeners
-    EventBus.on("ROOM_STATE", this.onRoomState, this);
-    EventBus.on("COLOR", this.onRoomState, this);
-    EventBus.on("PASS_TURN", this.onRoomState, this);
-    EventBus.on("SOCKET_ERROR", this.onSocketError, this);
+    EventBus.on("room_state", this.onRoomState, this);
+    EventBus.on("show_colors", this.selectColor, this);
+    //EventBus.on("PASS_TURN", this.onRoomState, this);
+    //EventBus.on("SOCKET_ERROR", this.onSocketError, this);
 
     this.events.once("shutdown", () => {
-      EventBus.off("ROOM_STATE", this.onRoomState, this);
-      EventBus.off("COLOR", this.selectColor, this);
-      EventBus.off("PASS_TURN", this.selectColor, this);
+      EventBus.off("room_state", this.onRoomState, this);
+      EventBus.off("SHOW_COLORS", this.selectColor, this);
+      //EventBus.off("PASS_TURN", this.selectColor, this);
       EventBus.off("SOCKET_ERROR", this.onSocketError, this);
       this.uiManager.hideAll();
     });
@@ -63,24 +70,17 @@ export class GameScene extends Scene {
       }
     }
 
-    if (room.game && room.game.discardTopCard.color === "wild") {
-      this.uiManager.showPassTurnButtons();
-    } else {
-      this.uiManager.hidePassTurnButtons();
-    }
-
     this.renderManager.render(room);
   }
 
-  private selectColor(room: FrontendRoom) {
-    const observer = room.players.find(p => p.isTheObserver);
-    this.room = room;
-    this.renderManager.render(room);
-    if (observer) {
+  private selectColor() {
       this.uiManager.showWildColorButtons();
-    }
   }
 
+  //private passTurn()
+  //{
+  //  this.
+  //}
   private onSocketError(err: { message: string }) {
     console.error(err.message);
   }

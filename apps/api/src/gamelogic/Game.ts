@@ -41,6 +41,7 @@ export class Game {
     );
   }
 
+
   private createPlayers(users: Map<string, string>[]): Player[] {
     const players: Player[] = [];
 
@@ -89,6 +90,12 @@ export class Game {
     this.table.currentColor = color;
   }
 
+  public playerPassBotton(playerId: string)
+  {
+    if (this.table.draw != 0) return false;
+    this.passTurn(playerId)
+  }
+
   public passTurn(playerId: string)
   {
       return this.gameMaster.advanceTurn(this.table, playerId);
@@ -96,5 +103,10 @@ export class Game {
 
   public checkEvent(): "uno" | "color" | "finished" | null {
     return (this.table.event);
+  }
+
+  public first_play()
+  {
+    this.gameMaster.applyEffect(this.table, this.table.discardPile[0])
   }
 }

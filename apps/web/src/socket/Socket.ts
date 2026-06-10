@@ -14,11 +14,12 @@ export const socket = io({
 
 // connection starts at login (check AuthContext.tsx)
 socket.on("connect", () => {
-  console.log(
-    `[socket] connected \n
-    id: ${socket.id} \n
-    transport: ${socket.io.engine.transport.name}`,
-  );
+  // we dont need this as we get this info on the authcontext (jess' code for login)
+  // console.log(
+  //   `[socket] connected \n
+  //   id: ${socket.id} \n
+  //   transport: ${socket.io.engine.transport.name}`,
+  // );
 });
 
 socket.on("connect_error", (err) => {
@@ -39,11 +40,17 @@ socket.io.engine?.on("upgradeError", (err) => {
 });
 
 socket.on("room_state", (frontendRoom: FrontendRoom) => {
-  console.log(`[EventBus] ROOM_STATE: \n ${JSON.stringify(frontendRoom)}`);
-  EventBus.emit("ROOM_STATE", frontendRoom);
+  console.log(`[EventBus] room_state: \n ${JSON.stringify(frontendRoom)}`);
+  EventBus.emit("room_state", frontendRoom);
+});
+
+socket.on("show_colors", (frontendRoom: FrontendRoom) => {
+  console.log(`[EventBus] show_colors: \n ${JSON.stringify(frontendRoom)}`);
+  EventBus.emit("show_colors", frontendRoom);
 });
 
 socket.on("error", (err) => {
   console.log(`[EventBus] SOCKET_ERROR \n Error Message: ${err.message}`);
   EventBus.emit("SOCKET_ERROR", err);
 });
+

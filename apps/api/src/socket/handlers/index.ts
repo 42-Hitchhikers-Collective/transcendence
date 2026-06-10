@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 14:08:22 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 14:15:45 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,9 +52,9 @@ export function registerSocketHandlers(
     const { playerId, userName } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
     const room = roomId ? gameManager.getRoomById(roomId) : null;
-    
-    const frontedPlayerInfo = utils.getFrontedPlayerInfo(playerId, userName, room);
-    socket.emit("player_info_response", frontedPlayerInfo); //the new version
+    // JESS WILL UNCOMMENT THIS ONCE I KNOW THE OLD VERSION WORKS
+    // const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
+    // socket.emit("player_info_response", frontedPlayerData); //the new version
 
     // old version:  
     socket.emit("player_info_response", {
