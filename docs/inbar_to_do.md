@@ -18,8 +18,6 @@ send db finish game details
 which details?
 
 
-player draws a card - pass turn
-
 
 when a player is in a room, then leaves the website, the drop timer will start and -- ? 
 check if player returns to room in time / doesnt

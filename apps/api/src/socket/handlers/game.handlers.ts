@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 14:12:28 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 14:21:08 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ export function registerGameHandlers(
     const res = gameManager.drawCard(playerId);
     if (!res.success)
         socket.emit("error", { message: res.error });
-    socket.emit("pass_turn");
+    socket.emit("display_pass_button");
     broadcastGameCanvas(res.roomId);
     })
 
