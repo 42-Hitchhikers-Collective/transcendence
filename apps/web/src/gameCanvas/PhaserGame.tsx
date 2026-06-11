@@ -3,8 +3,6 @@ import Phaser from "phaser";
 import { Boot } from "./scenes/Boot.ts";
 import { Preloader } from "./scenes/Preloader.ts";
 import { GameScene } from "./scenes/GameScene.ts";
-import { EventBus } from "../events/EventBus.ts";
-import { socket } from "@/socket/Socket";
 
 export default function PhaserGame() {
   const gameRef = useRef<HTMLDivElement>(null);
@@ -25,17 +23,13 @@ export default function PhaserGame() {
 
     const game = new Phaser.Game(config);
 
-    // socket.on("room_state", (roomState) => {
-    //   console.log(`[PhaserGame] Received room_state`);
-    //   EventBus.emit("ROOM_STATE", roomState);
-    // });
+    console.log(`[PhaserGame] Component Mounted`);
 
     return () => {
       game.destroy(true);
     };
   }, []);
 
-  console.warn(`[PhaserGame] MOUNTED`);
 
   return (
     <div

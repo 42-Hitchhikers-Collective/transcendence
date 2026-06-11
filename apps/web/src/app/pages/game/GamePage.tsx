@@ -1,8 +1,8 @@
 import { Navigate, useSearchParams } from "react-router";
 
-import Chat from "./components/Chat";
+import Chat from "./components/ChatWindow/Chat";
 import { useGamePage } from "./hooks/useGamePage";
-import GameWindow from "./components/GameWindow";
+import GameWindow from "./components/GameWindow/GameWindow";
 import { useEffect } from "react";
 import PhaserGame from "@/gameCanvas/PhaserGame";
 
@@ -56,7 +56,11 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
             <Chat />
          <button
-            onClick={startGame}
+            // onClick={startGame}
+            onClick={() => {
+              console.log(`[GamePage] Start Game button clicked`);
+              startGame();
+            }}
             disabled={gameStarted}
             className="mb-4 rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white disabled:bg-gray-400"
           >

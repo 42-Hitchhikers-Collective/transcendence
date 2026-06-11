@@ -1,4 +1,4 @@
-import StartGame from "../components/StartGame";
+import StartGame from "./StartGame";
 import PhaserGame from "@/gameCanvas/PhaserGame";
 import { useEffect } from "react";
 
