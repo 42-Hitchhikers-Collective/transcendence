@@ -1,15 +1,10 @@
-export type PlayerResult = {
-  userId: string;
-  placement: number; // 1 = winner, 2 = everyone else
-  score: number;     // sum of card values remaining in hand (UNO penalty scoring)
-};
-
 // Called when a game starts. Creates a RUNNING Game record and returns its id.
 // Store the returned id on room.gameDbId so it can be passed to finalizeGame/abortGame later.
-export async function createGameRecord(prisma: any, lobbyId?: string): Promise<string> {
+export async function createGameRecord(prisma: any, roomName?: string, lobbyId?: string): Promise<string> {
   const game = await prisma.game.create({
     data: {
       status: "RUNNING",
+      roomName: roomName ?? null,
       lobbyId: lobbyId ?? null,
     },
     select: { id: true },
@@ -18,11 +13,13 @@ export async function createGameRecord(prisma: any, lobbyId?: string): Promise<s
 }
 
 // Called when a game ends normally (a player empties their hand).
+// Pass the winnerId and the full playerIds list — placement is assigned here.
 // Marks the game FINISHED and writes one GamePlayer row per participant.
 export async function finalizeGame(
   prisma: any,
   gameId: string,
-  results: PlayerResult[]
+  winnerId: string,
+  playerIds: string[]
 ): Promise<void> {
   await prisma.game.update({
     where: { id: gameId },
@@ -30,11 +27,10 @@ export async function finalizeGame(
   });
 
   await prisma.gamePlayer.createMany({
-    data: results.map((r) => ({
+    data: playerIds.map((userId) => ({
       gameId,
-      userId: r.userId,
-      placement: r.placement,
-      score: r.score,
+      userId,
+      placement: userId === winnerId ? 1 : 2,
     })),
     skipDuplicates: true,
   });
