@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 14:25:11 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 12:48:13 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@ export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
         return {success: false, roomId: "undefined", error: "Room not found"};
     if (msg.length === 0 || msg.length > MAX_MSG_LENGTH)
         return {success: false, roomId: roomId, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
+    const regex = /^[a-zA-Z0-9\-_!?.]+$/;
+    if (!regex.test(msg))
+      return { success: false, roomId: "undefined", error: "Message contains invalid characters"};
     const username = getUsername(playerId) || "Unknown";
     addMsgToChatHistory(room, username, msg);
     return {success: true, roomId: roomId};

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 16:02:58 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/10 16:28:27 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,9 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
     const room = gm.getRoomById(roomId);
     if (!room || room.state !== "playing" || !room.game)
       return {success: false, roomId: roomId, error: "No active game found"};
+    console.log(`Color recived: ${color}`)
     room.game.table.changeColor(color);
+    room.game.passTurn(playerId);
     return {success: true, roomId: roomId};
 }
 
@@ -94,7 +96,7 @@ export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | n
   return null;
 }
 
-//  --- Start Game Events ---
+//  --- Start/End Game Events ---
 
 
 //  Start the game manually if start button was pressed, and all condition are met  
@@ -114,6 +116,18 @@ export function startGameButton(playerId: string): RoomResult {
   return {success: false, roomId: roomId, error: "Start conditions aren't met"};;
 }
 
+
+export function endGame(roomId: string) {
+  const room = gm.getRoomById(roomId);
+  if (!room || !room.game)
+    return {success: false, roomId: roomId, error: "Room or game not found"};
+  room.state = "finished";
+    return {
+    success: true,
+    winnerId: room.game.winner?.id || "undefined",
+    roomId: roomId
+  };
+}
 
 
 // --- Helpers ---
@@ -144,6 +158,19 @@ function mapPlayersForGame(players: { playerId: string; userName: string }[]): M
   });
 }
 
+// Players pressed Pass Turn Button
+export function passTurnButton(playerId: string): RoomIdResult {
+  const roomId = gm.getPlayerRoomId(playerId);
+  if (!roomId)
+    return {success: false, roomId: "undefined", error: "Player is not in room"};
+  const room = gm.getRoomById(roomId);
+  if (!room || room.state !== "playing" || !room.game)
+    return {success: false, roomId: roomId, error: "No active game found"};
+  if (room.game.playerPassBotton(playerId))
+    return {success: false, roomId: roomId, error: "Game logic error: invalid move"};
+  return {success: true, roomId: roomId};
+}
+
 // Returns true only if game is in waiting mode, at least 2 players in the room, and all players are ready
 function startGameCondition(room: Room): boolean {
     if (!room)
@@ -152,9 +179,5 @@ function startGameCondition(room: Room): boolean {
         return false;
     if (room.players.length < MIN_PLAYERS_TO_START)
         return false;
-    // REMOVED WITH INBAR - delete comments once sure code is tested/works
-    // const allPlayersReady = room.players.every(player => player.isReady);
-    // if (!allPlayersReady)
-    //     return false;
     return true;
   }
