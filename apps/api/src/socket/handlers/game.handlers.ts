@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 16:37:55 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/11 11:31:10 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,26 +76,37 @@ export function registerGameHandlers(
     broadcastGameCanvas(res.roomId);
   });
 
-    // Start the game by pressing a button.
-    socket.on("start_game", () => {
-        const { playerId } = getIdentity(socket);
-        const res = gameManager.startGameButton(playerId);
-        if (!res.success) {
-            socket.emit("error", { message: res.error });
-            socket.emit("game_start_error", { message: res.error });
-            return;
-        }
-        console.log(`Game started in room ${res.room.id}`);
-        socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
-        systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
-        broadcastGameCanvas(res.room.id);
-    });
+  // Start the game by pressing a button.
+  socket.on("start_game", () => {
+      const { playerId } = getIdentity(socket);
+      const res = gameManager.startGameButton(playerId);
+      if (!res.success) {
+          socket.emit("error", { message: res.error });
+          socket.emit("game_start_error", { message: res.error });
+          return;
+      }
+      console.log(`Game started in room ${res.room.id}`);
+      socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
+      systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
+      broadcastGameCanvas(res.room.id);
+  });
 
+
+  // When the game canvas is ready on the frontend, send the initial game state
+  socket.on("canvas_ready", () => {
+      const { playerId } = getIdentity(socket);
+      const roomId = gameManager.getPlayerRoomId(playerId);
+      if (!roomId) {
+          socket.emit("error", { message: "Player is not in a room" });
+          return;
+      }
+      broadcastGameCanvas(roomId);
+  });
 
 // --- Finish Game Events ---
 
-    // Send finished game data to the Database and announce the finished game
-    async function endGame(roomId: string, socket: Socket) {
+  // Send finished game data to the Database and announce the finished game
+  async function endGame(roomId: string, socket: Socket) {
     const res = gameManager.endGame(roomId);
     if (res.success) {
         
@@ -118,6 +129,5 @@ export function registerGameHandlers(
     }
     socket.nsp.to(roomId).emit("game_finished", { roomId: roomId });
     return;
-};
-}
+  };
 }
