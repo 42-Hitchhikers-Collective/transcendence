@@ -1,4 +1,5 @@
 import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
+import { CARDS, PLAYER, SCREEN } from "./Layouts.ts"
 
 type Position = { x: number; y: number };
 
@@ -31,16 +32,27 @@ export class RenderManager {
     });
 
     this.renderPile(room);
+    this.renderDrawPile();
   }
 
   private renderPile(room: FrontendRoom) {
     const sprite = this.scene.add.image(
-      300,
-      300,
+      (SCREEN.WIDTH / 2) - 50 ,   // x
+      SCREEN.HEIGHT / 2,          // y
       `${room.game?.discardTopCard.value}_${room.game?.discardTopCard.color}`,
     );
 
-    sprite.setScale(0.3);
+    sprite.setScale(CARDS.SCALE);
+    sprite.setInteractive();
+  }
+
+  private renderDrawPile() {
+    const sprite = this.scene.add.image(
+      (SCREEN.WIDTH / 2) + 50 ,   // x
+      SCREEN.HEIGHT / 2,          // y
+      `back`);
+
+    sprite.setScale(CARDS.SCALE);
     sprite.setInteractive();
   }
 
@@ -83,7 +95,7 @@ export class RenderManager {
           `${card.value}_${card.color}`,
         );
 
-        sprite.setScale(0.3);
+        sprite.setScale(CARDS.SCALE);
         sprite.setData("cardIndex", cardIndex);
         sprite.setInteractive();
         this.scene.input.setDraggable(sprite);
@@ -108,22 +120,39 @@ export class RenderManager {
     this.playerContainers.clear();
   }
 
-  private getPlayerPositions(count: number): Position[] {
-    const cx = 500;
-    const cy = 400;
-    const r = 250;
+private getPlayerPositions(count: number): Position[] {
+  const centerX = 500;
 
-    const res: Position[] = [];
+  switch (count) {
+    case 1:
+      return [
+        { x: SCREEN.WIDTH / 2, y: 650 },
+      ];
 
-    for (let i = 0; i < count; i++) {
-      const a = (i / count) * Math.PI * 2 + Math.PI;
+    case 2:
+      return [
+        { x: SCREEN.WIDTH / 2, y: 150 }, // top
+        { x: SCREEN.WIDTH / 2, y: 650 }, // observer
+      ];
 
-      res.push({
-        x: cx + Math.cos(a) * r,
-        y: cy + Math.sin(a) * r,
-      });
-    }
+    case 3:
+      return [
+        { x: 200, y: SCREEN.HEIGHT / 2 }, // left
+        { x: 800, y: SCREEN.HEIGHT / 2 }, // right
+        { x: SCREEN.WIDTH, y: 650 }, // observer
+      ];
 
-    return res;
+    case 4:
+      return [
+        { x: centerX, y: 100 }, // top
+        { x: 200, y: SCREEN.HEIGHT / 2 }, // left
+        { x: 800, y: SCREEN.HEIGHT / 2 }, // right
+        { x: centerX, y: 650 }, // observer
+      ];
+
+    default:
+      // fallback circular
+      return [];
   }
+}
 }
