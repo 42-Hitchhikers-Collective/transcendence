@@ -1,7 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket";
-import type { FrontendRoom } from "@/gameCanvas/types/roomTypes";
+import {eventBus} from "@/utils/EventBus";
+
+
+
 
 type PlayerInfo = {
   playerId: string;
@@ -11,6 +14,13 @@ type PlayerInfo = {
     roomName: string;
     gameState: "waiting" | "playing" | "finished";
   } | null;
+};
+
+type RoomInfo = {
+  roomId: string;
+  roomName: string;
+  roomState: string;
+  players: { userName: string; dropped: boolean }[];
 };
 
 type GameStartFailedPayload = {
@@ -39,7 +49,7 @@ export function useGamePage(roomName: string) {
   navigateRef.current = navigate;
 
   // Stores the latest full room state so Effect 3 can replay it on the EventBus
-  const roomStateRef = useRef<FrontendRoom | null>(null);
+  const roomStateRef = useRef<RoomInfo | null>(null);
 
   // ──────────────────────────────────────────
   // Effect 1: notifies backend when browser tab is closed/refreshed/navigated away to trigger drop timer
@@ -64,7 +74,7 @@ export function useGamePage(roomName: string) {
   // (runs once on mount; cleanup leaves the room)
   // ──────────────────────────────────────────
   useEffect(() => {
-    const handleRoomData = (roomData: FrontendRoom) => {
+    const handleRoomInfoResponse = (roomData: RoomInfo) => {
       roomStateRef.current = roomData;
       console.log(
         `🎮GAME PAGE - ROOM DATA RECEIVED:\n` +
@@ -72,12 +82,14 @@ export function useGamePage(roomName: string) {
             .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
             .join("\n"),
       );
-      setPlayers(roomData.players.map((p: any) => p.userName));
+      if(roomData)
+        setPlayers(roomData.players.map((p: any) => p.userName));
     };
 
     const handlePlayerData = (playerData: PlayerInfo) => {
       setPlayerInfo(playerData);
 
+      
       console.log(
         `🎮GAME PAGE - PLAYER INFO RECEIVED:\n` +
           Object.entries(playerData)
@@ -90,27 +102,6 @@ export function useGamePage(roomName: string) {
       const currentNavigate = navigateRef.current;
       const currentPlayerInfo = playerInfoRef.current;
 
-      // The ideal of these checks is thatthey should be in the backend
-      // keeping them here to quickly solve these edge cases for now and keep simple
-      if (!playerData.activeRoom?.roomName) {
-        console.error(
-          `${currentPlayerInfo?.userName} does not exist or player not in a room, redirecting to profile`,
-        );
-        return;
-      }
-
-      /* 
-        This check was added because if the player has an active room, the player will
-        be be redirected to it even if writing a different url.
-        */
-      if (playerData.activeRoom?.roomName !== currentRoomName) {
-        console.error(
-          `[GamePage] active_room mismatch! url: ${currentRoomName} payload: ${playerData.activeRoom?.roomName}`,
-        );
-        // instead of navigate
-        currentNavigate("/profile", { replace: true });
-      }
-
       // why does the setGameStarted change still shows transition from statgame to gamecanvas and not
       // just directly render the game canvas without the start game screen in between when the player refreshes the page while in a game?
       if (playerData.activeRoom.gameState === "playing") {
@@ -120,18 +111,47 @@ export function useGamePage(roomName: string) {
       
       // DIRTY CLEANUP BUT IT WORKS
       setTimeout(() => {
-        console.warn(`------------- SET TIMEOUT Game Started: ${gameStarted}`);
         socket.emit("canvas_ready");
-
+        console.warn(`Calling canvas Ready. Game Started: ${gameStarted}`);
         console.log("this is the first message");
       }, 2000);
 
     };
 
     const handleError = (payload: GameStartFailedPayload) => {
+
+      /*
+      Unsure why i should use this instead
+      currentNavigate("/profile", { replace: true });       
+       */
+
       if (payload?.message === "Room not found") {
         navigateRef.current("/profile", { replace: true });
       }
+      // TODO: make sure this error pops only for users that are not in a room
+      if (payload?.message === "Game already begun") {
+        navigateRef.current("/profile", { replace: true });
+      }
+      if (payload?.message === "Room is full") {
+        navigateRef.current("/profile", { replace: true });
+      }
+
+      // Shoots when a player tries to join a non existing room or a room
+      // CAREFUL WITH RACEING EVENTS (if player creates 
+      // the room and then joins, but join is quicker and we get error)
+      if (payload?.message === "Requested room not found") {
+        navigateRef.current("/profile", { replace: true });
+      }
+
+      // Covers a case when player is active in one room and tries to join another
+      if (payload?.message === "Player already in a different room") {
+        navigateRef.current("/profile", { replace: true });
+      }
+
+      // set a different view of the page or add popup when these errors appear
+      // and redirect the user to the profile via button
+      // also make sure its ok to keep the url the same if not valid
+
     };
 
     const handleGameStartSuccess = ({ roomId }: GameStartSuccessPayload) => {
@@ -150,19 +170,20 @@ export function useGamePage(roomName: string) {
 
     });
     socket.on("player_info_response", handlePlayerData);
-    socket.on("room_state", handleRoomData);
+    socket.on("room_info_response", handleRoomInfoResponse);
     socket.on("error", handleError);
     socket.on("game_start_success", handleGameStartSuccess);
     socket.on("game_start_failed", handleGameStartFailed);
 
     socket.emit("join_room", { roomName: roomNameRef.current });
     socket.emit("player_info_request");
+    socket.emit("room_info_request");
 
     return () => {
       socket.emit("user_dropped"); // needed to handle dropped user from non browser related stuff like just normal component unmount or refresh
       socket.off("player_info_response", handlePlayerData);
       socket.off("error", handleError);
-      socket.off("room_state", handleRoomData);
+      socket.off("room_info_response", handleRoomInfoResponse);
       socket.off("game_start_success", handleGameStartSuccess);
       socket.off("game_start_failed", handleGameStartFailed);
 

@@ -1,6 +1,6 @@
 # Backend Socket Emit List — Errors
 
-> A list of errors that the backend emits via sockets and that the frontend can use to handle navigation and room handling edgecases, organized by socket event name.
+> A list of errors that the backend emits via sockets and that the frontend can use to handle user edge cases while navigating the website, handling room creation/joining, playing the game, and chatting. Organized by socket event name.
 
 ---
 
