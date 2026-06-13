@@ -23,6 +23,14 @@ function useTimeout(durationMs: number) {
         if (prev <= 1000) {
           clearInterval(intervalRef.current!);
           setIsRunning(false);
+
+          // FIX: COVER PROBLEM OF RESET RELOAD BY CHECKING MACHINE CLOCK TIME
+          // AND COMPARE TO SECONDS PASSED
+
+          // TODO : DO NOT EMIT LEAVE ROOM (AS BACKEND DOES NOT HANDLE EDGECASE OF CALLED FUNC WHEN PLAYER LEFT ALREADY)
+          // JUST DISMOUNT COMPONENT
+          // TODO: ADD CHCK FO WHEN RELOAD IF PLAYER IS STILL IN ROOM!!!
+          // socket.emit("leave_room"); // Forces leave room if socket fails to emit for some reason
           return 0;
         }
         return prev - 1000;
@@ -77,7 +85,7 @@ export function CreateGameCard() {
   const handlePlayerInfo = (data: any) => {
     // prints json data in a readable format without needing to remember the structure of the data object
     console.log(
-      `Player info received:\n` +
+      `🃏 CREATE GAME CARD: Player info received:\n` +
         Object.entries(data)
           .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
           .join("\n"),

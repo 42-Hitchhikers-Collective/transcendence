@@ -8,16 +8,16 @@ export default function PhaserGame() {
   const gameRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const container = gameRef.current;
     const config = {
       type: Phaser.AUTO,
-      width: 1200,
-      height: 900,
-      parent: gameRef.current,
+      parent: container, //neeeded for responsive scaling to work properly
       scene: [Boot, Preloader, GameScene],
-      // Jess added this to scale the canvas to the website
       scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
+        mode: Phaser.Scale.RESIZE,   // canvas matches parent div exactly
+        // autoCenter: Phaser.Scale.CENTER_BOTH,
+        // width: container?.clientWidth || 800,
+        // height: container?.clientHeight || 1000,
       },
     };
 
@@ -34,8 +34,7 @@ export default function PhaserGame() {
   return (
     <div
       ref={gameRef}
-      // Jess added this to scale the canvas to the website
-      className="w-full max-h-[75vh] overflow-hidden rounded-xl"
+      // className="h-full w-full overflow-hidden rounded-xl"
     />
   );
 }

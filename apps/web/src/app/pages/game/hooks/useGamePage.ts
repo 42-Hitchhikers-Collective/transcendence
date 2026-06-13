@@ -1,14 +1,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket";
-import {eventBus} from "@/utils/EventBus";
+import { useAuthContext } from "@/app/auth/AuthContext";
 
-
-
-
-type PlayerInfo = {
+type PlayerData = {
   playerId: string;
   userName: string;
+  avatarUrl?: string;
   activeRoom: {
     roomId: string;
     roomName: string;
@@ -16,11 +14,11 @@ type PlayerInfo = {
   } | null;
 };
 
-type RoomInfo = {
+type RoomData = {
   roomId: string;
   roomName: string;
   roomState: string;
-  players: { userName: string; dropped: boolean }[];
+  players: { userName: string; avatarUrl?: string; dropped: boolean }[];
 };
 
 type GameStartFailedPayload = {
@@ -32,28 +30,30 @@ type GameStartSuccessPayload = {
 };
 
 export function useGamePage(roomName: string) {
-  const [playerInfo, setPlayerInfo] = useState<PlayerInfo | null>(null);
+  const { user } = useAuthContext();
+  const [playerInfo, setPlayerData] = useState<PlayerData | null>(null);
   const navigate = useNavigate();
   const [players, setPlayers] = useState<string[]>([]);
+  const [playerAvatars, setPlayerAvatars] = useState<Record<string, string>>({});
   const [gameStarted, setGameStarted] = useState(false);
   const [canvasError, setCanvasError] = useState<string | null>(null);
+  const [roomError, setRoomError] = useState<string | null>(null);
+  // const [socketReady, setSocketReady] = useState(socket.connected);
 
   // Keeps refs to avoid stale closures in socket callbacks ──
   const playerInfoRef = useRef(playerInfo);
   playerInfoRef.current = playerInfo;
 
+  // Stores the latest full room state so Effect 3 can replay it on the EventBus
+  const RoomDataRef = useRef<RoomData | null>(null);
   const roomNameRef = useRef(roomName);
   roomNameRef.current = roomName;
 
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
 
-  // Stores the latest full room state so Effect 3 can replay it on the EventBus
-  const roomStateRef = useRef<RoomInfo | null>(null);
-
   // ──────────────────────────────────────────
   // Effect 1: notifies backend when browser tab is closed/refreshed/navigated away to trigger drop timer
-  // (runs once on mount, cleans up on unmount)
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
   // ──────────────────────────────────────────
   useEffect(() => {
@@ -68,113 +68,32 @@ export function useGamePage(roomName: string) {
     };
   }, []);
 
-  // ──────────────────────────────────────────
-  // Effect 2: Socket connection lifecycle
-  // joins room, fetches player info, listens to events
-  // (runs once on mount; cleanup leaves the room)
-  // ──────────────────────────────────────────
+  /* 
+  MAIN USE EFFECT:
+  this mounts the gamepage only when we have user and socketId
+  It runs socket requests for player info and room info and we need to make sure we have the right user data and socketId before we do that
+  otherwise we will get null data and the gamepage will not mount properly
+  */
   useEffect(() => {
-    const handleRoomInfoResponse = (roomData: RoomInfo) => {
-      roomStateRef.current = roomData;
-      console.log(
-        `🎮GAME PAGE - ROOM DATA RECEIVED:\n` +
-          Object.entries(roomData)
-            .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-            .join("\n"),
-      );
-      if(roomData)
-        setPlayers(roomData.players.map((p: any) => p.userName));
-    };
-
-    const handlePlayerData = (playerData: PlayerInfo) => {
-      setPlayerInfo(playerData);
-
-      
-      console.log(
-        `🎮GAME PAGE - PLAYER INFO RECEIVED:\n` +
-          Object.entries(playerData)
-            .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-            .join("\n"),
-      );
-
-      // TO CHECK -> Reads latest values from refs to avoid stale closures
-      const currentRoomName = roomNameRef.current;
-      const currentNavigate = navigateRef.current;
-      const currentPlayerInfo = playerInfoRef.current;
-
-      // why does the setGameStarted change still shows transition from statgame to gamecanvas and not
-      // just directly render the game canvas without the start game screen in between when the player refreshes the page while in a game?
-      if (playerData.activeRoom.gameState === "playing") {
-        setGameStarted(true);
-        // socket.emit("canvas_ready");
-      }
-      
-      // DIRTY CLEANUP BUT IT WORKS
-      setTimeout(() => {
-        socket.emit("canvas_ready");
-        console.warn(`Calling canvas Ready. Game Started: ${gameStarted}`);
-        console.log("this is the first message");
-      }, 2000);
-
-    };
-
-    const handleError = (payload: GameStartFailedPayload) => {
-
-      /*
-      Unsure why i should use this instead
-      currentNavigate("/profile", { replace: true });       
-       */
-
-      if (payload?.message === "Room not found") {
-        navigateRef.current("/profile", { replace: true });
-      }
-      // TODO: make sure this error pops only for users that are not in a room
-      if (payload?.message === "Game already begun") {
-        navigateRef.current("/profile", { replace: true });
-      }
-      if (payload?.message === "Room is full") {
-        navigateRef.current("/profile", { replace: true });
-      }
-
-      // Shoots when a player tries to join a non existing room or a room
-      // CAREFUL WITH RACEING EVENTS (if player creates 
-      // the room and then joins, but join is quicker and we get error)
-      if (payload?.message === "Requested room not found") {
-        navigateRef.current("/profile", { replace: true });
-      }
-
-      // Covers a case when player is active in one room and tries to join another
-      if (payload?.message === "Player already in a different room") {
-        navigateRef.current("/profile", { replace: true });
-      }
-
-      // set a different view of the page or add popup when these errors appear
-      // and redirect the user to the profile via button
-      // also make sure its ok to keep the url the same if not valid
-
-    };
-
-    const handleGameStartSuccess = ({ roomId }: GameStartSuccessPayload) => {
-      console.log(`[GamePage] game_start_success received for room ${roomId}`);
-      setGameStarted(true);
-    };
-
-    const handleGameStartFailed = ({ message }: GameStartFailedPayload) => {
-      console.log(`[GamePage] game_start_failed received: ${message}`);
-      setCanvasError(message ?? "Unable to start the game.");
-    };
-
+    // if (!user || !socket.connected) return; // waits for user and socket connection before doing anything
+    if (!user) return; // waits for user and socket connection before doing anything
+    console.log(
+      `🔌 [GamePage] User info received "${user.username}", new socket id: ${socket.connected}`,
+    );
     socket.on("phaser_ready", () => {
-      console.log(`[GamePage] Phaser canvas is ready, requesting room state...`);
-        console.warn(`------------- Game Started: ${gameStarted}`);
-
+      console.log(
+        `[GamePage] Phaser canvas is ready, requesting room state...`,
+      );
     });
+
+    // Listen to socket events
     socket.on("player_info_response", handlePlayerData);
-    socket.on("room_info_response", handleRoomInfoResponse);
+    socket.on("room_info_response", handleRoomDataResponse);
     socket.on("error", handleError);
     socket.on("game_start_success", handleGameStartSuccess);
     socket.on("game_start_failed", handleGameStartFailed);
 
+    // emit socket events
     socket.emit("join_room", { roomName: roomNameRef.current });
     socket.emit("player_info_request");
     socket.emit("room_info_request");
@@ -183,7 +102,7 @@ export function useGamePage(roomName: string) {
       socket.emit("user_dropped"); // needed to handle dropped user from non browser related stuff like just normal component unmount or refresh
       socket.off("player_info_response", handlePlayerData);
       socket.off("error", handleError);
-      socket.off("room_info_response", handleRoomInfoResponse);
+      socket.off("room_info_response", handleRoomDataResponse);
       socket.off("game_start_success", handleGameStartSuccess);
       socket.off("game_start_failed", handleGameStartFailed);
 
@@ -191,35 +110,114 @@ export function useGamePage(roomName: string) {
         `💦 ${playerInfoRef.current?.userName} dropped from room ${roomNameRef.current}.`,
       );
     };
-  }, []);
+  }, [user]); // ⬅️ runs when user becomes available
 
-  // ──────────────────────────────────────────
-  // Effect 3: React to state changes & log
-  // (runs whenever playerInfo/gameStarted/players change)
-  // ──────────────────────────────────────────
   useEffect(() => {
+    if (players.length > 0) {
+      console.log(`👤👤👤👤 PLAYER LIST UPDATED: ${players}`);
+      console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
+    }
+    if (RoomDataRef.current?.roomState === "playing") {
+      // socket.emit("canvas_start"); // trigger game canvas to refresh with the latest room state when game starts (e.g. in case player refreshes page during game or joins late)
+      setGameStarted(true);
+    }
 
+    setTimeout(() => {
+      socket.emit("canvas_start");
+      console.warn(`🎨 Refreshing canvas: ${gameStarted}`);
+    }, 100);
 
-    console.debug(`[GamePage] State updated:`, {
-      playerInfo,
-      gameStarted,
-      players,
-    });
-  }, [players]);
+  }, [players, RoomDataRef.current?.roomState]); // ⬅️ runs whenever players or room state changes to keep the game canvas in sync with the latest room state (e.g. new player joins, game starts, etc)
 
-  // ──────────────────────────────────────────
-  // Actions
-  // ──────────────────────────────────────────
-  const startGame = useCallback(() => {
-    socket.emit("start_game");
-    console.log(`[GamePage] start_game emitted`);
-  }, []);
+  useEffect(() => {
+    console.log(`Game Started state changed: ${gameStarted}`);
+  }, [gameStarted]); // ⬅️ can be used for any side effects that need to run when game starts, currently not used but can be useful for future features like showing a "Game Started" banner or something
+
+  //#region -------------- SOCKET HANDLERS -----------------
+
+  const handleError = (payload: GameStartFailedPayload) => {
+    if (payload?.message === "Room not found") {
+      // navigateRef.current("/profile", { replace: true });
+      setRoomError(
+        "The room you are trying to join does not exist. Please join a different room or create your own.",
+      );
+      // or currentNavigate("/profile", { replace: true });
+    }
+    if (payload?.message === "Game already begun") {
+      // navigateRef.current("/profile", { replace: true });
+      setRoomError(
+        "The game in this room has already started. Please join a different room or create your own.",
+      );
+    }
+    if (payload?.message === "Room is full") {
+      // navigateRef.current("/profile", { replace: true });
+      setRoomError(
+        "The room you are trying to join is full. Please join a different room or create your own.",
+      );
+    }
+    // Shoots when a player tries to join a non existing room or a room (CAREFUL IF RACE BETWEEN CREATE / JOIN)
+    if (payload?.message === "Requested room not found") {
+      // navigateRef.current("/profile", { replace: true });
+      setRoomError(
+        "The room you are trying to join does not exist as it was not created or has been deleted.",
+      );
+    }
+    // Covers a case when player is active in one room and tries to join another
+    if (payload?.message === "Player already in a different room") {
+      // navigateRef.current("/profile", { replace: true });
+      setRoomError(
+        "You are already member of another room. Please leave that room before joining another.",
+      );
+    }
+  };
+
+  const handlePlayerData = (playerData: PlayerData) => {
+    setPlayerData(playerData);
+
+    console.log(
+      `🎮 PLAYER DATA RECEIVED FROM SOCKET \n`,
+      +Object.entries(playerData)
+        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+        .join("\n"),
+    );
+  };
+
+  const handleRoomDataResponse = (roomData: RoomData) => {
+    RoomDataRef.current = roomData; // current stores the latest full room state for replaying on EventBus
+    console.log(
+      `🎮 ROOM DATA RECEIVED FROM SOCKET\n`,
+      +Object.entries(roomData)
+        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+        .join("\n"),
+    );
+    if (roomData) {
+      setPlayers(roomData.players.map((p: any) => p.userName));
+      const avatars: Record<string, string> = {};
+      roomData.players.forEach((p: any) => {
+        if (p.avatarUrl) avatars[p.userName] = p.avatarUrl;
+      });
+      setPlayerAvatars(avatars);
+    }
+  };
+
+  const handleGameStartSuccess = ({ roomId }: GameStartSuccessPayload) => {
+    console.log(`[GamePage] game_start_success received for room ${roomId}`);
+    setGameStarted(true);
+  };
+
+  const handleGameStartFailed = ({ message }: GameStartFailedPayload) => {
+    console.log(`[GamePage] game_start_failed received: ${message}`);
+    setCanvasError(message ?? "Unable to start the game.");
+  };
+
+  //#endregion
 
   return {
     canvasError,
+    roomError,
     gameStarted,
     playerInfo,
     players,
-    startGame,
+    playerAvatars,
   };
 }
