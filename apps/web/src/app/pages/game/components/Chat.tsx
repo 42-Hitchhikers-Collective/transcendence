@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "@/socket/Socket";
+import type { PlayerListItem } from "../hooks/useGamePage";
 
 type ChatMessage = {
   senderId: string;
@@ -39,7 +40,7 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
   );
 }
 
-export default function Chat({ playerAvatars = {} }: { playerAvatars?: Record<string, string> }) {
+export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[] }) {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -85,9 +86,9 @@ export default function Chat({ playerAvatars = {} }: { playerAvatars?: Record<st
 
   return (
     <div className="flex flex-1 flex-col min-h-0">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-500">
+      {/* <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-rose-500">
         Chat
-      </h2>
+      </h2> */}
 
       {/* Messages area */}
       <div className="mt-4 flex flex-1 flex-col min-h-0 rounded-2xl border border-rose-200/60 bg-white">
@@ -104,12 +105,12 @@ export default function Chat({ playerAvatars = {} }: { playerAvatars?: Record<st
                 {msg.msg}
               </p>
             ) : (
-              <div className="flex gap-3" key={i}>
+              <div className="flex gap-3 bg-green-100 pl-4 py-4 m-6 rounded-2xl " key={i}>
                 <MessageAvatar
                   name={msg.senderId}
-                  src={playerAvatars[msg.senderId]}
+                  src={playerList.find(p => p.userName === msg.senderId)?.avatarUrl}
                 />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 ">
                   <div className="flex items-baseline gap-2">
                     <span className="text-sm font-semibold text-slate-800">
                       {msg.senderId}
@@ -128,16 +129,17 @@ export default function Chat({ playerAvatars = {} }: { playerAvatars?: Record<st
               No messages yet.
             </p>
           )}
+       
         </div>
 
         {/* Input area */}
-        <div className="flex items-center gap-2 border-t border-rose-100 px-3 py-2">
+        <div className="flex items-center gap-2 border-tpx-3 p-4">
           <input
             value={chatInput}
             onChange={(event) => setChatInput(event.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Write something..."
-            className="flex-1 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 outline-none"
+            className="flex-1 rounded-lg bg-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 outline-none"
           />
           <button
             type="button"

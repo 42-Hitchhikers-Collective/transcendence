@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket";
 import { useAuthContext } from "@/app/auth/AuthContext";
@@ -14,11 +14,17 @@ type PlayerData = {
   } | null;
 };
 
+export type PlayerListItem = {
+  userName: string;
+  avatarUrl?: string;
+  dropped: boolean;
+};
+
 type RoomData = {
   roomId: string;
   roomName: string;
   roomState: string;
-  players: { userName: string; avatarUrl?: string; dropped: boolean }[];
+  players: PlayerListItem[];
 };
 
 type GameStartFailedPayload = {
@@ -33,8 +39,7 @@ export function useGamePage(roomName: string) {
   const { user } = useAuthContext();
   const [playerInfo, setPlayerData] = useState<PlayerData | null>(null);
   const navigate = useNavigate();
-  const [players, setPlayers] = useState<string[]>([]);
-  const [playerAvatars, setPlayerAvatars] = useState<Record<string, string>>({});
+  const [playerList, setPlayerList] = useState<PlayerListItem[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [canvasError, setCanvasError] = useState<string | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);
@@ -91,7 +96,7 @@ export function useGamePage(roomName: string) {
     socket.on("room_info_response", handleRoomDataResponse);
     socket.on("error", handleError);
     socket.on("game_start_success", handleGameStartSuccess);
-    socket.on("game_start_failed", handleGameStartFailed);
+    socket.on("game_start_error", handleGameStartFailed);
 
     // emit socket events
     socket.emit("join_room", { roomName: roomNameRef.current });
@@ -104,7 +109,7 @@ export function useGamePage(roomName: string) {
       socket.off("error", handleError);
       socket.off("room_info_response", handleRoomDataResponse);
       socket.off("game_start_success", handleGameStartSuccess);
-      socket.off("game_start_failed", handleGameStartFailed);
+      socket.off("game_start_error", handleGameStartFailed);
 
       console.log(
         `💦 ${playerInfoRef.current?.userName} dropped from room ${roomNameRef.current}.`,
@@ -113,8 +118,8 @@ export function useGamePage(roomName: string) {
   }, [user]); // ⬅️ runs when user becomes available
 
   useEffect(() => {
-    if (players.length > 0) {
-      console.log(`👤👤👤👤 PLAYER LIST UPDATED: ${players}`);
+    if (playerList.length > 0) {
+      console.log(`👤👤👤👤 PLAYER LIST UPDATED: ${playerList.map(p => p.userName)}`);
       console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
     }
     if (RoomDataRef.current?.roomState === "playing") {
@@ -126,8 +131,7 @@ export function useGamePage(roomName: string) {
       socket.emit("canvas_start");
       console.warn(`🎨 Refreshing canvas: ${gameStarted}`);
     }, 100);
-
-  }, [players, RoomDataRef.current?.roomState]); // ⬅️ runs whenever players or room state changes to keep the game canvas in sync with the latest room state (e.g. new player joins, game starts, etc)
+  }, [playerList, RoomDataRef.current?.roomState]); // ⬅️ runs whenever players or room state changes to keep the game canvas in sync with the latest room state (e.g. new player joins, game starts, etc)
 
   useEffect(() => {
     console.log(`Game Started state changed: ${gameStarted}`);
@@ -175,28 +179,23 @@ export function useGamePage(roomName: string) {
     setPlayerData(playerData);
 
     console.log(
-      `🎮 PLAYER DATA RECEIVED FROM SOCKET \n`,
-      +Object.entries(playerData)
-        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-        .join("\n"),
+      `🎮 PLAYER DATA RECEIVED FROM SOCKET \n` +
+        Object.entries(playerData)
+          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+          .join("\n"),
     );
   };
 
   const handleRoomDataResponse = (roomData: RoomData) => {
     RoomDataRef.current = roomData; // current stores the latest full room state for replaying on EventBus
     console.log(
-      `🎮 ROOM DATA RECEIVED FROM SOCKET\n`,
-      +Object.entries(roomData)
-        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-        .join("\n"),
+      `🎮 ROOM DATA RECEIVED FROM SOCKET\n` +
+        Object.entries(roomData)
+          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+          .join("\n"),
     );
     if (roomData) {
-      setPlayers(roomData.players.map((p: any) => p.userName));
-      const avatars: Record<string, string> = {};
-      roomData.players.forEach((p: any) => {
-        if (p.avatarUrl) avatars[p.userName] = p.avatarUrl;
-      });
-      setPlayerAvatars(avatars);
+      setPlayerList(roomData.players);
     }
   };
 
@@ -206,7 +205,7 @@ export function useGamePage(roomName: string) {
   };
 
   const handleGameStartFailed = ({ message }: GameStartFailedPayload) => {
-    console.log(`[GamePage] game_start_failed received: ${message}`);
+    console.log(`[GamePage] game_start_error received: ${message}`);
     setCanvasError(message ?? "Unable to start the game.");
   };
 
@@ -217,7 +216,6 @@ export function useGamePage(roomName: string) {
     roomError,
     gameStarted,
     playerInfo,
-    players,
-    playerAvatars,
+    playerList,
   };
 }

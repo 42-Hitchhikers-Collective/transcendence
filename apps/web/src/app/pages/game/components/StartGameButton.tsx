@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { socket } from "@/socket/Socket";
 
 type StartGameButtonProps = {
@@ -15,20 +15,23 @@ export default function StartGameButton({
     console.log(`[GamePage] start_game emitted`);
   }, []);
 
+
+
   return (
     <>
       <button
         onClick={() => {
           console.log(`[GamePage] Start Game button clicked`);
           startGame();
+     
         }}
         disabled={disabled}
-        className="mb-4 rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white disabled:bg-gray-400"
+        className={` rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white disabled:bg-gray-400`}
       >
         {disabled ? "Game in Progress" : "Start Game"}
       </button>
-      {canvasError && (
-        <div className="rounded bg-red-500/80 p-3 text-sm">{canvasError}</div>
+      {canvasError && !disabled && (
+        <div className="rounded text-red-500  text-sm">{canvasError}</div>
       )}
     </>
   );

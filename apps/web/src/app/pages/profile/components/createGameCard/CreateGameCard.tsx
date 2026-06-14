@@ -54,9 +54,7 @@ export function CreateGameCard() {
   const { timeLeft, isRunning, start, reset } = useTimeout(30_000);
 
   useEffect(() => {
-    // This code runs as soon as the CreateGameCard component mounts.
-    // Socket listeners and emittters should be set up here
-    // listens for lea
+    // TODO: leave rooms mostly may not riun because new socket of the player is not connected
     socket.on("leave_room", () => {
       console.log("Leave_room event received on CreateGameCard");
       setHasActiveRoom(null);
