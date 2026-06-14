@@ -45,13 +45,14 @@ export function createAuthMiddleware(app: FastifyInstance) {
     try {
       const profile = await app.prisma.profile.findUnique({
         where: { userId: payload.sub },
-        select: { username: true },
+        select: { username: true, avatarUrl: true }, // JESS - I ADDED AVATAR URL TO THE PROFILE INFO WE GET FROM THE DATABASE SO WE CAN USE IT IN THE FRONTEND TO DISPLAY THE PLAYER'S AVATAR IN THE GAME PAGE
       });
 
       if (!profile) return next(new Error("unauthorized"));
 
       (socket as any).userId = payload.sub;
       (socket as any).userName = profile.username;
+      (socket as any).avatarUrl = profile.avatarUrl; // JESS - I ADDED AVATAR URL TO THE PROFILE INFO WE GET FROM THE DATABASE SO WE CAN USE IT IN THE FRONTEND TO DISPLAY THE PLAYER'S AVATAR IN THE GAME PAGE
       socket.join(`user:${payload.sub}`);
 
       return next();

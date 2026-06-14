@@ -23,6 +23,7 @@ export type Player = {
   playerId: string;      // permanent identity (userId) used for game logic
   socketId: string;      // current connection used for networking
   userName: string;      // display name for UI/chat
+  avatarUrl: string;     // <-------- JESS - I added this to get the avatar of the player to show in the chat
 };
 
 export type GameState = "waiting" | "playing" | "finished";

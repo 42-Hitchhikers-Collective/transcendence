@@ -40,9 +40,21 @@ export function registerSocketHandlers(
     gameManager.debugState();
   }
 
+  // 👋 JESS ADD HERE ------- TO BROADCAST ROOM INFO FOR THE GAME WEBPAGE (so the frontend can change the view on every change) to all players in the room
+  function broadcastGamePage(roomId: string) {
+    const roomInfo = utils.getFrontedRoomInfo(roomId);
+    if (roomInfo) {
+      socket.nsp.to(roomId).emit("room_info_response", roomInfo);
+      // JESS - please leave this for me to better debug inconsistencies between backend and frontend room states
+      // I left it commented out to not add noise for your own debugging
+      // console.log(`<-------------  ♥️ ROOM INFO ${roomId} ♥️ -------------> \n`, roomInfo);
+      // console.log(`<--------------------------------------------->`);
+    }
+  }
+
   // Register related event handlers
-  registerConnectionHandlers(app, socket, broadcastGameCanvas);
-  registerRoomHandlers(socket, broadcastGameCanvas);
+  registerConnectionHandlers(app, socket, broadcastGameCanvas /* broadcastGamePage */);
+  registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);  // <------------- 👋 JESS ADDED HERE
   registerGameHandlers(socket, broadcastGameCanvas, /*broadcastPlayerState*/);
   // registerFriendHandlers(app, socket);
 
@@ -52,23 +64,8 @@ export function registerSocketHandlers(
     const { playerId, userName } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
     const room = roomId ? gameManager.getRoomById(roomId) : null;
-    // JESS WILL UNCOMMENT THIS ONCE I KNOW THE OLD VERSION WORKS
-    // const frontedPlayerData = utils.getFrontedPlayerData(playerId, userName, room);
-    // socket.emit("player_info_response", frontedPlayerData); //the new version
-
-    // old version:  
-    socket.emit("player_info_response", {
-    playerId,
-    userName,
-    // userState: no_room, in_room, dropped
-    activeRoom: room
-    ? {
-    roomId: room.id,
-    roomName: room.name,
-    gameState: room.state, // waiting, playing, finished
-    }
-    : null,
-    });
+    const frontedPlayerData = utils.getFrontedPlayerInfo(playerId, userName, room);
+    socket.emit("player_info_response", frontedPlayerData); //the new version
   });
 
   // Emits an object of the current room state or null

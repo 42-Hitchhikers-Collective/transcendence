@@ -42,7 +42,7 @@ Payload: `{ message: string }`
 | Error Message | Case |
 |---|---|
 | `"Player is not in room"` | `play_card` / `draw_card` / `select_wild_color` / `on_press_pass_button` — player has no room assignment |
-| `"Player is not in a room"` | `start_game` / `canvas_start` — player has no room assignment |
+| `"Player is not in a room"` | `start_game` / `canvas_ready` — player has no room assignment |
 | `"No active game found"` | `play_card` / `draw_card` / `select_wild_color` / `on_press_pass_button` — room state is not `"playing"` or `room.game` is undefined |
 | `"Invalid card index"` | `play_card` — card index is out of bounds for the player's hand |
 | `"Card play failed"` | `play_card` — the game logic rejected the card play (e.g., invalid card for current discard) |

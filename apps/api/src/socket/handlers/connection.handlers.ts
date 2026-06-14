@@ -36,7 +36,7 @@ export function registerConnectionHandlers(
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
         console.log(`[Socket] ${userName} reconnected with new socketId: ${socket.id}`);
-        // socket.join(roomId);
+        socket.join(roomId); // <-------------  JESS - this was commented out, but we need it because if the player is still in the room and refreshes, they get a new socket id and we need to join them back to the room with the new socket id ( otherwise they won't receive any updates of the room or game state )
         // gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page
         // console.log(`Player ${userName} automatically rejoin room ${roomId}`);
         broadcastRoomState(roomId);

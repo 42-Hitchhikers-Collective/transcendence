@@ -123,12 +123,12 @@ export function useGamePage(roomName: string) {
       console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
     }
     if (RoomDataRef.current?.roomState === "playing") {
-      // socket.emit("canvas_start"); // trigger game canvas to refresh with the latest room state when game starts (e.g. in case player refreshes page during game or joins late)
+      // socket.emit("canvas_ready"); // trigger game canvas to refresh with the latest room state when game starts (e.g. in case player refreshes page during game or joins late)
       setGameStarted(true);
     }
 
     setTimeout(() => {
-      socket.emit("canvas_start");
+      socket.emit("canvas_ready");
       console.warn(`🎨 Refreshing canvas: ${gameStarted}`);
     }, 100);
   }, [playerList, RoomDataRef.current?.roomState]); // ⬅️ runs whenever players or room state changes to keep the game canvas in sync with the latest room state (e.g. new player joins, game starts, etc)
