@@ -19,7 +19,7 @@ export class Table {
 
   currentColor: "red" | "blue" | "green" | "yellow" | "wild" | null;
 
-  event: "uno" | "color" | "finished" | null;
+  event: "uno" | "color" | "finished" | "skip" | null;
 
   constructor(gameID: number, rivals: Player[]) {
     this.gameID = gameID;

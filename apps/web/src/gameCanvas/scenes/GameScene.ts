@@ -69,7 +69,10 @@ export class GameScene extends Scene {
       }
     }
 
+    console.log("myPlayerId:", this.myPlayerId);
+    console.log("current_turn:", room.current_turn);
     if (this.myPlayerId !== room.current_turn) {
+      console.log("ocultar");
       this.uiManager.hidePassTurnButtons();
     }
 

@@ -88,9 +88,7 @@ export class GameMaster {
   }
 
   private skip(table: Table): void {
-    table.turnIndex =
-      (table.turnIndex + table.direction + table.players.length) %
-      table.players.length;
+    table.event = "skip"
   }
 
   // ============================================================
@@ -143,10 +141,15 @@ export class GameMaster {
 
   advanceTurn(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
+    
     if (!player || table.draw != 0) return false;
-
+    
+    let skip = 0;
+    if (table.event == "skip")
+      skip = 1 * table.direction;
+    
     table.turnIndex =
-      (table.turnIndex + table.direction + table.players.length) %
+      (table.turnIndex + table.direction + skip + table.players.length) %
       table.players.length;
 
     this.newTurnStats(table);
