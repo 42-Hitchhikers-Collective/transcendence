@@ -14,6 +14,10 @@ check logs:
 docker compose logs -f api | cat -n
 
 
+
+game is on ppl leave, only 1 player left playing - emit "lonely_player"
+
+
 send db finish game details
 which details?
 

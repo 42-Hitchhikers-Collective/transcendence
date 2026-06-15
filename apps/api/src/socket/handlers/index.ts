@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 14:15:45 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 13:56:48 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ export function registerSocketHandlers(
   socket: Socket
 ) {
 
- // Broadcast room state to everyone including the sender
+ // Broadcast Game Canvas to everyone including the sender
   function broadcastGameCanvas(roomId: string) {
     const room = gameManager.getRoomById(roomId);
     if (!room) return;
@@ -40,13 +40,11 @@ export function registerSocketHandlers(
     gameManager.debugState();
   }
 
-  // 👋 JESS ADD HERE ------- TO BROADCAST ROOM INFO FOR THE GAME WEBPAGE (so the frontend can change the view on every change) to all players in the room
+  // Broadcast Game Page info to everyone in the room
   function broadcastGamePage(roomId: string) {
     const roomInfo = utils.getFrontedRoomInfo(roomId);
     if (roomInfo) {
       socket.nsp.to(roomId).emit("room_info_response", roomInfo);
-      // JESS - please leave this for me to better debug inconsistencies between backend and frontend room states
-      // I left it commented out to not add noise for your own debugging
       // console.log(`<-------------  ♥️ ROOM INFO ${roomId} ♥️ -------------> \n`, roomInfo);
       // console.log(`<--------------------------------------------->`);
     }
@@ -54,21 +52,21 @@ export function registerSocketHandlers(
 
   // Register related event handlers
   registerConnectionHandlers(app, socket, broadcastGameCanvas /* broadcastGamePage */);
-  registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);  // <------------- 👋 JESS ADDED HERE
-  registerGameHandlers(socket, broadcastGameCanvas, /*broadcastPlayerState*/);
+  registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);
+  registerGameHandlers(socket, broadcastGameCanvas,);
   // registerFriendHandlers(app, socket);
 
 
-  // Emits an object of the current player state
+  // Emits an object of the current player state (or null) on request
   socket.on("player_info_request", () => {
     const { playerId, userName } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
     const room = roomId ? gameManager.getRoomById(roomId) : null;
     const frontedPlayerData = utils.getFrontedPlayerInfo(playerId, userName, room);
-    socket.emit("player_info_response", frontedPlayerData); //the new version
+    socket.emit("player_info_response", frontedPlayerData);
   });
 
-  // Emits an object of the current room state or null
+  // Emits an object of the current room state (or null) on request
   socket.on("room_info_request", () => {
     const { playerId, userName } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
