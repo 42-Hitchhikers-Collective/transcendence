@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 13:45:53 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 15:39:42 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ export type Room = {
   players: Player[];
   state: GameState;
   chatHistory: Array<{ username: string; msg: string }>;
+  gameDbId?: string; // id of the game in the database
   game?: Game;
 };
 

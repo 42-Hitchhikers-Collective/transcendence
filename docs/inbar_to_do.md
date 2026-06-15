@@ -21,6 +21,32 @@ game is on ppl leave, only 1 player left playing - emit "lonely_player"
 send db finish game details
 which details?
 
+// When game ends (in your endGame function)
+async function endGame(roomId: string, socket: Socket) {
+  const res = gameManager.endGame(roomId);
+  if (res.success) {
+    const room = gameManager.getRoom(roomId); // Retrieve room to get gameDbId
+    
+    // Get ALL player IDs in the room
+    const playerIds = room.players.map((p) => p.userId);
+    
+    // REPLACE your manual DB calls with this one line:
+    await finalizeGame(app.prisma, room.gameDbId, res.winnerId, playerIds);
+  }
+  socket.nsp.to(roomId).emit("game_finished", { roomId });
+}
+
+// If a player disconnects mid-game (optional)
+socket.on("disconnect", () => {
+  const room = gameManager.getRoomForPlayer(playerId);
+  if (room && room.state === "playing") {
+    await abortGame(app.prisma, room.gameDbId);
+  }
+});
+
+
+
+
 gameId //roomid
 roomName
 players - playerId //userId

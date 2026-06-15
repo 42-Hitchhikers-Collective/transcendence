@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 13:56:48 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 15:41:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ export function registerSocketHandlers(
   // Register related event handlers
   registerConnectionHandlers(app, socket, broadcastGameCanvas /* broadcastGamePage */);
   registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);
-  registerGameHandlers(socket, broadcastGameCanvas,);
+  registerGameHandlers(app, socket, broadcastGameCanvas,);
   // registerFriendHandlers(app, socket);
 
 

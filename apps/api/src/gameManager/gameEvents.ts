@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 16:28:27 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 15:55:22 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,11 +121,22 @@ export function endGame(roomId: string) {
   const room = gm.getRoomById(roomId);
   if (!room || !room.game)
     return {success: false, roomId: roomId, error: "Room or game not found"};
+  if (room.gameDbId === "undefined") {
+    return {success: false, roomId: roomId, error: "Game DB ID is undefined"};
+  };
   room.state = "finished";
-    return {
+  if (!room.game.winner) {
+    return {success: false, roomId: roomId, error: "Game finished without a winner"};
+  }
+  if (!room.gameDbId) {
+    return {success: false, roomId: roomId, error: "Game DB ID not found"};
+  };
+  return {
     success: true,
-    winnerId: room.game.winner?.id || "undefined",
-    roomId: roomId
+    roomId: roomId,
+    room: room,
+    winnerId: room.game.winner.id,
+    gameDbId: room.gameDbId
   };
 }
 
