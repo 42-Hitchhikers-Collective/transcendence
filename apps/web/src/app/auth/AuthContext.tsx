@@ -86,8 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log("👤 AUTHENTICATION: token found " + token);
     socket.auth = { token };
     if (!socket.connected) {
-      socket.connect();
-      console.log("👤 AUTHENTICATION: socket connected");
+      socket.once("connect", () => { // listener to log successful socket connection after login/signup
+        console.log(`👤 AUTHENTICATION: socket connected, ID: ${socket.id}`);
+      });
+      socket.connect();  //  connects AFTER registering the listener
     } else {
       console.log("👤 AUTHENTICATION: socket was already connected");
     }

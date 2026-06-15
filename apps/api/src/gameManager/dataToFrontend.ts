@@ -49,9 +49,11 @@ export function getGameCanvasRoom(room: Room, observerPlayerId: string): GameCan
 
 // Returns a player object for the frontend with only the relevant info NEW
 export function getFrontedPlayerInfo(playerId: string, userName: string, room: Room | null) {
+  const player = room ? room.players.find(p => p.playerId === playerId) : null; // <-------- JESS - I added this so to get the avatar of the player to show in the chat
   return {
     playerId,
     userName,
+    avatarUrl: player?.avatarUrl ?? "/avatars/default.png", // <-------- JESS - I Added the avatar of the player to show in the chat and player list in the game page
     duringDrop: getDropTimeouts().has(playerId), // true if player is currently in drop timer grace period
     activeRoom: room? 
       {
@@ -73,6 +75,7 @@ export function getFrontedRoomInfo(roomid: string) {
     roomState: room.state, // "waiting", "playing", or "finished"
     players: room.players.map(p => ({
       userName: p.userName,
+      avatarUrl: p.avatarUrl ?? "/avatars/default.png", // <-------- JESS - I added the avatar of the player to show in the chat and player list in the game page
       dropped: getDropTimeouts().has(p.playerId) // true if player is currently in drop timer grace period
     })) || []
   };

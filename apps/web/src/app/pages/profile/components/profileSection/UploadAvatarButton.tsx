@@ -35,8 +35,8 @@ export const UploadAvatarButton = ({ avatar }: UploadAvatarButtonProps) => {
         maxSize={2 * 1024 * 1024}
       >
         <FileUploadTrigger asChild>
-          <button className="group relative cursor-pointer ">
-            <Avatar className="size-full rounded-none">
+          <button className="group relative size-24 cursor-pointer md:size-32">
+            <Avatar className="size-full rounded-none ring-2 ring-gray-300 ring-offset-2 ring-offset-white">
               <AvatarImage src={avatar ? avatar : defaultAvatar} alt="Avatar" />
             </Avatar>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
