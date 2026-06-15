@@ -8,6 +8,7 @@ import { multipartPlugin } from "./plugins/multipart";
 import { authRoutes } from "./routes/auth";
 import { userRoutes } from "./routes/users";
 import { profileRoutes } from "./routes/profiles";
+import { friendRoutes } from "./routes/friends";
 import { setupSocket } from "./socket/socket";
 import { gameManager } from "./gameManager";
 
@@ -47,9 +48,9 @@ const start = async () => {
   await app.register(multipartPlugin);
 
   await app.register(authRoutes, { prefix: "/api/auth" });
-
   await app.register(userRoutes, { prefix: "/api/users" });
   await app.register(profileRoutes, { prefix: "/api/profiles" });
+  await app.register(friendRoutes, { prefix: "/api/friends" });
 
   setupSocket(app);
   await app.listen({ port, host: "0.0.0.0" });
