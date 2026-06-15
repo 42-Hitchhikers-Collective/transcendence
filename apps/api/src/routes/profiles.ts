@@ -1,14 +1,22 @@
 import { randomUUID } from "crypto";
-import { createWriteStream, mkdirSync } from "fs";
-import { pipeline } from "stream/promises";
+import { writeFile, unlink } from "fs/promises";
+import { mkdirSync } from "fs";
 import path from "path";
+import sharp from "sharp";
 
-// const AVATAR_DIR = "/app/data/avatars";  // Use this in production (inside Docker)
-const AVATAR_DIR = process.env.AVATAR_DIR || "./data/avatars"; // Use this in development (local filesystem)
-const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const EXT: Record<string, string> = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif" };
+const AVATAR_DIR = process.env.AVATAR_DIR || "/app/data/avatars";
+const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
+const EXT: Record<string, string> = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" };
 
 mkdirSync(AVATAR_DIR, { recursive: true });
+
+// Deletes a locally stored avatar file. Skips default avatar and non-local URLs.
+async function deleteLocalAvatar(avatarUrl: string | null) {
+  if (!avatarUrl || !avatarUrl.startsWith("/avatars/")) return;
+  const filename = path.basename(avatarUrl);
+  if (filename === "default.png") return;
+  await unlink(path.join(AVATAR_DIR, filename)).catch(() => {});
+}
 
 export async function profileRoutes(app: any) {
   app.patch(
@@ -59,10 +67,24 @@ export async function profileRoutes(app: any) {
       const file = await request.file();
       if (!file) return reply.code(400).send({ error: "no file uploaded" });
       if (!ALLOWED_MIME.includes(file.mimetype))
-        return reply.code(400).send({ error: "only jpeg, png, webp, gif allowed" });
+        return reply.code(400).send({ error: "only jpeg, png, webp allowed" });
+
+      // Buffer the entire upload so we can inspect dimensions before writing
+      const buffer = await file.toBuffer();
+
+      const metadata = await sharp(buffer).metadata();
+      if (!metadata.width || !metadata.height || metadata.width !== metadata.height)
+        return reply.code(400).send({ error: "image must have a 1:1 aspect ratio" });
+
+      // Clean up old avatar before saving the new one
+      const existing = await app.prisma.profile.findUnique({
+        where: { userId: payload.sub },
+        select: { avatarUrl: true },
+      });
+      await deleteLocalAvatar(existing?.avatarUrl ?? null);
 
       const filename = randomUUID() + EXT[file.mimetype];
-      await pipeline(file.file, createWriteStream(path.join(AVATAR_DIR, filename)));
+      await writeFile(path.join(AVATAR_DIR, filename), buffer);
 
       const avatarUrl = `/avatars/${filename}`;
       await app.prisma.profile.upsert({
@@ -72,6 +94,29 @@ export async function profileRoutes(app: any) {
       });
 
       return reply.send({ avatarUrl });
+    }
+  );
+
+  app.delete(
+    "/me/avatar",
+    { preHandler: [app.auth] },
+    async (request: any, reply: any) => {
+      const payload = request.user as { sub?: string };
+      if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
+
+      const profile = await app.prisma.profile.findUnique({
+        where: { userId: payload.sub },
+        select: { avatarUrl: true },
+      });
+
+      await deleteLocalAvatar(profile?.avatarUrl ?? null);
+
+      await app.prisma.profile.update({
+        where: { userId: payload.sub },
+        data: { avatarUrl: null },
+      });
+
+      return reply.send({ avatarUrl: null });
     }
   );
 }
