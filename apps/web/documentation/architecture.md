@@ -57,7 +57,7 @@ app/
 │   │       │   ├── ProfileSection.tsx
 │   │       │   ├── StatsCards.tsx
 │   │       │   ├── ProgressBar.tsx
-│   │       │   ├── UploadAvatarButton.tsx
+│   │       │   ├── ProfileAvatar.tsx
 │   │       │   └── ExperienceBadge.tsx
 │   │       ├── createGameCard/
 │   │       │   ├── CreateGameCard.tsx

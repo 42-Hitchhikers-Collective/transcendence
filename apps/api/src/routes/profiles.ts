@@ -72,9 +72,10 @@ export async function profileRoutes(app: any) {
       // Buffer the entire upload so we can inspect dimensions before writing
       const buffer = await file.toBuffer();
 
-      const metadata = await sharp(buffer).metadata();
-      if (!metadata.width || !metadata.height || metadata.width !== metadata.height)
-        return reply.code(400).send({ error: "image must have a 1:1 aspect ratio" });
+      // JESS: Remove this as too restrictive for users (frontend also makes the image squared, no matter what aspects ration the original image has).
+      // const metadata = await sharp(buffer).metadata();
+      // if (!metadata.width || !metadata.height || metadata.width !== metadata.height)
+      //   return reply.code(400).send({ error: "image must have a 1:1 aspect ratio" });
 
       // Clean up old avatar before saving the new one
       const existing = await app.prisma.profile.findUnique({
