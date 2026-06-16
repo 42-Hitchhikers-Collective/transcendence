@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 13:52:36 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/16 16:39:30 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,9 +109,11 @@ export function registerRoomHandlers(
       username: socket.name,
       roomId: res.roomId,
     });
+    checkLonelyPlayer(res.roomId); // check if only 1 player left in the room after a player left
   });
 
-
+  
+  // When a player leaves the room web page informally, start a drop timer
   socket.on("user_dropped", () => {
     const { playerId, userName } = getIdentity(socket);
     console.log("[room:user_dropped] will start 30s drop timer", { 
@@ -141,16 +143,23 @@ export function registerRoomHandlers(
       console.log("[room:user_dropped] timer expired, player removed from room", { userName, roomId });
       broadcastGameCanvas(roomId);
       broadcastGamePage(roomId);  // update GamePage when player leaves the room after end of drop timer
+      checkLonelyPlayer(roomId); // check if only 1 player left in the room after a player dropped
     });
     broadcastGamePage(roomId);  //update GamePage when a player drops (and timer started)
   });
-
-
-
-
+  
 
 
 // --- Helpers ---
+
+
+  // Emits "lonely_player" if only 1 player is left in the room.
+  function checkLonelyPlayer(roomId: string) {
+    if (gameManager.isLonelyPlayer(roomId)) {
+      console.log(`[room:check_lonely_player] Room ${roomId} has only 1 player left.`);
+      socket.nsp.to(roomId).emit("lonely_player");
+    }
+  }
   
   // Check if the room with the given name exists, returns room name and exists boolean true or false
   socket.on("is_room_exists", ({ roomName }) => {

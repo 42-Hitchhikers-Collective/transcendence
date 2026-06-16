@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 15:55:22 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/16 16:37:43 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_START } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
+import { abortGame } from "../services/game.service";
 
 
  // --- Game Events ---
@@ -126,7 +127,7 @@ export function endGame(roomId: string) {
   };
   room.state = "finished";
   if (!room.game.winner) {
-    return {success: false, roomId: roomId, error: "Game finished without a winner"};
+    return {success: false, roomId: roomId, error: "Winner not found"};
   }
   if (!room.gameDbId) {
     return {success: false, roomId: roomId, error: "Game DB ID not found"};
@@ -139,7 +140,6 @@ export function endGame(roomId: string) {
     gameDbId: room.gameDbId
   };
 }
-
 
 // --- Helpers ---
 
