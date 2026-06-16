@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/16 16:37:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/16 16:47:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,14 +124,15 @@ export function cancelDropTimer(playerId: string) {
 
 // --- Helpers ---
 
-// Checks if only 1 player left in the room and returns true if so, false otherwise
+// Checks if only 1 player is in the room during an active game and returns true if so, false otherwise
 export function isLonelyPlayer(roomId: string): boolean {
   const room = gm.getRoomById(roomId);
   if (!room) {
     console.error(`Failed to check lonely player: room ${roomId} not found`);
     return false;
   }
-  return room.players.length === 1;
+  const lonely = room.players.length === 1 && room.state === "playing";
+  return lonely;
 }
 
 // Returns true if player is in a room, false otherwise

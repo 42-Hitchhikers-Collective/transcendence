@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/16 16:39:30 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/16 17:02:41 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,12 +152,16 @@ export function registerRoomHandlers(
 
 // --- Helpers ---
 
-
   // Emits "lonely_player" if only 1 player is left in the room.
   function checkLonelyPlayer(roomId: string) {
     if (gameManager.isLonelyPlayer(roomId)) {
       console.log(`[room:check_lonely_player] Room ${roomId} has only 1 player left.`);
-      socket.nsp.to(roomId).emit("lonely_player");
+      socket.nsp.to(roomId).emit("lonely_player"); // emit to "everyone" is safer
+      
+      // ---- this function may also trigger the "abortGame" function
+      // but otherwise frontend will trigger it by emitting "abort_game" to the backend. ----
+      
+      // abortGameAndCleanup(roomId, "Only 1 player left");
     }
   }
   
