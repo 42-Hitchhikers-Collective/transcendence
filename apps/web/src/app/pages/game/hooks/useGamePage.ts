@@ -163,14 +163,14 @@ export function useGamePage(roomName: string) {
     if (payload?.message === "Requested room not found") {
       // navigateRef.current("/profile", { replace: true });
       setRoomError(
-        "The room you are trying to join does not exist as it was not created or has been deleted.",
+        "The room you are trying to join does not exist!",
       );
     }
     // Covers a case when player is active in one room and tries to join another
     if (payload?.message === "Player already in a different room") {
       // navigateRef.current("/profile", { replace: true });
       setRoomError(
-        "You are already member of another room. Please leave that room before joining another.",
+        "You are already member of another room. \nPlease leave that room before joining another.",
       );
     }
   };

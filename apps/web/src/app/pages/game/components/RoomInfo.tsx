@@ -13,7 +13,7 @@ export default function RoomInfo({ roomName }: { roomName: string }) {
   return (
     <div className="rounded-xl bg-white px-4 py-3 text-center">
       <p className="text-xs font-semibold uppercase tracking-[0.2em]">
-        This room's code:
+        This room's name:
       </p>
       <button
         onClick={copyRoomName}
@@ -25,8 +25,8 @@ export default function RoomInfo({ roomName }: { roomName: string }) {
       {copied && (
         <p className="mt-1 text-xs text-emerald-500">Copied!</p>
       )}
-      <p className="mt-1 text-xs text-slate-500 text-start">
-        Click the code above to copy and share with your friends!
+      <p className="mt-1 text-xs text-slate-500 text-center">
+        Click the name above to copy and share with your friends!
       </p>
     </div>
   );

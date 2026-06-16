@@ -36,14 +36,14 @@ function PlayerItem({
       }`}
     >
       <img
-        src={player.avatarUrl}
+        src={player.avatarUrl }
         alt={player.userName}
         className={`h-12 w-12 rounded-full object-cover ${
           player.dropped ? "grayscale opacity-50" : ""
         }`}
         onError={(e) => {
-          const el = e.target as HTMLImageElement;
-          el.style.display = "none";
+          console.warn(`Failed to load avatar for ${player.userName}, using default.`, e);
+          (e.target as HTMLImageElement).src = "/avatars/default.png";
         }}
       />
       <p

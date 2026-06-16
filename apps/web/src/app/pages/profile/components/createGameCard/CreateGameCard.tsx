@@ -120,7 +120,7 @@ export function CreateGameCard() {
       if (exists) {
         navigate(`/game?room=${encodeURIComponent(roomName)}`);
       } else {
-        setJoinError("Room not found. Check the code and try again.");
+        setJoinError("Room not found. Check the name and try again.");
         setIsJoining(false);
       }
     });
