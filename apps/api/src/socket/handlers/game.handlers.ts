@@ -3,27 +3,32 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.de>              +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/11 11:31:10 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/17 16:10:55 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { Socket } from "socket.io";
+import { FastifyInstance } from "fastify/types/instance";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from "./index";
 import { ChatMsgType } from "../../gameManager/chatEvents";
+import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
+// import "../../plugins/prisma"; // Load Prisma module augmentation
 
 // --- Game Events ---
 
 export function registerGameHandlers(
+  app: FastifyInstance, 
   socket: Socket,
   broadcastGameCanvas: (roomId: string) => void,
 ) {
+
   // Play a card
-  socket.on("play_card", ({ cardIndex }) => {
+  socket.on("play_card", async ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.playCard(playerId, cardIndex);
     if (!res.success) socket.emit("error", { message: res.error });
@@ -33,19 +38,13 @@ export function registerGameHandlers(
     if (event == "color") {
       socket.emit("show_colors", { roomId: res.roomId });
       return;
-    } else if (event == "finished") {
-      socket.nsp.to(res.roomId).emit("game_finished", { roomId: res.roomId });
-      return;
     } else if (event == "uno") {
       socket.nsp.to(res.roomId).emit("uno", { playerId });
     }
     else if (event == "finished") {
-        //finish the game and announce the winner
-        endGame(res.roomId, socket);
+        //finish the game and announce the winner ###
+        await endGame(res.roomId, socket);
         return ;
-    }
-    else if (event == "uno") {
-        socket.nsp.to(res.roomId).emit("uno", { playerId });    
     }
     console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
     gameManager.passTurn(playerId, res.roomId);
@@ -76,22 +75,6 @@ export function registerGameHandlers(
     broadcastGameCanvas(res.roomId);
   });
 
-  // Start the game by pressing a button.
-  socket.on("start_game", () => {
-      const { playerId } = getIdentity(socket);
-      const res = gameManager.startGameButton(playerId);
-      if (!res.success) {
-          socket.emit("error", { message: res.error });
-          socket.emit("game_start_error", { message: res.error });
-          return;
-      }
-      console.log(`Game started in room ${res.room.id}`);
-      socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
-      systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
-      broadcastGameCanvas(res.room.id);
-  });
-
-
   // When the game canvas is ready on the frontend, send the initial game state
   socket.on("canvas_ready", () => {
       const { playerId } = getIdentity(socket);
@@ -103,31 +86,59 @@ export function registerGameHandlers(
       broadcastGameCanvas(roomId);
   });
 
-// --- Finish Game Events ---
+  // --- Major Game Events ---
+
+
+  // Start the game by pressing a button. Create DB record and store the ID
+  socket.on("start_game", async () => {
+      const { playerId } = getIdentity(socket);
+      const res = gameManager.startGameButton(playerId);
+      if (!res.success) {
+          socket.emit("error", { message: res.error });
+          socket.emit("game_start_error", { message: res.error });
+          return;
+      }
+      console.log(`Game started in room ${res.room.id}`);
+      const gameDbId = await createGameRecord(app.prisma, res.room.name); //DB recored creation
+      res.room.gameDbId = gameDbId;
+      socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
+      systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
+      broadcastGameCanvas(res.room.id);
+  });
 
   // Send finished game data to the Database and announce the finished game
   async function endGame(roomId: string, socket: Socket) {
     const res = gameManager.endGame(roomId);
-    if (res.success) {
-        
-        
-        // Update Game record
-        await prisma.game.update({
-            where: { id: roomId }, // GameId is the same as RoomId
-            data: {
-            // RoomName to be added
-            status: "FINISHED",
-            endedAt: new Date()
-            }
-        });
-
-        // Consider to change to placement to 1 winner
-        await prisma.gamePlayer.update({
-            where: { gameId_userId: { gameId: roomId, userId: res.winnerId } },
-            data: { placement: 1 }
-        });
+    if (!res.success) {
+      console.error(`Failed to end game in room ${roomId}: ${res.error}`);
+      return;
     }
-    socket.nsp.to(roomId).emit("game_finished", { roomId: roomId });
-    return;
-  };
+    if (res.room && res.gameDbId && res.winnerId) {
+      const playerIds = res.room.players.map((p) => p.playerId);
+      await finalizeGame(app.prisma, res.gameDbId, res.winnerId, playerIds);
+    }
+    socket.nsp.to(roomId).emit("game_finished", { roomId });
+  }
+
+  // Abort game - can be triggered by frontend
+  socket.on("abort_game", async ({ roomId }) => {
+    abortGameAndCleanup(roomId, "aborted_by_frontend");
+  });
+
+
+  // Abort game helper, set game state, update database, notify players in room
+  async function abortGameAndCleanup(roomId: string, reason: string) {
+    const room = gameManager.getRoomById(roomId);
+    if (!room) {
+      console.error(`Failed to abort game: room ${roomId} not found`);
+      return;
+    }
+    room.state = "finished"; // update game state
+    // update database
+    if (room.gameDbId)
+      await abortGame(app.prisma, room.gameDbId);
+    // Notify players in the room
+    socket.nsp.to(roomId).emit("game_aborted", { roomId, reason: reason });
+    console.log(`Game in room ${roomId} aborted due to: ${reason}`);
+  }
 }
