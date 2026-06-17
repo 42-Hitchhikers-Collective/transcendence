@@ -34,6 +34,8 @@ export class Deck {
     }
 
     this.shuffle(this.cards);
+    this.shuffle(this.cards);
+    this.shuffle(this.cards);
   }
 
   shuffle = <T>(array: T[]): void => {

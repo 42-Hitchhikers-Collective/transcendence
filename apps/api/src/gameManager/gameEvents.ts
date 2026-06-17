@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 16:28:27 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/17 15:23:28 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@ import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_ST
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
 
+type Event = { color: boolean; uno: boolean; finish: boolean};
 
  // --- Game Events ---
 
@@ -85,7 +86,7 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
 }
 
 
-export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | null {
+export function checkGameEvent(roomId: string): Event | null {
   const room = gm.getRoomById(roomId);
   if (room) {
     if (room.game) {

@@ -19,7 +19,10 @@ export class Table {
 
   currentColor: "red" | "blue" | "green" | "yellow" | "wild" | null;
 
-  event: "uno" | "color" | "finished" | "skip" | null;
+  uno: boolean;
+  color: boolean;
+  skip: boolean;
+  finish: boolean;
 
   constructor(gameID: number, rivals: Player[]) {
     this.gameID = gameID;
@@ -42,9 +45,12 @@ export class Table {
     this.discardPile = [];
     this.discardPile.push(this.drawPile.pop());
 
-    this.event = null;
-
     this.currentColor = this.discardPile[this.discardPile.length - 1].color;
+
+    this.color = false; 
+    this.uno = false;
+    this.finish = false;
+    this.skip = false;
 
     this.dealCards();
   }
