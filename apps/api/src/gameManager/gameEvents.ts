@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 14:51:10 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/10 16:28:27 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | n
   return null;
 }
 
-//  --- Start Game Events ---
+//  --- Start/End Game Events ---
 
 
 //  Start the game manually if start button was pressed, and all condition are met  
@@ -116,6 +116,18 @@ export function startGameButton(playerId: string): RoomResult {
   return {success: false, roomId: roomId, error: "Start conditions aren't met"};;
 }
 
+
+export function endGame(roomId: string) {
+  const room = gm.getRoomById(roomId);
+  if (!room || !room.game)
+    return {success: false, roomId: roomId, error: "Room or game not found"};
+  room.state = "finished";
+    return {
+    success: true,
+    winnerId: room.game.winner?.id || "undefined",
+    roomId: roomId
+  };
+}
 
 
 // --- Helpers ---
@@ -154,11 +166,7 @@ export function passTurnButton(playerId: string): RoomIdResult {
   const room = gm.getRoomById(roomId);
   if (!room || room.state !== "playing" || !room.game)
     return {success: false, roomId: roomId, error: "No active game found"};
-  
-  // call the method defined in the Interface!
-  const success = room.game.playerPassBotton(playerId);
-  
-  if (!success)
+  if (room.game.playerPassBotton(playerId))
     return {success: false, roomId: roomId, error: "Game logic error: invalid move"};
   return {success: true, roomId: roomId};
 }
@@ -171,9 +179,5 @@ function startGameCondition(room: Room): boolean {
         return false;
     if (room.players.length < MIN_PLAYERS_TO_START)
         return false;
-    // REMOVED WITH INBAR - delete comments once sure code is tested/works
-    // const allPlayersReady = room.players.every(player => player.isReady);
-    // if (!allPlayersReady)
-    //     return false;
     return true;
   }

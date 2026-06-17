@@ -29,6 +29,7 @@ export function setupSocket(app: FastifyInstance) {
   io.on("connection", (socket) => {
     const playerId = (socket as any).userId as string;
     const userName = (socket as any).userName as string;
+    const avatarUrl = (socket as any).avatarUrl as string;
     console.log(`[Socket] ${userName} connected. socketId: ${socket.id}`);
 
     // Add player to online players list (or update socketId if already exists)
@@ -36,12 +37,13 @@ export function setupSocket(app: FastifyInstance) {
     if (existingPlayer) {
       console.log(`[online players] ${userName} is already online, updating socketId to ${socket.id}`);
       existingPlayer.socketId = socket.id;
+      existingPlayer.avatarUrl = avatarUrl; // update avatar in case it changed
       const roomId = gameManager.getPlayerRoomId(playerId);
       // if (roomId)
         // io.to(roomId).emit("playerUpdate", existingPlayer); // emiting that player is now online again to the room - neccessary?
     } else {
         console.log(`[online players] New player: ${userName}`);
-        const newPlayer: Player = { playerId, socketId: socket.id, userName };
+        const newPlayer: Player = { playerId, socketId: socket.id, userName, avatarUrl };
         gameManager.addPlayerToOnlinePlayers(newPlayer);
         // socket.emit("playerUpdate", newPlayer); // not neccessary ? is there a need to be updated when a new player is in town?
     }

@@ -19,7 +19,8 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 
 export function registerRoomHandlers(
   socket: Socket,
-  broadcastGameCanvas: (roomId: string) => void
+  broadcastGameCanvas: (roomId: string) => void,
+  broadcastGamePage: (roomId: string) => void  // <------------- JESS - ADDED TO BROADCAST ROOM INFO FOR THE GAME WEBPAGE (so the frontend can change the view on every change) to all players in the room
 ) {
 
   // Create a new room
@@ -58,6 +59,10 @@ export function registerRoomHandlers(
         roomName,
         error: res.error,
       });
+      if (res.error === "Player already in room (Dropped)") { // <------ JESS ADDED THIS BECAUSE WE NEED TO BROADCAST THE UPDATED STATE OF THE PLAYER THAT DROPPED AND REJOINED THE ROOM
+        console.log(`👉👉👉👉👉  BROADCAST UPDTED PLAYER STATE TO ROOM`);
+        broadcastGamePage(res.roomId); // JESS - without the broadcast, the player who drops appears as "dropped" to other players whenrefreshing the page or re-joining
+      }
       socket.emit("error", { message: res.error });
       return;
     }
@@ -69,6 +74,7 @@ export function registerRoomHandlers(
     systemChatMsg(playerId, roomId, socket, ChatMsgType.JOIN_ROOM);
     socket.emit("chatHistory", res.room.chatHistory); // Send chat history to player when they join the room
     broadcastGameCanvas(roomId);
+    broadcastGamePage(roomId);  // <------------- JESS ADDED HERE
     
     console.log("[room:join_room] success", {
       playerId,
@@ -98,6 +104,7 @@ export function registerRoomHandlers(
     systemChatMsg(playerId, res.roomId, socket, ChatMsgType.LEFT_ROOM);
     socket.leave(res.roomId);
     broadcastGameCanvas(res.roomId);
+    broadcastGamePage(res.roomId);  // <------------- JESS ADDED HERE
     console.log("[room:leave_room] success", {
       playerId,
       username: socket.name,
@@ -126,12 +133,22 @@ export function registerRoomHandlers(
       });
     }
     gameManager.startDropTimer(playerId, ({ roomId }) => { // paranthasis will run only after drop timer expires
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // JESS - I REMOVED socket.emit("leave_room") BECAUSE THE EVENT IS NOT LISTENED BY THE FRONTEND WHEN THE SOCKET ID CHANGES
+      // (For example when the player navigates to profile page and sees the "return to game" button)
+      // socket.emit("leave_room") worked only for players that are in the game and see the player leaving, but not for the player that left
+      const currentPlayer = gameManager.getOnlinePlayer(playerId);
+      if (currentPlayer?.socketId) {
+        socket.nsp.to(currentPlayer.socketId).emit("leave_room"); 
+      }
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
       socket.leave(roomId);
-      socket.emit("leave_room");
       systemChatMsg(playerId, roomId, socket, ChatMsgType.LEFT_ROOM);
       console.log("[room:user_dropped] timer expired, player removed from room", { userName, roomId });
       broadcastGameCanvas(roomId);
+      broadcastGamePage(roomId);  // <------------- JESS ADDED HERE: to update everyones' GamePage when player leaves the room after end of drop timer
     });
+      broadcastGamePage(roomId);  // <------------- JESS ADDED HERE: i need this to update everyone's GamePage when a player drops (and timer started)
   });
 
 

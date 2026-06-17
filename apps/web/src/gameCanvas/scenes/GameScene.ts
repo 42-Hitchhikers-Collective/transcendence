@@ -35,13 +35,12 @@ export class GameScene extends Scene {
     this.uiManager = new UIManager(this);
 
     this.inputManager.setup();
-
     // Zoom camera so game content fills the canvas
     // Game content occupies roughly a 600x500 area centered at (500, 400)
     // Canvas is 1200x900, so zoom = min(1200/600, 900/500) ≈ 1.8
     this.cameras.main.setZoom(1.5); // try 1.5–2.0
     this.cameras.main.centerOn(500, 400);
-    this.cameras.main.setBackgroundColor("#1e293b"); // slate-800
+    this.cameras.main.setBackgroundColor("#1e293b");
 
     // Setup event listeners
     EventBus.on("room_state", this.onRoomState, this);
@@ -59,6 +58,9 @@ export class GameScene extends Scene {
   }
 
   private onRoomState(room: FrontendRoom) {
+    // Guard: prevent render before scene is fully initialized
+    // if (!this.scene.isActive()) return;
+
     this.room = room;
 
     if (!this.myPlayerId) {

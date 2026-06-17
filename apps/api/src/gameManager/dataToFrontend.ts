@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   dataToFrontend.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:26:58 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/10 15:51:22 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ export function getGameCanvasRoom(room: Room, observerPlayerId: string): GameCan
     id: room.id,
     name: room.name,
     state: room.state,
-    current_turn: room.game?.table.players[room.game?.table.turnIndex].id,
+    current_turn: room.game?.table.players[room.game?.table.turnIndex].id || "",
     players: gameCanvasPlayers,
     game: room.game ? {
       currentPlayerId: room.game.table.players[room.game.table.turnIndex]?.id || "",
@@ -49,9 +49,11 @@ export function getGameCanvasRoom(room: Room, observerPlayerId: string): GameCan
 
 // Returns a player object for the frontend with only the relevant info NEW
 export function getFrontedPlayerInfo(playerId: string, userName: string, room: Room | null) {
+  const player = room ? room.players.find(p => p.playerId === playerId) : null; // <-------- JESS - I added this so to get the avatar of the player to show in the chat
   return {
     playerId,
     userName,
+    avatarUrl: player?.avatarUrl ?? "/avatars/default.png", // <-------- JESS - I Added the avatar of the player to show in the chat and player list in the game page
     duringDrop: getDropTimeouts().has(playerId), // true if player is currently in drop timer grace period
     activeRoom: room? 
       {
@@ -73,6 +75,7 @@ export function getFrontedRoomInfo(roomid: string) {
     roomState: room.state, // "waiting", "playing", or "finished"
     players: room.players.map(p => ({
       userName: p.userName,
+      avatarUrl: p.avatarUrl ?? "/avatars/default.png", // <-------- JESS - I added the avatar of the player to show in the chat and player list in the game page
       dropped: getDropTimeouts().has(p.playerId) // true if player is currently in drop timer grace period
     })) || []
   };

@@ -12,7 +12,7 @@ type AuthUser = {
   } | null;
 } | null;
 
-import { UploadAvatarButton } from "./UploadAvatarButton";
+import { ProfileAvatar } from "./ProfileAvatar";
 
 export function ProfileSection({
   user,
@@ -27,7 +27,6 @@ export function ProfileSection({
   // console.log("User data was loaded:", user);
 
   const username = user?.profile?.username ?? user?.username ?? "Player";
-  const avatar = user?.profile?.avatarUrl ?? undefined; // if avatar is null or undefined, we pass undefined to the UploadAvatarButton to use the default avatar. If it's a string (even an empty one), we pass it as is.
   const memberSince = user?.createdAt ? new Date(user.createdAt) : null;
   const wins = stats.wins;
   const losses = stats.losses;
@@ -42,7 +41,7 @@ export function ProfileSection({
       <div className="relative flex flex-col md:grid md:grid-cols-[1fr_1.2fr] lg:grid-cols-[0.7fr_1.5fr] xl:grid-cols-[0.6fr_1.7fr] items-stretch gap-6 xl:gap-10">
         {/* left content */}
         <div className="flex items-center justify-center">
-          <UploadAvatarButton avatar={avatar} />
+          <ProfileAvatar avatarUrl={user?.profile?.avatarUrl}  /> 
         </div>
 
         {/* Right content */}

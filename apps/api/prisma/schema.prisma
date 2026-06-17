@@ -145,6 +145,7 @@ model Game {
   id        String     @id @default(uuid())
   lobbyId   String?
   lobby     Lobby?     @relation(fields: [lobbyId], references: [id], onDelete: SetNull)
+  roomName  String?
   status    GameStatus @default(RUNNING)
   state     Json?      // UNO game state (draw pile, discard pile, current color, direction)
   createdAt DateTime   @default(now())

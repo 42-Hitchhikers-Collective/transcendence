@@ -17,6 +17,14 @@ docker compose logs -f api | cat -n
 send db finish game details
 which details?
 
+gameId //roomid
+roomName
+players - playerId //userId
+winner
+date of finished game
+
+
+
 
 
 when a player is in a room, then leaves the website, the drop timer will start and -- ? 
