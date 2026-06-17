@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import Fastify from "fastify";
 
+import "./plugins/prisma"; // Load Prisma module augmentation
 import { prismaPlugin } from "./plugins/prisma";
 import { authPlugin } from "./plugins/auth";
 import { rateLimitPlugin } from "./plugins/rate_limit";
