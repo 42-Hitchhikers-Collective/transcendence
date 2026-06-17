@@ -1,4 +1,4 @@
-import { drawCard } from "../../network/gameNetwork";
+import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
 
 export class BoardManager {
   private pile!: Phaser.GameObjects.Zone;
@@ -13,12 +13,12 @@ export class BoardManager {
     this.boardContainer = this.scene.add.container(0, 0);
 
     this.pile = this.scene.add
-      .zone(500, 350, 120, 160)
+      .zone(SCREEN.WIDTH / 2 - 50 , SCREEN.HEIGHT / 2, 60, 85)
       .setRectangleDropZone(120, 160);
 
-    const g = this.scene.add.graphics();
-    g.lineStyle(4, 0xffffff);
-    g.strokeRectShape(this.pile.getBounds());
+    //const g = this.scene.add.graphics();
+    //g.lineStyle(4, 0xffffff);
+    //g.strokeRectShape(this.pile.getBounds());
 
 
     return {

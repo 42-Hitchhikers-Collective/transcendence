@@ -29,12 +29,13 @@ export class RenderManager {
     );
     const positions = this.getPlayerPositions(orderedPlayers.length);
 
+    this.renderDiscardPile(room);
+    this.renderDrawPile();
+    
     orderedPlayers.forEach((player, i) => {
       this.renderPlayer(player, positions[i], room.current_turn);
     });
 
-    this.renderDiscardPile(room);
-    this.renderDrawPile();
   }
 
   private renderDiscardPile(room: FrontendRoom) {
