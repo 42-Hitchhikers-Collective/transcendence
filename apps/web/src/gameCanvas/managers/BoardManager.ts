@@ -3,7 +3,6 @@ import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
 export class BoardManager {
   private pile!: Phaser.GameObjects.Zone;
   private boardContainer!: Phaser.GameObjects.Container;
-  private drawCardButton!: Phaser.GameObjects.Container;
 
   constructor(private scene: Phaser.Scene) {}
 
