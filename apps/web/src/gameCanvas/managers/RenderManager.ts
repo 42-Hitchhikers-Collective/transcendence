@@ -1,7 +1,8 @@
 import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
 import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
+import { drawCard } from "../../network/gameNetwork";
 
-type Position = { x: number; y: number, p: "v" | "h"};
+type Position = { x: number; y: number; p: "v" | "h" };
 
 export class RenderManager {
   private playerContainers = new Map<string, Phaser.GameObjects.Container>();
@@ -32,11 +33,11 @@ export class RenderManager {
       this.renderPlayer(player, positions[i], room.current_turn);
     });
 
-    this.renderPile(room);
+    this.renderDiscardPile(room);
     this.renderDrawPile();
   }
 
-  private renderPile(room: FrontendRoom) {
+  private renderDiscardPile(room: FrontendRoom) {
     const sprite = this.scene.add.image(
       SCREEN.WIDTH / 2 - 50, // x
       SCREEN.HEIGHT / 2, // y
@@ -56,6 +57,9 @@ export class RenderManager {
 
     sprite.setScale(CARDS.SCALE);
     sprite.setInteractive();
+    sprite.on("pointerdown", () => {
+      drawCard();
+    });
   }
 
   private reorderPlayersWithObserverAtBottom(
@@ -80,16 +84,11 @@ export class RenderManager {
 
     let color = " #119632";
     if (current_turn == player.id) color = "#c31919";
-    
-    const title = this.scene.add.text(
-      pos.x - 40,
-      pos.y + 80,
-      player.userName,
-      {
-        fontSize: "24px",
-        color: color,
-      },
-    );
+
+    const title = this.scene.add.text(pos.x - 40, pos.y + 80, player.userName, {
+      fontSize: "24px",
+      color: color,
+    });
 
     container.add(title);
 
@@ -115,18 +114,18 @@ export class RenderManager {
     } else {
       let offsetX = 0;
       let offsetY = 0;
-      if (pos.p == "h")
-        offsetX = -(player.cardCount * 20);
-      if (pos.p == "v")
-        offsetY = -(player.cardCount * 20);
+      if (pos.p == "h") offsetX = -(player.cardCount * 20);
+      if (pos.p == "v") offsetY = -(player.cardCount * 20);
       for (let i = 0; i < player.cardCount; i++) {
-        const sprite = this.scene.add.image(pos.x + offsetX, pos.y + offsetY, `back`);
+        const sprite = this.scene.add.image(
+          pos.x + offsetX,
+          pos.y + offsetY,
+          `back`,
+        );
         sprite.setScale(0.3);
         container.add(sprite);
-        if (pos.p == "h")
-          offsetX += 40;
-        if (pos.p == "v")
-          offsetY += 40;
+        if (pos.p == "h") offsetX += 40;
+        if (pos.p == "v") offsetY += 40;
       }
     }
   }
@@ -145,23 +144,23 @@ export class RenderManager {
 
       case 2:
         return [
-          { x: SCREEN.WIDTH / 2, y: 150, p: "h" },  // top
-          { x: SCREEN.WIDTH / 2, y: 650, p: "h" },  // observer
+          { x: SCREEN.WIDTH / 2, y: 150, p: "h" }, // top
+          { x: SCREEN.WIDTH / 2, y: 650, p: "h" }, // observer
         ];
 
       case 3:
         return [
-          { x: 200, y: SCREEN.HEIGHT / 2, p: "v"},  // left
-          { x: 800, y: SCREEN.HEIGHT / 2, p: "v"},  // right
-          { x: SCREEN.WIDTH / 2, y: 650, p: "h"},       // observer
+          { x: 200, y: SCREEN.HEIGHT / 2, p: "v" }, // left
+          { x: 800, y: SCREEN.HEIGHT / 2, p: "v" }, // right
+          { x: SCREEN.WIDTH / 2, y: 650, p: "h" }, // observer
         ];
 
       case 4:
         return [
-          { x: centerX, y: 100, p: "h"}, // top
-          { x: 200, y: SCREEN.HEIGHT / 2, p: "v"},  // left
-          { x: 800, y: SCREEN.HEIGHT / 2, p: "v"},  // right
-          { x: centerX, y: 650, p: "h"},            // observer
+          { x: centerX, y: 100, p: "h" }, // top
+          { x: 200, y: SCREEN.HEIGHT / 2, p: "v" }, // left
+          { x: 800, y: SCREEN.HEIGHT / 2, p: "v" }, // right
+          { x: centerX, y: 650, p: "h" }, // observer
         ];
 
       default:
