@@ -153,6 +153,7 @@ export class GameMaster {
       table.players.length;
 
     this.newTurnStats(table);
+    console.log(`New Turn: ${table.players[table.turnIndex].username}`)
     return true;
   }
 
