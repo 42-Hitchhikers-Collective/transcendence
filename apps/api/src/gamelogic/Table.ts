@@ -75,10 +75,7 @@ export class Table {
   }
 
   changeColor(color: "red" | "blue" | "green" | "yellow") {
-    console.log(`COLOR SELECTED ${color}`)
     this.currentColor = color;
-    console.log(`NEW COLOR OF TABLE ${this.currentColor}`)
-
   }
 
   getPlayerPlayed()

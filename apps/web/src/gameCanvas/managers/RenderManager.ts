@@ -83,8 +83,8 @@ export class RenderManager {
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    let color = " #119632";
-    if (current_turn == player.id) color = "#c31919";
+    let color = "#c31919"
+    if (current_turn == player.id) color = " #119632";
 
     const title = this.scene.add.text(pos.x - 40, pos.y + 80, player.userName, {
       fontSize: "24px",
