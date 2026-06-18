@@ -57,6 +57,8 @@ export function getFrontedPlayerInfo(playerId: string, userName: string, room: R
     duringDrop: getDropTimeouts().has(playerId), // true if player is currently in drop timer grace period
     activeRoom: room? 
       {
+        playerTurnId: room.game?.table.players[room.game.table.turnIndex]?.id || "",
+        playerTurnUserName: room.game?.table.players[room.game.table.turnIndex]?.username || "",
         roomId: room.id,
         roomName: room.name,
         roomState: room.state, // "waiting", "playing", or "finished"
