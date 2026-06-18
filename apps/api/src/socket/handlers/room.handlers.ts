@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/16 17:23:39 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 16:22:44 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,6 +145,7 @@ export function registerRoomHandlers(
       broadcastGamePage(roomId);  // update GamePage when player leaves the room after end of drop timer
       checkLonelyPlayer(roomId); // check if only 1 player left in the room after a player dropped
     });
+    systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM);
     broadcastGamePage(roomId);  //update GamePage when a player drops (and timer started)
   });
   
@@ -182,4 +183,14 @@ export function registerRoomHandlers(
     const isPart = playerRoomId === potentialRoom.id;
     socket.emit("part_of_room_response", { roomName, isPart });
   });
+  
+  // Listens to when a player rejoins a room after dropping, notifys with a chat msg
+  socket.on("dropped_player_back", () => {
+    const { playerId } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (roomId) {
+      systemChatMsg(playerId, roomId, socket, ChatMsgType.LEFT_ROOM);
+    }
+  });
 }
+  

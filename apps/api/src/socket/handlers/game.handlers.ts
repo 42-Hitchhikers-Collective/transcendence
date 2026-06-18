@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/17 16:11:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 16:23:24 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ export function registerGameHandlers(
     }
     else if (event === "finished") {
         //finish the game and announce the winner ###
+        systemChatMsg(playerId, res.roomId, socket, ChatMsgType.WON_GAME);
         await endGame(res.roomId, socket);
         return ;
     }
