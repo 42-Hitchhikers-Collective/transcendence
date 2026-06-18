@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 15:08:01 by ilazar            #+#    #+#             */
-/*   Updated: 2026/05/19 14:00:10 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 14:42:46 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ export function createAuthMiddleware(app: FastifyInstance) {
       (socket as any).userId = payload.sub;
       (socket as any).userName = profile.username;
       (socket as any).avatarUrl = profile.avatarUrl; // JESS - I ADDED AVATAR URL TO THE PROFILE INFO WE GET FROM THE DATABASE SO WE CAN USE IT IN THE FRONTEND TO DISPLAY THE PLAYER'S AVATAR IN THE GAME PAGE
+      console.log(`User ${profile.username} profile.avatarUrl: ${profile.avatarUrl}`);
       socket.join(`user:${payload.sub}`);
 
       return next();
