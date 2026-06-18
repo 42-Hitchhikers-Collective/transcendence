@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/17 15:44:56 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/18 14:46:26 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,12 @@ export function registerGameHandlers(
     if (!res.success) socket.emit("error", { message: res.error });
     broadcastGameCanvas(res.roomId);
     const events = gameManager.checkGameEvent(res.roomId);
-    console.log(`[play_card] event: ${event} in room ${res.roomId}`);
     if (!events)
     {
       socket.emit("error", { message: res.error });
       return;
     }
-    if (events.finish == true) {
+    if (events.finish) {
       endGame(res.roomId, socket);
       return;
     }
@@ -49,6 +48,7 @@ export function registerGameHandlers(
     }
     console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
     gameManager.passTurn(playerId, res.roomId);
+    broadcastGameCanvas(res.roomId);
   });
 
   // Draw a card
