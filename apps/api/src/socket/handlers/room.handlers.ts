@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 16:22:44 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 16:49:57 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,7 +189,7 @@ export function registerRoomHandlers(
     const { playerId } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
-      systemChatMsg(playerId, roomId, socket, ChatMsgType.LEFT_ROOM);
+      systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK);
     }
   });
 }
