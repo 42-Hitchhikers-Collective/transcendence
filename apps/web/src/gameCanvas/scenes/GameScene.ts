@@ -65,6 +65,8 @@ export class GameScene extends Scene {
     // Guard: prevent render before scene is fully initialized
     // if (!this.scene.isActive()) return;
 
+    this.uiManager.hidePassTurnButtons();
+
     this.room = room;
 
     if (!this.myPlayerId) {
@@ -78,7 +80,6 @@ export class GameScene extends Scene {
     console.log("myPlayerId:", this.myPlayerId);
     console.log("current_turn:", room.current_turn);
     if (this.myPlayerId !== room.current_turn) {
-      console.log("ocultar");
       this.uiManager.hidePassTurnButtons();
     }
 
