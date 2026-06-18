@@ -1,6 +1,8 @@
 import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
+import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
+import { drawCard } from "../../network/gameNetwork";
 
-type Position = { x: number; y: number };
+type Position = { x: number; y: number; p: "v" | "h" };
 
 export class RenderManager {
   private playerContainers = new Map<string, Phaser.GameObjects.Container>();
@@ -12,6 +14,7 @@ export class RenderManager {
     boardContainer: Phaser.GameObjects.Container,
   ) {
     this.boardContainer = boardContainer;
+    this.scene = scene;
   }
 
   setMyPlayerId(id: string) {
@@ -26,22 +29,38 @@ export class RenderManager {
     );
     const positions = this.getPlayerPositions(orderedPlayers.length);
 
+    this.renderDiscardPile(room);
+    this.renderDrawPile();
+    
     orderedPlayers.forEach((player, i) => {
-      this.renderPlayer(player, positions[i]);
+      this.renderPlayer(player, positions[i], room.current_turn);
     });
 
-    this.renderPile(room);
   }
 
-  private renderPile(room: FrontendRoom) {
+  private renderDiscardPile(room: FrontendRoom) {
     const sprite = this.scene.add.image(
-      300,
-      300,
+      SCREEN.WIDTH / 2 - 50, // x
+      SCREEN.HEIGHT / 2, // y
       `${room.game?.discardTopCard.value}_${room.game?.discardTopCard.color}`,
     );
 
-    sprite.setScale(0.3);
+    sprite.setScale(CARDS.SCALE);
     sprite.setInteractive();
+  }
+
+  private renderDrawPile() {
+    const sprite = this.scene.add.image(
+      SCREEN.WIDTH / 2 + 50, // x
+      SCREEN.HEIGHT / 2, // y
+      `back`,
+    );
+
+    sprite.setScale(CARDS.SCALE);
+    sprite.setInteractive();
+    sprite.on("pointerdown", () => {
+      drawCard();
+    });
   }
 
   private reorderPlayersWithObserverAtBottom(
@@ -54,21 +73,23 @@ export class RenderManager {
     return [...others, observer];
   }
 
-  private renderPlayer(player: FrontendPlayer, pos: Position) {
+  private renderPlayer(
+    player: FrontendPlayer,
+    pos: Position,
+    current_turn: string,
+  ) {
     const container = this.scene.add.container(0, 0);
 
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    const title = this.scene.add.text(
-      pos.x - 40,
-      pos.y - 120,
-      player.userName,
-      {
-        fontSize: "24px",
-        color: "#fff",
-      },
-    );
+    let color = " #119632";
+    if (current_turn == player.id) color = "#c31919";
+
+    const title = this.scene.add.text(pos.x - 40, pos.y + 80, player.userName, {
+      fontSize: "24px",
+      color: color,
+    });
 
     container.add(title);
 
@@ -83,22 +104,29 @@ export class RenderManager {
           `${card.value}_${card.color}`,
         );
 
-        sprite.setScale(0.3);
+        sprite.setScale(CARDS.SCALE);
         sprite.setData("cardIndex", cardIndex);
         sprite.setInteractive();
         this.scene.input.setDraggable(sprite);
 
         container.add(sprite);
-
         offsetX += 40;
       });
     } else {
-      let offsetX = -(player.cardCount * 20);
+      let offsetX = 0;
+      let offsetY = 0;
+      if (pos.p == "h") offsetX = -(player.cardCount * 20);
+      if (pos.p == "v") offsetY = -(player.cardCount * 20);
       for (let i = 0; i < player.cardCount; i++) {
-        const sprite = this.scene.add.image(pos.x + offsetX, pos.y, `back`);
+        const sprite = this.scene.add.image(
+          pos.x + offsetX,
+          pos.y + offsetY,
+          `back`,
+        );
         sprite.setScale(0.3);
         container.add(sprite);
-        offsetX += 40;
+        if (pos.p == "h") offsetX += 40;
+        if (pos.p == "v") offsetY += 40;
       }
     }
   }
@@ -109,21 +137,36 @@ export class RenderManager {
   }
 
   private getPlayerPositions(count: number): Position[] {
-    const cx = 500;
-    const cy = 400;
-    const r = 250;
+    const centerX = 500;
 
-    const res: Position[] = [];
+    switch (count) {
+      case 1:
+        return [{ x: SCREEN.WIDTH / 2, y: 650, p: "h" }];
 
-    for (let i = 0; i < count; i++) {
-      const a = (i / count) * Math.PI * 2 + Math.PI;
+      case 2:
+        return [
+          { x: SCREEN.WIDTH / 2, y: 150, p: "h" }, // top
+          { x: SCREEN.WIDTH / 2, y: 650, p: "h" }, // observer
+        ];
 
-      res.push({
-        x: cx + Math.cos(a) * r,
-        y: cy + Math.sin(a) * r,
-      });
+      case 3:
+        return [
+          { x: 200, y: SCREEN.HEIGHT / 2, p: "v" }, // left
+          { x: 800, y: SCREEN.HEIGHT / 2, p: "v" }, // right
+          { x: SCREEN.WIDTH / 2, y: 650, p: "h" }, // observer
+        ];
+
+      case 4:
+        return [
+          { x: centerX, y: 100, p: "h" }, // top
+          { x: 200, y: SCREEN.HEIGHT / 2, p: "v" }, // left
+          { x: 800, y: SCREEN.HEIGHT / 2, p: "v" }, // right
+          { x: centerX, y: 650, p: "h" }, // observer
+        ];
+
+      default:
+        // fallback circular
+        return [];
     }
-
-    return res;
   }
 }

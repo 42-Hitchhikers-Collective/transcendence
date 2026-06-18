@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 16:23:24 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 16:45:53 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
 // import "../../plugins/prisma"; // Load Prisma module augmentation
 
+type Event = { color: boolean; uno: boolean; finish: boolean };
 // --- Game Events ---
 
 export function registerGameHandlers(
@@ -31,24 +32,33 @@ export function registerGameHandlers(
   socket.on("play_card", async ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.playCard(playerId, cardIndex);
-    if (!res.success) socket.emit("error", { message: res.error });
+    if (!res.success) {
+      socket.emit("error", { message: res.error });
+    } else {
+      const events = gameManager.checkGameEvent(res.roomId);
+      if (!events) {
+        socket.emit("error", { message: res.error });
+        return;
+      }
+      if (events.finish) {
+        endGame(res.roomId, socket);
+        broadcastGameCanvas(res.roomId);
+        return;
+      }
+      if (events.uno) {
+        socket.nsp.to(res.roomId).emit("uno", { playerId });
+      }
+      if (events.color) {
+        socket.emit("show_colors", { roomId: res.roomId });
+        broadcastGameCanvas(res.roomId);
+        return;
+      }
+      console.log(
+        `[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`,
+      );
+      gameManager.passTurn(playerId, res.roomId);
+    }
     broadcastGameCanvas(res.roomId);
-    const event = gameManager.checkGameEvent(res.roomId);
-    console.log(`[play_card] event: ${event} in room ${res.roomId}`);
-    if (event == "color") {
-      socket.emit("show_colors", { roomId: res.roomId });
-      return;
-    } else if (event === "uno") {
-      socket.nsp.to(res.roomId).emit("uno", { playerId });
-    }
-    else if (event === "finished") {
-        //finish the game and announce the winner ###
-        systemChatMsg(playerId, res.roomId, socket, ChatMsgType.WON_GAME);
-        await endGame(res.roomId, socket);
-        return ;
-    }
-    console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
-    gameManager.passTurn(playerId, res.roomId);
   });
 
   // Draw a card
@@ -56,15 +66,16 @@ export function registerGameHandlers(
     const { playerId } = getIdentity(socket);
     const res = gameManager.drawCard(playerId);
     if (!res.success) socket.emit("error", { message: res.error });
-    socket.emit("display_pass_button");
     broadcastGameCanvas(res.roomId);
-    });
+    socket.emit("display_pass_button");
+  });
 
   // Select color for wild card. When a player selects a color
   socket.on("select_wild_color", ({ color }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.selectWildColor(playerId, color);
     if (!res.success) socket.emit("error", { message: res.error });
+
     broadcastGameCanvas(res.roomId);
   });
 
@@ -78,13 +89,13 @@ export function registerGameHandlers(
 
   // When the game canvas is ready on the frontend, send the initial game state
   socket.on("canvas_ready", () => {
-      const { playerId } = getIdentity(socket);
-      const roomId = gameManager.getPlayerRoomId(playerId);
-      if (!roomId) {
-          socket.emit("error", { message: "Player is not in a room" });
-          return;
-      }
-      broadcastGameCanvas(roomId);
+    const { playerId } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) {
+      socket.emit("error", { message: "Player is not in a room" });
+      return;
+    }
+    broadcastGameCanvas(roomId);
   });
 
   // --- Major Game Events ---

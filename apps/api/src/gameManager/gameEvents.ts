@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/16 16:37:43 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 16:42:43 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
 import { abortGame } from "../services/game.service";
 
+type Event = { color: boolean; uno: boolean; finish: boolean};
 
  // --- Game Events ---
 
@@ -86,7 +87,7 @@ export function selectWildColor(playerId: string, color: "red" | "blue" | "green
 }
 
 
-export function checkGameEvent(roomId: string): "uno" | "color" | "finished" | null {
+export function checkGameEvent(roomId: string): Event | null {
   const room = gm.getRoomById(roomId);
   if (room) {
     if (room.game) {

@@ -5,6 +5,8 @@ import { BoardManager } from "../managers/BoardManager";
 import { InputManager } from "../managers/InputManager";
 import { RenderManager } from "../managers/RenderManager";
 import { UIManager } from "../managers/UIManager";
+import { Announcement } from "../managers/Announcemente";
+
 
 export class GameScene extends Scene {
   private room!: FrontendRoom;
@@ -14,6 +16,7 @@ export class GameScene extends Scene {
   private inputManager!: InputManager;
   private renderManager!: RenderManager;
   private uiManager!: UIManager;
+  private announcement!: Announcement;
 
   constructor() {
     super("Game");
@@ -33,6 +36,7 @@ export class GameScene extends Scene {
     this.renderManager = new RenderManager(this, boardContainer);
     this.inputManager = new InputManager(this, pile);
     this.uiManager = new UIManager(this);
+    this.announcement = new Announcement(this);
 
     this.inputManager.setup();
     // Zoom camera so game content fills the canvas
@@ -46,13 +50,13 @@ export class GameScene extends Scene {
     EventBus.on("room_state", this.onRoomState, this);
     EventBus.on("show_colors", this.selectColor, this);
     EventBus.on("display_pass_button", this.passTurn, this);
-    //EventBus.on("SOCKET_ERROR", this.onSocketError, this);
+    EventBus.on("uno", this.uno_announcemente, this);
 
     this.events.once("shutdown", () => {
       EventBus.off("room_state", this.onRoomState, this);
       EventBus.off("show_colors", this.selectColor, this);
       EventBus.off("display_pass_button", this.passTurn, this);
-      EventBus.off("SOCKET_ERROR", this.onSocketError, this);
+      EventBus.off("uno", this.uno_announcemente, this);
       this.uiManager.hideAll();
     });
   }
@@ -60,6 +64,8 @@ export class GameScene extends Scene {
   private onRoomState(room: FrontendRoom) {
     // Guard: prevent render before scene is fully initialized
     // if (!this.scene.isActive()) return;
+
+    this.uiManager.hidePassTurnButtons();
 
     this.room = room;
 
@@ -71,6 +77,8 @@ export class GameScene extends Scene {
       }
     }
 
+    console.log("myPlayerId:", this.myPlayerId);
+    console.log("current_turn:", room.current_turn);
     if (this.myPlayerId !== room.current_turn) {
       this.uiManager.hidePassTurnButtons();
     }
@@ -88,5 +96,11 @@ export class GameScene extends Scene {
   }
   private onSocketError(err: { message: string }) {
     console.error(err.message);
+  }
+
+  private uno_announcemente()
+  {
+    this.announcement.uno();
+    
   }
 }
