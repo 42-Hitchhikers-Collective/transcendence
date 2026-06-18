@@ -4,6 +4,7 @@ export type FrontendPlayer = {
   isTheObserver: boolean;
   isReady: boolean;
   cardCount: number;
+  current_turn: boolean;
   cards?: { color: string; value: string }[];
 };
 

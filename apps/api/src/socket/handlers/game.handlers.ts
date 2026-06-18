@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/17 16:11:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 14:46:26 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
 // import "../../plugins/prisma"; // Load Prisma module augmentation
 
+type Event = { color: boolean; uno: boolean; finish: boolean};
 // --- Game Events ---
 
 export function registerGameHandlers(
@@ -33,21 +34,26 @@ export function registerGameHandlers(
     const res = gameManager.playCard(playerId, cardIndex);
     if (!res.success) socket.emit("error", { message: res.error });
     broadcastGameCanvas(res.roomId);
-    const event = gameManager.checkGameEvent(res.roomId);
-    console.log(`[play_card] event: ${event} in room ${res.roomId}`);
-    if (event == "color") {
-      socket.emit("show_colors", { roomId: res.roomId });
+    const events = gameManager.checkGameEvent(res.roomId);
+    if (!events)
+    {
+      socket.emit("error", { message: res.error });
       return;
-    } else if (event === "uno") {
+    }
+    if (events.finish) {
+      endGame(res.roomId, socket);
+      return;
+    }
+    if (events.uno) {
       socket.nsp.to(res.roomId).emit("uno", { playerId });
     }
-    else if (event === "finished") {
-        //finish the game and announce the winner ###
-        await endGame(res.roomId, socket);
-        return ;
+    if (events.color) {
+      socket.emit("show_colors", { roomId: res.roomId });
+      return;
     }
     console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
     gameManager.passTurn(playerId, res.roomId);
+    broadcastGameCanvas(res.roomId);
   });
 
   // Draw a card
@@ -64,6 +70,7 @@ export function registerGameHandlers(
     const { playerId } = getIdentity(socket);
     const res = gameManager.selectWildColor(playerId, color);
     if (!res.success) socket.emit("error", { message: res.error });
+
     broadcastGameCanvas(res.roomId);
   });
 

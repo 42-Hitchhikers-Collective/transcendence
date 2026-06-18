@@ -44,6 +44,11 @@ socket.on("room_state", (frontendRoom: FrontendRoom) => {
   EventBus.emit("room_state", frontendRoom);
 });
 
+socket.on("uno", (frontendRoom: FrontendRoom) => {
+  console.log(`[EventBus] room_state: \n ${JSON.stringify(frontendRoom)}`);
+  EventBus.emit("uno", frontendRoom);
+});
+
 socket.on("display_pass_button", (frontendRoom: FrontendRoom) => {
   console.log(`[EventBus] display_pass_button: \n ${JSON.stringify(frontendRoom)}`);
   EventBus.emit("display_pass_button", frontendRoom);

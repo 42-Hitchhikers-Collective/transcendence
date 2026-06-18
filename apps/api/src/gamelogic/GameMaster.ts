@@ -64,7 +64,7 @@ export class GameMaster {
   // ============================================================
 
   public applyEffect(table: Table, card: Card): void {
-    if (card.color == "wild") table.event = "color";
+    if (card.color == "wild") table.color = true;
     else table.currentColor = card.color;
 
     switch (card.value) {
@@ -88,9 +88,7 @@ export class GameMaster {
   }
 
   private skip(table: Table): void {
-    table.turnIndex =
-      (table.turnIndex + table.direction + table.players.length) %
-      table.players.length;
+    table.skip = true;
   }
 
   // ============================================================
@@ -143,10 +141,15 @@ export class GameMaster {
 
   advanceTurn(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
+    
     if (!player || table.draw != 0) return false;
-
+    
+    let skip = 0;
+    if (table.skip)
+      skip = 1 * table.direction;
+    
     table.turnIndex =
-      (table.turnIndex + table.direction + table.players.length) %
+      (table.turnIndex + table.direction + skip + table.players.length) %
       table.players.length;
 
     this.newTurnStats(table);
@@ -158,7 +161,9 @@ export class GameMaster {
    * */
   private newTurnStats(table: Table) {
     table.draw = 1;
-    table.event = null;
+    table.color = false;
+    table.skip = false;
+    table.uno = false;
     table.playerPlayed = false;
   }
 
@@ -167,8 +172,8 @@ export class GameMaster {
   }
 
   private eventUpdate(table: Table, player: Player) {
-    if (player.hand.length === 1) table.event = "uno";
-    else if (player.hand.length === 0) table.event = "finished";
+    if (player.hand.length === 1) table.uno = true;
+    else if (player.hand.length === 0) table.finish = true;
   }
 
   /* *

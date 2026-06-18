@@ -3,6 +3,8 @@ import { Table } from "./Table";
 import { GameMaster } from "./GameMaster";
 import { Card } from "./Card";
 
+type Event = { color: boolean; uno: boolean; finish: boolean};
+
 export class Game {
   public gameId: number;
 
@@ -101,8 +103,8 @@ export class Game {
       return this.gameMaster.advanceTurn(this.table, playerId);
   }
 
-  public checkEvent(): "uno" | "color" | "finished" | null {
-    return (this.table.event);
+  public checkEvent(): Event  {
+    return {color: this.table.color, uno: this.table.uno, finish: this.table.finish}
   }
 
   public first_play()
