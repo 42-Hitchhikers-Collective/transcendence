@@ -26,6 +26,7 @@ export function registerGameHandlers(
   app: FastifyInstance, 
   socket: Socket,
   broadcastGameCanvas: (roomId: string) => void,
+  broadcastGamePage: (roomId: string) => void, // JESS: I need this to update the gamepage on who is playing
 ) {
 
   // Play a card
@@ -54,6 +55,7 @@ export function registerGameHandlers(
     console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
     gameManager.passTurn(playerId, res.roomId);
     broadcastGameCanvas(res.roomId);
+    broadcastGamePage(res.roomId); // JESS: I need this to update the gamepage on who is playing 
   });
 
   // Draw a card
@@ -80,6 +82,7 @@ export function registerGameHandlers(
     const res = gameManager.passTurnButton(playerId);
     if (!res.success) socket.emit("error", { message: res.error });
     broadcastGameCanvas(res.roomId);
+    broadcastGamePage(res.roomId);  // JESS: I need this to update the gamepage on who is playing 
   });
 
   // When the game canvas is ready on the frontend, send the initial game state
@@ -111,6 +114,7 @@ export function registerGameHandlers(
       socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
       systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
       broadcastGameCanvas(res.room.id);
+      broadcastGamePage(res.room.id); // JESS: I need this to update the gamepage on who is playing 
   });
 
   // Send finished game data to the Database and announce the finished game

@@ -45,7 +45,7 @@ export function registerSocketHandlers(
     const roomInfo = utils.getFrontedRoomInfo(roomId);
     if (roomInfo) {
       socket.nsp.to(roomId).emit("room_info_response", roomInfo);
-      // console.log(`<-------------  ♥️ ROOM INFO ${roomId} ♥️ -------------> \n`, roomInfo);
+      // console.log(`<-------------  📋 ROOM INFO ${roomId} 📋 -------------> \n`, roomInfo);
       // console.log(`<--------------------------------------------->`);
     }
   }
@@ -53,7 +53,7 @@ export function registerSocketHandlers(
   // Register related event handlers
   registerConnectionHandlers(app, socket, broadcastGameCanvas /* broadcastGamePage */);
   registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);
-  registerGameHandlers(app, socket, broadcastGameCanvas,);
+  registerGameHandlers(app, socket, broadcastGameCanvas, broadcastGamePage); // JESS: I need to pass broadcastGamePage to update the gamepage on who is playing
   // registerFriendHandlers(app, socket);
 
 
