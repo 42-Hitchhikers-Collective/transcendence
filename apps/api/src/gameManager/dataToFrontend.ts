@@ -55,15 +55,13 @@ export function getFrontedPlayerInfo(playerId: string, userName: string, room: R
     userName,
     avatarUrl: player?.avatarUrl ?? "/avatars/default.png", 
     duringDrop: getDropTimeouts().has(playerId), // true if player is currently in drop timer grace period
-    activeRoom: room? 
-      {
-        playerTurnId: room.game?.table.players[room.game.table.turnIndex]?.id || "",
-        playerTurnUserName: room.game?.table.players[room.game.table.turnIndex]?.username || "",
-        roomId: room.id,
-        roomName: room.name,
-        roomState: room.state, // "waiting", "playing", or "finished"
-      }
-    : null,
+    activeRoom: room
+      ? {
+          roomId: room.id,
+          roomName: room.name,
+          roomState: room.state, // "waiting", "playing", or "finished"
+        }
+      : null,
   };
 }
 
@@ -75,10 +73,14 @@ export function getFrontedRoomInfo(roomid: string) {
     roomId: room.id,
     roomName: room.name,
     roomState: room.state, // "waiting", "playing", or "finished"
-    players: room.players.map(p => ({
-      userName: p.userName,
-      avatarUrl: p.avatarUrl ?? "/avatars/default.png",
-      dropped: getDropTimeouts().has(p.playerId) // true if player is currently in drop timer grace period
-    })) || []
+    playerTurnId: room.game?.table.players[room.game.table.turnIndex]?.id || "", // JESS: I need this to update the gamepage on who is playing
+    playerTurnUserName:
+      room.game?.table.players[room.game.table.turnIndex]?.username || "", // JESS: I need this to update the gamepage on who is playing
+    players:
+      room.players.map((p) => ({
+        userName: p.userName,
+        avatarUrl: p.avatarUrl ?? "/avatars/default.png",
+        dropped: getDropTimeouts().has(p.playerId), // true if player is currently in drop timer grace period
+      })) || [],
   };
 }
