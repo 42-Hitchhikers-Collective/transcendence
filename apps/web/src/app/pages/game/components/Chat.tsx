@@ -43,6 +43,7 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
 export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[] }) {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [open, setOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
       </h2> */}
 
       {/* Messages area */}
-      <div className="mt-4 flex flex-1 flex-col min-h-0 rounded-2xl border border-rose-200/60 bg-white">
+      <div className="mt-4 rounded-2xl border border-rose-200/60 bg-white flex flex-col h-64 lg:h-80">
         <div
           ref={scrollRef}
           className="flex-1 space-y-4 overflow-y-auto p-4"

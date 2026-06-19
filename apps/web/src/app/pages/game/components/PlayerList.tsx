@@ -21,23 +21,23 @@ function PlayerStatus({ dropped }: { dropped: boolean }) {
 function TurnStatus({ turnPlayer }: { turnPlayer: PlayerListItem | undefined }) {
   if (!turnPlayer) return null;
 
-  if (turnPlayer.dropped) {
-    return (
-      <div>
-        <p className="mt-10 text-2xl font-medium">
-          <span className="animate-bounce text-slate-200">
-            {turnPlayer.userName}
-          </span>{" "}
-          was playing but dropped from the game!
-        </p>
-        <p className="mt-4 text-xs text-red-500">
-          Player will be kicked out and removed from the game if not
-          returning within{" "}
-          <span className="font-semibold text-red-600">30 seconds.</span>
-        </p>
-      </div>
-    );
-  }
+  // if (turnPlayer.dropped) {
+  //   return (
+  //     <div>
+  //       <p className="mt-10 text-2xl font-medium">
+  //         <span className="animate-bounce text-slate-200">
+  //           {turnPlayer.userName}
+  //         </span>{" "}
+  //         was playing but dropped from the game!
+  //       </p>
+  //       <p className="mt-4 text-xs text-red-500">
+  //         Player will be kicked out and removed from the game if not
+  //         returning within{" "}
+  //         <span className="font-semibold text-red-600">30 seconds.</span>
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div>
@@ -109,6 +109,7 @@ export default function PlayerList({
   clientUsername,
 }: PlayerListProps) {
   const turnPlayer = playerList.find((p) => p.isPlayerTurn);
+  const droppedPlayers = playerList.filter((p) => p.dropped);
 
 
 
@@ -134,7 +135,7 @@ export default function PlayerList({
       {playerList.length === 0 && (
         <p className="text-sm text-slate-400">Waiting for someone to join...</p>
       )}
-      <div className="my-10 flex flex-wrap gap-3 ">
+      <div className="my-10 flex flex-wrap gap-3 justify-center">
         {/* Sorts list before rendering, so that clientUser is set first */}
         {[...playerList]
           .sort((a, b) => {
@@ -151,6 +152,25 @@ export default function PlayerList({
           ))}
       </div>
       <TurnStatus turnPlayer={turnPlayer} />
+      {droppedPlayers.length > 0 && (
+        <div className="mt-4 space-y-6">
+          {droppedPlayers.map((p) => (
+            <div key={p.userName}>
+              <p className="text-2xl font-medium">
+                <span className="animate-bounce text-slate-200">
+                  {p.userName}
+                </span>
+                {" "}dropped from the game!
+              </p>
+              <p className="mt-4 text-xs text-red-500">
+                Player will be kicked out and removed from the game if not
+                returning within{" "}
+                <span className="font-semibold text-red-600">30 seconds.</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -62,7 +62,7 @@ export class UIManager {
     if (this.passTurnContainer) {
       return;
     }
-    this.passTurnContainer = this.scene.add.container(700, 200);
+    this.passTurnContainer = this.scene.add.container(500, 520); // JESS: I improved the position of the pass turn button, to make it more obvious
 
     const button = this.scene.add
       .rectangle(0, 0, 140, 60, 0x444444)

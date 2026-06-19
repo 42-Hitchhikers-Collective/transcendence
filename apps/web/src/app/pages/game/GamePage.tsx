@@ -23,14 +23,12 @@ function GamePageContent({ roomName }: { roomName: string }) {
     useGamePage(roomName);
 
   if (roomError) {
-    return (
-      <GamePageError roomError={roomError} />
-    );
+    return <GamePageError roomError={roomError} />;
   }
 
   return (
     <div
-      className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
+      className="bg-neutral-800 overflow-auto h-screen flex flex-col items-center justify-center"
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -39,32 +37,27 @@ function GamePageContent({ roomName }: { roomName: string }) {
         backgroundBlendMode: "saturation",
       }}
     >
-      <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-[500px_1fr]">
-
-        <div className="flex flex-col min-h-0 overflow-hidden">
+      <div className="grid h-full w-full max-w-7xl grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-[30%_1fr]">
+        {/* left col */}
+        <div className="flex py-10 flex-col min-h-0 overflow-hidden order-2 lg:order-1">
           <RoomCode gameStarted={gameStarted} roomName={roomName} />
           <div className="mt-4 items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
-          <PlayerList
-            playerList={playerList}
-            clientUsername={playerInfo?.userName}
+            <PlayerList
+              playerList={playerList}
+              clientUsername={playerInfo?.userName}
             />
-
-          <StartGameButton gameStarted={gameStarted} canvasError={canvasError} />
-            </div>
+            <StartGameButton
+              gameStarted={gameStarted}
+              canvasError={canvasError}
+            />
+          </div>
           <Chat playerList={playerList} />
         </div>
-        
-
-        {/* <div className="min-h-0"> */}
+          {/* Right col */}
+        <div className="flex flex-col  order-1 lg:order-2 min-h-300px lg:min-h-0"> {/*  bg-amber-500 */}
           <PhaserGame />
-        {/* </div> */}
-      
-      </div>
-      <div className="mt-6 flex justify-end">
-        <div className="max-w-md">{/* <Footer /> */}</div>
+        </div>
       </div>
     </div>
   );
 }
-
-
