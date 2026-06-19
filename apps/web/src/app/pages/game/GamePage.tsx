@@ -1,5 +1,4 @@
 import { Navigate, useSearchParams } from "react-router";
-import { useState } from "react";
 import background from "@/assets/backgrounds/unocards_gemini.png";
 
 import Chat from "./components/Chat";
@@ -8,7 +7,7 @@ import PlayerList from "./components/PlayerList";
 import StartGameButton from "./components/StartGameButton";
 import PhaserGame from "@/gameCanvas/PhaserGame";
 import GamePageError from "./components/GamePageError";
-import RoomInfo from "./components/RoomInfo";
+import RoomCode from "./components/RoomCode";
 
 export default function GamePage() {
   const [searchParams] = useSearchParams();
@@ -43,13 +42,14 @@ function GamePageContent({ roomName }: { roomName: string }) {
       <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-[500px_1fr]">
 
         <div className="flex flex-col min-h-0 overflow-hidden">
-          <RoomInfo roomName={roomName} />
+          <RoomCode gameStarted={gameStarted} roomName={roomName} />
           <div className="mt-4 items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
           <PlayerList
             playerList={playerList}
             clientUsername={playerInfo?.userName}
             />
-          <StartGameButton disabled={gameStarted} canvasError={canvasError} />
+
+          <StartGameButton gameStarted={gameStarted} canvasError={canvasError} />
             </div>
           <Chat playerList={playerList} />
         </div>

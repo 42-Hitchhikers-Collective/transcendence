@@ -18,6 +18,7 @@ export type PlayerListItem = {
   userName: string;
   avatarUrl?: string;
   dropped: boolean;
+  isPlayerTurn: boolean;
 };
 
 type RoomData = {
@@ -25,6 +26,8 @@ type RoomData = {
   roomName: string;
   roomState: string;
   players: PlayerListItem[];
+  playerTurnId: string;
+  playerTurnUserName: string;
 };
 
 type GameStartFailedPayload = {
@@ -91,6 +94,10 @@ export function useGamePage(roomName: string) {
       );
     });
 
+    // TODO:
+    // socket on game_finished  handleEndGame to trigger end game screen with winner info and to prompt player to leave
+    // the room and navigate back to profile or home page or something like that
+
     // Listen to socket events
     socket.on("player_info_response", handlePlayerData);
     socket.on("room_info_response", handleRoomDataResponse);
@@ -119,7 +126,9 @@ export function useGamePage(roomName: string) {
 
   useEffect(() => {
     if (playerList.length > 0) {
-      console.log(`👤👤👤👤 PLAYER LIST UPDATED: ${playerList.map(p => p.userName)}`);
+      console.log(
+        `👤👤👤👤 PLAYER LIST UPDATED: ${playerList.map((p) => p.userName)}`,
+      );
       console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
     }
     if (RoomDataRef.current?.roomState === "playing") {
@@ -162,9 +171,7 @@ export function useGamePage(roomName: string) {
     // Shoots when a player tries to join a non existing room or a room (CAREFUL IF RACE BETWEEN CREATE / JOIN)
     if (payload?.message === "Requested room not found") {
       // navigateRef.current("/profile", { replace: true });
-      setRoomError(
-        "The room you are trying to join does not exist!",
-      );
+      setRoomError("The room you are trying to join does not exist!");
     }
     // Covers a case when player is active in one room and tries to join another
     if (payload?.message === "Player already in a different room") {
@@ -195,7 +202,11 @@ export function useGamePage(roomName: string) {
           .join("\n"),
     );
     if (roomData) {
-      setPlayerList(roomData.players);
+      const playersData = roomData.players.map((p) => ({
+        ...p,
+        isPlayerTurn: p.userName === roomData.playerTurnUserName, // ← compute this
+      }));
+      setPlayerList(playersData); // ← use the new list
     }
   };
 
