@@ -17,7 +17,7 @@ import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from "./index";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
-// import "../../plugins/prisma"; // Load Prisma module augmentation
+import "../../plugins/prisma"; // Load Prisma module augmentation
 
 type Event = { color: boolean; uno: boolean; finish: boolean};
 // --- Game Events ---
@@ -36,9 +36,8 @@ export function registerGameHandlers(
     if (!res.success) socket.emit("error", { message: res.error });
     broadcastGameCanvas(res.roomId);
     const events = gameManager.checkGameEvent(res.roomId);
-    if (!events)
-    {
-      socket.emit("error", { message: res.error });
+    if (!events) {
+      socket.emit("error", { message: "Unable to check game event" }); // JESS: res.error doesn't exist in this case, so added a generic error message
       return;
     }
     if (events.finish) {

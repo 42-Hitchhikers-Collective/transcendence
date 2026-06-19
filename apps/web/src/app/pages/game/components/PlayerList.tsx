@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { PlayerListItem } from "../hooks/useGamePage";
 
 type PlayerListProps = {
@@ -63,7 +62,7 @@ function PlayerItem({
 
   return (
     <div
-      className={`flex w-[88px] flex-col items-center gap-2 rounded-xl border-2 px-5 py-3 shadow-md ${
+      className={`flex w-22 flex-col items-center gap-2 rounded-xl border-2 px-5 py-3 shadow-md ${
         player.dropped
           ? "border-slate-200"
           : player.isPlayerTurn
