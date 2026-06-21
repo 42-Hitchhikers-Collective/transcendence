@@ -46,6 +46,7 @@ export function useGamePage(roomName: string) {
   const [gameStarted, setGameStarted] = useState(false);
   const [canvasError, setCanvasError] = useState<string | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);
+  const [gameOver, setGameOver] = useState<{ reason: "finished" | "lonely"; winnerId?: string } | null>(null);
   // const [socketReady, setSocketReady] = useState(socket.connected);
 
   // Keeps refs to avoid stale closures in socket callbacks ──
@@ -105,6 +106,12 @@ export function useGamePage(roomName: string) {
     socket.on("game_start_success", handleGameStartSuccess);
     socket.on("game_start_error", handleGameStartFailed);
 
+    // Game-over events
+    socket.on("game_finished", ({ winnerId }: { winnerId?: string }) => setGameOver({ reason: "finished", winnerId }));
+    socket.on("lonely_player", () => {
+      setGameOver({ reason: "lonely" });
+    });
+
     // emit socket events
     socket.emit("join_room", { roomName: roomNameRef.current });
     socket.emit("player_info_request");
@@ -117,6 +124,8 @@ export function useGamePage(roomName: string) {
       socket.off("room_info_response", handleRoomDataResponse);
       socket.off("game_start_success", handleGameStartSuccess);
       socket.off("game_start_error", handleGameStartFailed);
+      socket.off("game_finished");
+      socket.off("lonely_player");
 
       console.log(
         `💦 ${playerInfoRef.current?.userName} dropped from room ${roomNameRef.current}.`,
@@ -226,7 +235,9 @@ export function useGamePage(roomName: string) {
     canvasError,
     roomError,
     gameStarted,
+    gameOver,
     playerInfo,
     playerList,
+    roomId: RoomDataRef.current?.roomId,
   };
 }

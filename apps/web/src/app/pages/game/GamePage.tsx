@@ -8,6 +8,8 @@ import StartGameButton from "./components/StartGameButton";
 import PhaserGame from "@/gameCanvas/PhaserGame";
 import GamePageError from "./components/GamePageError";
 import RoomCode from "./components/RoomCode";
+import GameOver from "./components/GameOver";
+import LonelyPlayerOverlay from "./components/LonelyPlayerOverlay";
 
 export default function GamePage() {
   const [searchParams] = useSearchParams();
@@ -19,7 +21,7 @@ export default function GamePage() {
 }
 
 function GamePageContent({ roomName }: { roomName: string }) {
-  const { playerInfo, playerList, gameStarted, canvasError, roomError } =
+  const { playerInfo, playerList, gameStarted, gameOver, roomId, canvasError, roomError } =
     useGamePage(roomName);
 
   if (roomError) {
@@ -28,7 +30,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
   return (
     <div
-      className="bg-neutral-800 overflow-auto h-screen flex flex-col items-center justify-center"
+      className="bg-neutral-800 overflow-auto h-screen flex flex-col items-center justify-center relative"
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -58,6 +60,10 @@ function GamePageContent({ roomName }: { roomName: string }) {
           <PhaserGame />
         </div>
       </div>
+      {gameOver?.reason === "finished" && (
+        <GameOver isWinner={playerInfo?.playerId === gameOver.winnerId} />
+      )}
+      {gameOver?.reason === "lonely" && roomId && <LonelyPlayerOverlay roomId={roomId} />}
     </div>
   );
 }

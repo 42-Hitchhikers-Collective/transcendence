@@ -49,7 +49,7 @@ Payload: `{ message: string }`
 | `"Game logic error: invalid move"` | `draw_card` — draw failed in game logic |
 | `"Game logic error: invalid move"` | `on_press_pass_button` — pass turn failed in game logic |
 | `"Room not found"` | `start_game` — room ID doesn't exist in the rooms map |
-| `"Start conditions aren't met"` | `start_game` — room state is not `"waiting"`, or fewer than 2 players in the room |
+| `"At least 2 players are required to start the game!"` | `start_game` — room state is not `"waiting"`, or fewer than 2 players in the room |
 
 ### Chat Events
 
@@ -72,7 +72,7 @@ Emitted **in addition to** the `error` event for `start_game` failures.
 |---|---|
 | `"Player is not in a room"` | `start_game` — player has no room assignment |
 | `"Room not found"` | `start_game` — room ID doesn't exist |
-| `"Start conditions aren't met"` | `start_game` — not in `"waiting"` state or fewer than 2 players |
+| `"At least 2 players are required to start the game!"` | `start_game` — not in `"waiting"` state or fewer than 2 players |
 
 ---
 

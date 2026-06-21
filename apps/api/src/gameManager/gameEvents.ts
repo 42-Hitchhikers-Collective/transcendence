@@ -115,7 +115,7 @@ export function startGameButton(playerId: string): RoomResult {
       room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
       return {success: true, room};
   }
-  return {success: false, roomId: roomId, error: "Start conditions aren't met"};;
+  return {success: false, roomId: roomId, error: "At least 2 players are required to start the game!"};
 }
 
 
@@ -127,6 +127,15 @@ export function endGame(roomId: string) {
     return {success: false, roomId: roomId, error: "Game DB ID is undefined"};
   };
   room.state = "finished";
+  // ----- JESS : Find the winner (player with empty hand) from the game's player list and set it -----
+  const winner = room.game.players.find(p => {
+    const hand = room.game?.table.getHand(p.id);
+    return hand && hand.length === 0;
+  });
+  if (winner) {
+    room.game.finishGame(winner);
+  }
+  // ----- JESS : If no winner found (shouldn't happen in normal flow) set the game as interrupted -----
   if (!room.game.winner) {
     return {success: false, roomId: roomId, error: "Winner not found"};
   }

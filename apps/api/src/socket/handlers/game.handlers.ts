@@ -131,7 +131,7 @@ export function registerGameHandlers(
       const playerIds = res.room.players.map((p) => p.playerId);
       await finalizeGame(app.prisma, res.gameDbId, res.winnerId, playerIds);
     }
-    socket.nsp.to(roomId).emit("game_finished", { roomId });
+    socket.nsp.to(roomId).emit("game_finished", { roomId, winnerId: res.winnerId });
   }
 
   // Abort game - can be triggered by frontend
