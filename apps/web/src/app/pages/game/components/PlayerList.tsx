@@ -78,8 +78,17 @@ function PlayerItem({
           player.dropped ? "grayscale opacity-50" : ""
         }`}
         onError={(e) => {
-          console.warn(`Failed to load avatar for ${player.userName}, using default.`, e);
+           console.warn(`Failed to load avatar for ${player.userName}, using default.`, e);
           (e.target as HTMLImageElement).src = "/avatars/default.png";
+
+          // Inbar -> THIS IS A BANDAID, DOES NOT SOLVE THE PROBLEM
+          // const img = e.currentTarget;
+          // console.log("Failed URL:", img.src);
+          // if (img.src.includes("/avatars/default.png")) {
+          //   console.log("Default avatar missing too, aborting.");
+          //   return;
+          // }
+          // img.src = "/avatars/default.png";
         }}
       />
 
