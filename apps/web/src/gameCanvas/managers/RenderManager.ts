@@ -1,6 +1,7 @@
 import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
 import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
 import { drawCard } from "../../network/gameNetwork";
+import { EventBus } from "../../events/EventBus";
 
 type Position = { x: number; y: number; p: "v" | "h" };
 
@@ -8,6 +9,8 @@ export class RenderManager {
   private playerContainers = new Map<string, Phaser.GameObjects.Container>();
   private myPlayerId: string = "";
   private boardContainer!: Phaser.GameObjects.Container;
+  private drawPileSprite: Phaser.GameObjects.Image | null = null;
+  private canDraw = false; // JESS: we need a flag to disable the draw pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
 
   constructor(
     private scene: Phaser.Scene,
@@ -19,6 +22,20 @@ export class RenderManager {
 
   setMyPlayerId(id: string) {
     this.myPlayerId = id;
+  }
+
+
+  setCanDraw(canDraw: boolean) {
+
+    this.canDraw = canDraw; // JESS: added flag to disable the draw pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
+    if (!this.drawPileSprite) return; 
+      if (canDraw) {
+      // this.drawPileSprite.setInteractive(); // JESS: this is not needed 
+      this.drawPileSprite.setAlpha(1);
+    } else {
+      // this.drawPileSprite.disableInteractive(); // JESS: this is not needed 
+      this.drawPileSprite.setAlpha(0.4); // JESS: we just need set alpha
+    }
   }
 
   render(room: FrontendRoom) {
@@ -59,8 +76,14 @@ export class RenderManager {
     sprite.setScale(CARDS.SCALE);
     sprite.setInteractive();
     sprite.on("pointerdown", () => {
+      //JESS: added guard to prevent players to draw cards when it's not their turn, or it will create unexpected behaviors in the game scene
+      if (!this.canDraw) {
+        EventBus.emit("not_turn", { message: "It's not your turn yet" });
+        return;
+      }
       drawCard();
     });
+    this.drawPileSprite = sprite; // JESS: we store the draw pile sprite in a variable to be able to disable it when it's not the player's turn
   }
 
   private reorderPlayersWithObserverAtBottom(

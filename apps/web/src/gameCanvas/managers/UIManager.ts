@@ -14,7 +14,7 @@ export class UIManager {
   showWildColorButtons() {
     this.hideWildColorButtons();
 
-    this.wildColorContainer = this.scene.add.container(500, 200);
+    this.wildColorContainer = this.scene.add.container(500, 290); // JESS: I improved the position of the wild color buttons
 
     const colors: ColorButton[] = [
       { color: "red", hex: 0xff0000 },

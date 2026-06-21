@@ -57,13 +57,15 @@ export class GameScene extends Scene {
     EventBus.on("show_colors", this.selectColor, this);
     EventBus.on("display_pass_button", this.passTurn, this);
     EventBus.on("uno", this.uno_announcemente, this);
-    LOG("  EventBus listeners registered"); // JESS: keep this log to help with debugging tha game scene
+    EventBus.on("not_turn", this.showNotTurn, this); // JESS: WE NEED AN EVENT BUS ALSO 
+    LOG("  EventBus listeners registered");
 
     this.events.once("shutdown", () => {
       EventBus.off("room_state", this.onRoomState, this);
       EventBus.off("show_colors", this.selectColor, this);
       EventBus.off("display_pass_button", this.passTurn, this);
       EventBus.off("uno", this.uno_announcemente, this);
+      EventBus.off("not_turn", this.showNotTurn, this);
       this.uiManager.hideAll();
       LOG("💀 GameScene shutdown — all listeners removed"); // JESS: keep this log to help with debugging tha game scene
     });
@@ -89,8 +91,11 @@ export class GameScene extends Scene {
 
     // JESS: stored conditions in variables to simplify the logs and create less noise
     const turnName = room.players.find((p) => p.id === room.current_turn)?.userName ?? "Unknown";
-    if(turnName !== "Unknown") { // JESS: we log the info only if the game is started (when not started the turn is set to "Unknown" to avoid confusion in the logs)
-      const isMyTurn = this.myPlayerId === room.current_turn;
+    const isMyTurn = this.myPlayerId === room.current_turn; // JESS: we use the isMyTurn variable to simplify the conditions in the logs and in the guards for the user interactions with the game when it's not their turn
+    this.inputManager.setCanPlay(isMyTurn); // JESS: we use the isMyTurn variable to set the canPlay flag in the input manager, which is used to guard the user interactions with the game when it's not their turn
+    this.renderManager.setCanDraw(isMyTurn); // JESS: we use the isMyTurn variable to set the canDraw flag in the render manager, which is used to guard the user interactions with the draw pile when it's not their turn
+    // JESS: added this log to show the game state in a more clear way, with the name of the player that is playing and the number of cards they have, and also if it's the observer or not, to help with debugging the game scene and understand better what's going on in the game
+    if(turnName !== "Unknown") { 
       const myCards =
         room.players.find((p) => p.id === this.myPlayerId)?.cardCount ?? "?";
       LOG(`GAME STATE \n    Is ${turnName} 's turn is playing with ${myCards} cards`); // // JESS: keep this log to help with debugging tha game scene
@@ -99,24 +104,45 @@ export class GameScene extends Scene {
     if (this.myPlayerId !== room.current_turn) {
       console.log(`🕹️ ${this.myPlayerName} - turn pass button hidden`); // JESS: added precision for debugging message to show better context to all team members
       this.uiManager.hidePassTurnButtons();
+      this.uiManager.hideWildColorButtons(); // JESS: You also need to hide the wild color buttons to other players if it's not their turn, otherwise they will see the wild color buttons and get confused about why they are showing up
     }
     this.renderManager.render(room);
   }
 
   private selectColor() {
-    LOG("Wild card played — showing color picker"); // JESS: keep this log to help with debugging tha game scene
+    if (this.myPlayerId !== this.room?.current_turn) return; // JESS: put a guard to prevent other players to see and interact with the wild color buttons if it's not their turn
+    LOG("Wild card played — showing color picker");
     this.uiManager.showWildColorButtons();
   }
 
   private passTurn() {
-    if (this.myPlayerId == this.room.current_turn) {
-      LOG(`${this.myPlayerName} passed turn`); // JESS: keep this log to help with debugging tha game scene
-      this.uiManager.showPassTurnButtons();
-    }
+    if (this.myPlayerId !== this.room?.current_turn) return; // JESS: put a guard to prevent other players to see and interact with the pass turn button if it's not their turn
+    LOG(`${this.myPlayerName} passed turn`);
+    this.uiManager.showPassTurnButtons();
   }
 
   private onSocketError(err: { message: string }) {
-    console.error(`Socket error: ${err.message}`); // JESS: keep this log to help with debugging tha game scene
+    console.error(`Socket error: ${err.message}`);
+  }
+
+  // JESS: THIS FUNCTION SHOW A MESSAGE WHEN THE USER INTERACTS WITH THE GAME BUT IT'S NOT THEIR TURN TO EXPLAIN WHY NOTHING HAPPENS, THIS IS IMPORTANT TO IMPROVE THE USER EXPERIENCE AND AVOID CONFUSION FOR NEW PLAYERS
+  private showNotTurn() {
+    const txt = this.add.text(500, 400, "It's not your turn yet", {
+      fontSize: "36px",
+      color: "#ff4444",
+      fontStyle: "bold",
+      stroke: "#000",
+      strokeThickness: 4,
+    });
+    txt.setOrigin(0.5);
+    txt.setDepth(100);
+    this.tweens.add({
+      targets: txt,
+      alpha: 0,
+      y: 350,
+      duration: 2000,
+      onComplete: () => txt.destroy(),
+    });
   }
 
   private uno_announcemente() {

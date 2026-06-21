@@ -33,33 +33,29 @@ export function registerGameHandlers(
   socket.on("play_card", async ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.playCard(playerId, cardIndex);
-    if (!res.success) {
-      socket.emit("error", { message: res.error });
-    } else {
-      const events = gameManager.checkGameEvent(res.roomId);
-      if (!events) {
-        socket.emit("error", { message: "Unable to check game event" }); // JESS: res.error doesn't exist in this case, so added a generic error message
-        return;
-      }
-      if (events.finish) { // Game finnish with a winner
-        systemChatMsg(playerId, res.roomId, socket, ChatMsgType.WON_GAME);
-        await endGame(res.roomId, socket);
-        broadcastGameCanvas(res.roomId);
-        return;
-      }
-      if (events.uno) {
-        socket.nsp.to(res.roomId).emit("uno", { playerId });
-      }
-      if (events.color) {
-        socket.emit("show_colors", { roomId: res.roomId });
-        broadcastGameCanvas(res.roomId);
-        return;
-      }
-      console.log(
-        `[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`,
-      );
-      gameManager.passTurn(playerId, res.roomId);
+    if (!res.success) socket.emit("error", { message: res.error });
+    // this was encapsulated in an else statement
+    broadcastGameCanvas(res.roomId);
+    const events = gameManager.checkGameEvent(res.roomId);
+    if (!events) {
+      socket.emit("error", { message: "Unable to check game event" }); // JESS: res.error doesn't exist in this case, so added a generic error message
+      return;
     }
+    if (events.finish) {
+      systemChatMsg(playerId, res.roomId, socket, ChatMsgType.WON_GAME);
+      await endGame(res.roomId, socket); // JESS: why await added?
+      broadcastGameCanvas(res.roomId);
+      return;
+    }
+    if (events.uno) {
+      socket.nsp.to(res.roomId).emit("uno", { playerId });
+    }
+    if (events.color) {
+      socket.emit("show_colors", { roomId: res.roomId });
+      return;
+    }
+    console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
+    gameManager.passTurn(playerId, res.roomId);
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId); // JESS: I need this to update the gamepage on who is playing 
   });
