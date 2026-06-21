@@ -84,7 +84,8 @@ export async function profileRoutes(app: any) {
       });
       await deleteLocalAvatar(existing?.avatarUrl ?? null);
 
-      const filename = randomUUID() + EXT[file.mimetype];
+      // const filename = randomUUID() + EXT[file.mimetype];
+      const filename = `${payload.sub}${EXT[file.mimetype]}`; // Use userId as filename to avoid accumulating old avatars and hitting storage limits
       await writeFile(path.join(AVATAR_DIR, filename), buffer);
 
       const avatarUrl = `/avatars/${filename}`;

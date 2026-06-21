@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 14:46:26 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/18 16:48:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
 import "../../plugins/prisma"; // Load Prisma module augmentation
 
-type Event = { color: boolean; uno: boolean; finish: boolean};
+type Event = { color: boolean; uno: boolean; finish: boolean };
 // --- Game Events ---
 
 export function registerGameHandlers(
@@ -33,26 +33,33 @@ export function registerGameHandlers(
   socket.on("play_card", async ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.playCard(playerId, cardIndex);
-    if (!res.success) socket.emit("error", { message: res.error });
-    broadcastGameCanvas(res.roomId);
-    const events = gameManager.checkGameEvent(res.roomId);
-    if (!events) {
-      socket.emit("error", { message: "Unable to check game event" }); // JESS: res.error doesn't exist in this case, so added a generic error message
-      return;
+    if (!res.success) {
+      socket.emit("error", { message: res.error });
+    } else {
+      const events = gameManager.checkGameEvent(res.roomId);
+      if (!events) {
+        socket.emit("error", { message: "Unable to check game event" }); // JESS: res.error doesn't exist in this case, so added a generic error message
+        return;
+      }
+      if (events.finish) { // Game finnish with a winner
+        systemChatMsg(playerId, res.roomId, socket, ChatMsgType.WON_GAME);
+        await endGame(res.roomId, socket);
+        broadcastGameCanvas(res.roomId);
+        return;
+      }
+      if (events.uno) {
+        socket.nsp.to(res.roomId).emit("uno", { playerId });
+      }
+      if (events.color) {
+        socket.emit("show_colors", { roomId: res.roomId });
+        broadcastGameCanvas(res.roomId);
+        return;
+      }
+      console.log(
+        `[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`,
+      );
+      gameManager.passTurn(playerId, res.roomId);
     }
-    if (events.finish) {
-      endGame(res.roomId, socket);
-      return;
-    }
-    if (events.uno) {
-      socket.nsp.to(res.roomId).emit("uno", { playerId });
-    }
-    if (events.color) {
-      socket.emit("show_colors", { roomId: res.roomId });
-      return;
-    }
-    console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
-    gameManager.passTurn(playerId, res.roomId);
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId); // JESS: I need this to update the gamepage on who is playing 
   });
@@ -62,9 +69,9 @@ export function registerGameHandlers(
     const { playerId } = getIdentity(socket);
     const res = gameManager.drawCard(playerId);
     if (!res.success) socket.emit("error", { message: res.error });
-    socket.emit("display_pass_button");
     broadcastGameCanvas(res.roomId);
-    });
+    socket.emit("display_pass_button");
+  });
 
   // Select color for wild card. When a player selects a color
   socket.on("select_wild_color", ({ color }) => {
@@ -86,13 +93,13 @@ export function registerGameHandlers(
 
   // When the game canvas is ready on the frontend, send the initial game state
   socket.on("canvas_ready", () => {
-      const { playerId } = getIdentity(socket);
-      const roomId = gameManager.getPlayerRoomId(playerId);
-      if (!roomId) {
-          socket.emit("error", { message: "Player is not in a room" });
-          return;
-      }
-      broadcastGameCanvas(roomId);
+    const { playerId } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) {
+      socket.emit("error", { message: "Player is not in a room" });
+      return;
+    }
+    broadcastGameCanvas(roomId);
   });
 
   // --- Major Game Events ---

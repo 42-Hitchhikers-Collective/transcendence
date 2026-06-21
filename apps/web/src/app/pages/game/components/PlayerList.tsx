@@ -78,10 +78,7 @@ function PlayerItem({
           player.dropped ? "grayscale opacity-50" : ""
         }`}
         onError={(e) => {
-          console.warn(
-            `Failed to load avatar for ${player.userName}, using default.`,
-            e,
-          );
+          console.warn(`Failed to load avatar for ${player.userName}, using default.`, e);
           (e.target as HTMLImageElement).src = "/avatars/default.png";
         }}
       />

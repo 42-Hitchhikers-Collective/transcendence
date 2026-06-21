@@ -72,6 +72,10 @@ export class GameScene extends Scene {
   }
 
   private onRoomState(room: FrontendRoom) {
+    // Guard: prevent render before scene is fully initialized
+    // if (!this.scene.isActive()) return;
+    this.uiManager.hidePassTurnButtons(); // <---- MERGE CONFLICT: was added to resolve
+
     this.room = room;
 
     if (!this.myPlayerId) {

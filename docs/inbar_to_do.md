@@ -14,6 +14,8 @@ check logs:
 docker compose logs -f api | cat -n
 
 
+sysMSG - user dropped / back from dropped
+
 
 game is on ppl leave, only 1 player left playing - emit "lonely_player"
 

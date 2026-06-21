@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 12:48:13 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/18 17:13:05 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@ export enum ChatMsgType {
   CREATE_ROOM = "CREATE_ROOM",
   LEFT_ROOM = "LEFT_ROOM",
   STARTED_GAME = "STARTED_GAME",
-  WON_GAME = "WON_GAME"
+  WON_GAME = "WON_GAME",
+  DROP_ROOM = "DROP_ROOM",
+  DROP_ROOM_BACK = "DROP_ROOM_BACK"
 }
 
 // Map enum to actual message text
@@ -32,7 +34,9 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
   [ChatMsgType.CREATE_ROOM]: "has created the room.",
   [ChatMsgType.LEFT_ROOM]: "has left the room.",
   [ChatMsgType.STARTED_GAME]: "started the game.",
-  [ChatMsgType.WON_GAME]: "won the game!"
+  [ChatMsgType.WON_GAME]: "won the game!",
+  [ChatMsgType.DROP_ROOM]: "dropped the room. They have 30 seconds to rejoin.",
+  [ChatMsgType.DROP_ROOM_BACK]: "rejoined the room after dropping."
 };
 
 // Validate a chat msg and add it to room's chat history
@@ -45,7 +49,7 @@ export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
         return {success: false, roomId: "undefined", error: "Room not found"};
     if (msg.length === 0 || msg.length > MAX_MSG_LENGTH)
         return {success: false, roomId: roomId, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
-    const regex = /^[a-zA-Z0-9\-_!?.]+$/;
+    const regex = /^[a-zA-Z0-9 \-_!?.]+$/;
     if (!regex.test(msg))
       return { success: false, roomId: "undefined", error: "Message contains invalid characters"};
     const username = getUsername(playerId) || "Unknown";
