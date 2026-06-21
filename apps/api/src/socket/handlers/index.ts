@@ -77,6 +77,16 @@ export function registerSocketHandlers(
   });
 
   
+  // JESS: I NEEDED THESE EVENT TO REQUEST THE CHAT HSTORY WHEN THE GAME PAGE MOUNTS
+  socket.on("chat_history_request", () => {
+    const { playerId } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const room = gameManager.getRoomById(roomId);
+    if (!room) return;
+    socket.emit("chat_history_response", room.chatHistory ?? []);
+  });
+
   // ---> Msg Events ---
   socket.on("send_msg", ({ msg }) => {
     const { playerId, userName } = getIdentity(socket);

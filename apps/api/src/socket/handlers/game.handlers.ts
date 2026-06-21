@@ -49,6 +49,7 @@ export function registerGameHandlers(
     }
     if (events.uno) {
       socket.nsp.to(res.roomId).emit("uno", { playerId });
+      systemChatMsg(playerId, res.roomId, socket, ChatMsgType.UNO); // JESS: added system message for UNO call
     }
     if (events.color) {
       socket.emit("show_colors", { roomId: res.roomId });

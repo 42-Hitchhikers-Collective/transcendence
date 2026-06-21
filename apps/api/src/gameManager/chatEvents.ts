@@ -25,18 +25,20 @@ export enum ChatMsgType {
   STARTED_GAME = "STARTED_GAME",
   WON_GAME = "WON_GAME",
   DROP_ROOM = "DROP_ROOM",
-  DROP_ROOM_BACK = "DROP_ROOM_BACK"
+  DROP_ROOM_BACK = "DROP_ROOM_BACK",
+  UNO = "UNO"
 }
 
 // Map enum to actual message text
 const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
-  [ChatMsgType.JOIN_ROOM]: "has joined the room.",
-  [ChatMsgType.CREATE_ROOM]: "has created the room.",
-  [ChatMsgType.LEFT_ROOM]: "has left the room.",
+  [ChatMsgType.JOIN_ROOM]: "joined.",
+  [ChatMsgType.CREATE_ROOM]: "created the room.",
+  [ChatMsgType.LEFT_ROOM]: "left. \n If the game already started, they won't be able to rejoin.",
   [ChatMsgType.STARTED_GAME]: "started the game.",
-  [ChatMsgType.WON_GAME]: "won the game!",
-  [ChatMsgType.DROP_ROOM]: "dropped the room. They have 30 seconds to rejoin.",
-  [ChatMsgType.DROP_ROOM_BACK]: "rejoined the room after dropping."
+  [ChatMsgType.WON_GAME]: "won!",
+  [ChatMsgType.DROP_ROOM]: "dropped! They have 30 seconds to rejoin or will be removed from the game.",
+  [ChatMsgType.DROP_ROOM_BACK]: "is back!",
+  [ChatMsgType.UNO]: "called UNO! 🚨", // JESS: add uno call
 };
 
 // Validate a chat msg and add it to room's chat history
