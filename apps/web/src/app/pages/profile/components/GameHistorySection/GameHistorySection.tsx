@@ -25,6 +25,9 @@ export function GamesHistorySection({
 
   const foundHistory = () => (
     <div>
+      <p className="text-xs font-semibold uppercase tracking-widest text-amber-300 drop-shadow-[0_1px_2px_rgba(252,211,77,0.4)] mb-3">
+        Your recent Matches
+      </p>
       {gamesPlayed.map((game) => (
         <HistoryCard key={game.id} game={game} />
       ))}

@@ -21,7 +21,7 @@ export function ProfileSection({
   ...props
 }: {
   user?: AuthUser;
-  stats: { wins: number; losses: number };
+  stats: { wins: number; losses: number; rank: number | null };
   onLogout?: () => void;
 } & React.ComponentProps<"div">) {
   // console.log("User data was loaded:", user);
@@ -41,7 +41,7 @@ export function ProfileSection({
       <div className="relative flex flex-col md:grid md:grid-cols-[1fr_1.2fr] lg:grid-cols-[0.7fr_1.5fr] xl:grid-cols-[0.6fr_1.7fr] items-stretch gap-6 xl:gap-10">
         {/* left content */}
         <div className="flex items-center justify-center">
-          <ProfileAvatar avatarUrl={user?.profile?.avatarUrl}  /> 
+          <ProfileAvatar avatarUrl={user?.profile?.avatarUrl ?? undefined}  /> 
         </div>
 
         {/* Right content */}
@@ -66,7 +66,7 @@ export function ProfileSection({
               )}
             </div>
           </div>
-          <StatsCards wins={wins} losses={losses} winRate={winRate} />
+          <StatsCards wins={wins} losses={losses} winRate={winRate} rank={stats.rank} />
         </div>
       </div>
     </div>

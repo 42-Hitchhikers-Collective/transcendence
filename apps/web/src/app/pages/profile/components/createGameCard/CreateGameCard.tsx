@@ -4,8 +4,8 @@ import { socket } from "@/socket/Socket";
 import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import PendingGameCard from "./PendingGameCard/PendingGameCard";
-import CreateRoomCard from "./CreateRoomCard";
-import JoinRoomCard from "./JoinRoomCard";
+import CreateRoom from "./CreateRoom";
+import JoinRoom from "./JoinRoom";
 
 export function CreateGameCard() {
   const [isCreating, setIsCreating] = useState(false);
@@ -144,7 +144,7 @@ export function CreateGameCard() {
             <TabsTrigger value="join">Join room</TabsTrigger>
           </TabsList>
           <TabsContent value="create" className="h-full">
-            <CreateRoomCard
+            <CreateRoom
               roomNameInput={roomNameInput}
               onRoomNameChange={setRoomNameInput}
               isCreating={isCreating}
@@ -153,7 +153,7 @@ export function CreateGameCard() {
             />
           </TabsContent>
           <TabsContent value="join" className="h-full">
-            <JoinRoomCard
+            <JoinRoom
               roomNameInput={joinRoomName}
               onRoomNameChange={setJoinRoomName}
               isJoining={isJoining}

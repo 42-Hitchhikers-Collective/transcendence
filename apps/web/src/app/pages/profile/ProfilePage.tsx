@@ -35,12 +35,13 @@ export default function ProfilePage() {
       .finally(() => setHistoryLoading(false));
   }, [token]);
 
-  // compute stats from history; memoize to avoid unnecessary recalculations on re-renders
+  // compute wins/losses from history; rank comes from the API (via /api/users/me stored in auth context)
   const stats = useMemo(() => {
     const wins = history.filter((game) => game.result === "win").length;
     const losses = history.filter((game) => game.result === "loss").length;
-    return { wins, losses };
-  }, [history]);
+    const rank = user?.stats?.rank ?? null;
+    return { wins, losses, rank };
+  }, [history, user?.stats?.rank]);
 
   return (
     <div

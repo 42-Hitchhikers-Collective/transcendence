@@ -1,20 +1,20 @@
 import cardBack from "@/assets/icons/uno_card_back.png";
 
-type CreateRoomCardProps = {
+type JoinRoomProps = {
   roomNameInput: string;
   onRoomNameChange: (value: string) => void;
-  isCreating: boolean;
+  isJoining: boolean;
   error: string | null;
-  onCreateRoom: () => void;
+  onJoinRoom: () => void;
 };
 
-export default function CreateRoomCard({
+export default function JoinRoom({
   roomNameInput,
   onRoomNameChange,
-  isCreating,
+  isJoining,
   error,
-  onCreateRoom,
-}: CreateRoomCardProps) {
+  onJoinRoom,
+}: JoinRoomProps) {
   return (
     <div className="relative h-full overflow-hidden rounded-2xl border bg-linear-to-br from-rose-50 via-white to-amber-50 p-12">
       <style>{cardAnimation}</style>
@@ -23,7 +23,7 @@ export default function CreateRoomCard({
 
       <div className="relative flex h-full flex-col items-center justify-center gap-8 p-24">
         <div
-          className={`fan-wrapper${isCreating ? " is-active" : ""}`}
+          className={`fan-wrapper${isJoining ? " is-active" : ""}`}
           style={{ "--card-back": `url(${cardBack})` } as React.CSSProperties}
           aria-hidden="true"
         >
@@ -34,10 +34,10 @@ export default function CreateRoomCard({
 
         <div className="space-y-3 text-center">
           <h3 className="text-5xl font-extrabold tracking-tight text-slate-900">
-            Start playing now
+            Join a room
           </h3>
           <p className="max-w-xl text-lg text-slate-600">
-            Pick a room name and share the link with a friend.
+            Enter a room code to join your friends.
           </p>
         </div>
 
@@ -47,17 +47,17 @@ export default function CreateRoomCard({
             value={roomNameInput}
             onChange={(e) => onRoomNameChange(e.target.value)}
             placeholder="Room name"
-            disabled={isCreating}
+            disabled={isJoining}
             className="h-12 w-72 rounded-lg border border-slate-300 px-4 text-lg"
           />
 
           <button
             type="button"
-            onClick={onCreateRoom}
-            disabled={isCreating || !roomNameInput.trim()}
-            className="h-14 rounded-lg bg-rose-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={onJoinRoom}
+            disabled={isJoining || !roomNameInput.trim()}
+            className="h-14 rounded-lg bg-emerald-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isCreating ? "Loading room..." : "Create room"}
+            {isJoining ? "Joining..." : "Join room"}
           </button>
 
           {error && <p className="text-sm text-rose-600">{error}</p>}

@@ -1,10 +1,13 @@
+import { useState } from "react";
 import {
   PuzzlePieceIcon,
   UserGroupIcon,
-  ChartBarSquareIcon,
+  GlobeAmericasIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/solid";
 
 import { ProgressBar } from "./ProgressBar";
+import { LeaderboardModal } from "./LeaderboardModal";
 import skipCard from "@/assets/icons/skip_card.webp";
 
 
@@ -12,11 +15,15 @@ export function StatsCards({
   wins,
   losses,
   winRate,
+  rank,
 }: {
   wins: number;
   losses: number;
   winRate: number;
+  rank: number | null;
 }) {
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+
   return (
     <div>
       {wins + losses === 0 ? (
@@ -25,13 +32,19 @@ export function StatsCards({
         <div>
           <Stats
             gamesPlayed={wins + losses}
+            wins={wins}
             winRate={winRate}
-            rank={0}
+            rank={rank}
+            onOpenLeaderboard={() => setLeaderboardOpen(true)}
             smallOnMd
           />
           <ProgressBar wins={wins} losses={losses} />
         </div>
       )}
+      <LeaderboardModal
+        open={leaderboardOpen}
+        onClose={() => setLeaderboardOpen(false)}
+      />
     </div>
   );
 }
@@ -73,10 +86,14 @@ function Stats({
   gamesPlayed,
   winRate,
   rank,
+  wins,
+  onOpenLeaderboard,
 }: {
   gamesPlayed: number;
   winRate: number;
-  rank: number;
+  rank: number | null;
+  wins: number;
+  onOpenLeaderboard: () => void;
   smallOnMd?: boolean;
 }) {
   type CardStat = {
@@ -89,26 +106,27 @@ function Stats({
 
   const cardStats: CardStat[] = [
     {
-      label: "Total matches",
-      value: gamesPlayed,
-      color: "text-yellow-800",
-      bgColor: "bg-yellow-400",
-      icon: PuzzlePieceIcon,
-    },
-    {
       label: "Global rank",
-      value: `#missing` /* TODO: get data from api instead of hardcoded */,
-      color: "text-rose-900",
-      bgColor: "bg-rose-500",
-      icon: ChartBarSquareIcon,
-    },
-    {
-      label: "Friends",
-      value: `${winRate.toFixed(0)}%`,
+      value: rank != null ? `#${rank}` : "?",
       color: "text-sky-900",
       bgColor: "bg-sky-400",
+      icon: GlobeAmericasIcon,
+    },
+    {
+      label: "Total matches",
+      value: gamesPlayed,
+      color: "text-violet-800",
+      bgColor: "bg-violet-400",
       icon: UserGroupIcon,
     },
+    {
+      label: "Winning points",
+      value: `${wins}`,
+      color: "text-emerald-800",
+      bgColor: "bg-emerald-400",
+      icon: SparklesIcon,
+    },
+
   ];
 
   return (
@@ -137,6 +155,14 @@ function Stats({
               >
                 {value}
               </p>
+              {label === "Global rank" && (
+                <button
+                  onClick={onOpenLeaderboard}
+                  className="text-[10px] md:text-[8px] xl:text-[10px] font-medium text-sky-600 hover:text-sky-300 underline mt-0.5 cursor-pointer"
+                >
+                  See leaderboard
+                </button>
+              )}
             </div>
           </div>
         ))}

@@ -61,8 +61,8 @@ app/
 │   │       │   └── ExperienceBadge.tsx
 │   │       ├── createGameCard/
 │   │       │   ├── CreateGameCard.tsx
-│   │       │   ├── CreateRoomCard.tsx
-│   │       │   ├── JoinRoomCard.tsx
+│   │       │   ├── CreateRoom.tsx
+│   │       │   ├── JoinRoom.tsx
 │   │       │   ├── GameOptions/
 │   │       │   │   ├── GameOptionsCard.tsx
 │   │       │   │   ├── OptionSwitcherBtn.tsx

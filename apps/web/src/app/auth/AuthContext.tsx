@@ -47,6 +47,11 @@ type User = {
     username?: string;
     avatarUrl?: string | null;
   } | null;
+  stats?: {
+    rank: number | null;
+    wins: number;
+    losses: number;
+  };
 }; /* TODO: put null rendering case */
 
 type AuthContextValue = {
