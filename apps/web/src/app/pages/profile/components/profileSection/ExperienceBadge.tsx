@@ -19,8 +19,16 @@ export function ExperienceBadge({
 
   const levels = [
     {
+      level: "Master",
+      gamesRange: [300, 9999],
+      winRange: [70, 100],
+      textColor: "text-violet-700",
+      bgColor: "bg-violet-200",
+      icon: FireIcon,
+    },
+    {
       level: "Expert",
-      gamesRange: [50, 300],
+      gamesRange: [50, 299],
       winRange: [70, 100],
       textColor: "text-rose-700",
       bgColor: "bg-rose-200",
@@ -75,3 +83,4 @@ export function ExperienceBadge({
     </div>
   );
 }
+
