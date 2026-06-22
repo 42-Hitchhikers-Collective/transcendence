@@ -122,7 +122,7 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
       </h2> */}
 
       {/* Messages area */}
-      <div className="mt-4 rounded-2xl border border-rose-200/60 bg-white flex flex-col h-48 lg:h-64">
+      <div className=" rounded-2xl border border-rose-200/60 bg-white flex flex-col h-56 lg:h-98">
         <div
           ref={scrollRef}
           className="flex-1 space-y-2 overflow-y-auto p-2"

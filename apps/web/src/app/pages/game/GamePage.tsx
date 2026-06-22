@@ -30,7 +30,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
   return (
     <div
-      className="bg-neutral-800 overflow-auto h-screen flex flex-col items-center justify-center relative"
+      className="bg-neutral-800 overflow-auto min-h-screen flex flex-col relative  py-6"
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -39,11 +39,11 @@ function GamePageContent({ roomName }: { roomName: string }) {
         backgroundBlendMode: "saturation",
       }}
     >
-      <div className="grid h-full w-full max-w-7xl grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-[30%_1fr]">
+      <div className="grid min-h-full w-full max-w-7xl mx-auto grid-cols-1 gap-4 lg:gap-6 lg:grid-cols-[30%_1fr] ">
         {/* left col */}
-        <div className="flex py-10 flex-col min-h-0 overflow-hidden order-2 lg:order-1">
+        <div className="flex flex-col gap-4 min-h-0 overflow-hidden order-2 px-10 lg:px-0 lg:order-1">
           <RoomCode gameStarted={gameStarted} roomName={roomName} />
-          <div className="mt-4 items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
+          <div className="items-center gap-4 rounded-xl border bg-white shadow-sm p-6">
             <PlayerList
               playerList={playerList}
               clientUsername={playerInfo?.userName}
@@ -56,7 +56,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
           <Chat playerList={playerList} />
         </div>
           {/* Right col */}
-        <div className="flex flex-col  order-1 lg:order-2 min-h-300px lg:min-h-0"> {/*  bg-amber-500 */}
+        <div className="flex flex-col  order-1 lg:order-2 min-h-300px  lg:min-h-0"> {/*  bg-amber-500 */}
           <PhaserGame />
         </div>
       </div>

@@ -23,12 +23,12 @@ export default function StartGameButton({
           console.log(`[GamePage] Start Game button clicked`);
           startGame();
         }}
-        className={` rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white gameStarted:bg-gray-400`}
+        className={` rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white gameStarted:bg-gray-400 mt-3`}
       >
         Start Game
       </button>
       {canvasError && !gameStarted && (
-        <div className="rounded text-red-500  text-sm">{canvasError}</div>
+        <div className="rounded text-red-500  mt-2 text-xs ">{canvasError}</div>
       )}
     </>
   );

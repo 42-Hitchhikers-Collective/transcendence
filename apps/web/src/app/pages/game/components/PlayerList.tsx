@@ -62,7 +62,7 @@ function PlayerItem({
 
   return (
     <div
-      className={`flex w-22 flex-col items-center gap-2 rounded-xl border-2 px-5 py-3 shadow-md ${
+      className={`flex w-22 flex-col items-center gap-2 rounded-xl border-2 px-5 py-3 my-2 shadow-md ${
         player.dropped
           ? "border-slate-200"
           : player.isPlayerTurn
@@ -131,8 +131,8 @@ export default function PlayerList({
     }
 
   return (
-    <div className="mb-4 p-4 my-2">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em]">
+    <div className="">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] py-2 ">
         Joined:
         <span className="ml-2 rounded-full bg-emerald-100 p-2 text-xs font-medium text-emerald-800">
           {playerList.length}
@@ -141,7 +141,7 @@ export default function PlayerList({
       {playerList.length === 0 && (
         <p className="text-sm text-slate-400">Waiting for someone to join...</p>
       )}
-      <div className="my-10 flex flex-wrap gap-3 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center">
         {/* Sorts list before rendering, so that clientUser is set first */}
         {[...playerList]
           .sort((a, b) => {
