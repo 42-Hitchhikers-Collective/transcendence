@@ -71,21 +71,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetches user whenever token changes; self-clean on failure
   useEffect(() => {
     if (!token) {
-      // console.warn("AuthContext: no token found, clearing user");  
+      console.log("👤 AUTHENTICATION: token not found, user not authenticated");  
       if (socket.connected) {
         socket.disconnect();
+        console.log("👤 AUTHENTICATION: disconnecting previously active socket");  
+      } else {
+        console.log("👤 AUTHENTICATION: socket already disconnected");
       }
-      // should the leave room or waiting show here?
-      setUser(null);
+      setUser(null); // free the user info
+      console.log("👤 AUTHENTICATION: user cleared");
       return;
     }
 
+    console.log("👤 AUTHENTICATION: token found " + token);
     socket.auth = { token };
     if (!socket.connected) {
-      socket.connect();
+      socket.once("connect", () => { // listener to log successful socket connection after login/signup
+        console.log(`👤 AUTHENTICATION: socket connected, ID: ${socket.id}`);
+      });
+      socket.connect();  //  connects AFTER registering the listener
+    } else {
+      console.log("👤 AUTHENTICATION: socket was already connected");
     }
 
-    console.info("Auth[token] - token present, fetching /api/users/me");
     fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -97,11 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return data;
       })
       .then((data) => {
-        console.log("Auth[token] - /api/users/me payload", data);
+        console.log("👤 AUTHENTICATION: fetched user data", data);
         if (data) setUser(data.user ?? data);
       })
       .catch(() => {
-        console.warn("Auth[token] - /api/users/me failed, clearing token");
+        console.warn("👤 AUTHENTICATION: fetching user data failed");
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
         setUser(null);
@@ -109,23 +117,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const login = async (email: string, password: string) => {
+    console.log("🚪 LOGIN: sending request to backend");
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ email, password }),
     });
-    // console.log("LOGIN - /api/auth/login status", res.status);
     const loginRawText = await res.text();
-    console.log("LOGIN - /api/auth/login token created", loginRawText);
+    // console.log("🚪 LOGIN: token created ", loginRawText);
     if (!res.ok) {
       const err = loginRawText ? JSON.parse(loginRawText) : null;
-      console.log("LOGIN - /api/auth/login error payload", err);
-      throw new Error(err?.error ?? err?.message ?? "login failed");
+      console.log("🚪 LOGIN: failed with error ", err);
+      throw new Error(err?.error ?? err?.message ?? "generic fail error");
     }
     const parsed = loginRawText ? JSON.parse(loginRawText) : null;
     const newToken = parsed?.token ?? null;
-    console.log("LOGIN - /api/auth/login token present", !!newToken);
+    console.log("🚪 LOGIN: user logged in with new token ", !!newToken);
     localStorage.setItem(TOKEN_KEY, newToken);
     setToken(newToken);
   };
@@ -137,12 +145,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
       body: JSON.stringify({ email, password, username }),
     });
-    console.log("SIGNUP - /api/auth/register status", res.status);
+    console.log("📋 SIGNUP: status", res.status);
     const signupRawText = await res.text();
-    console.log("SIGNUP - /api/auth/register raw body", signupRawText);
+    console.log("📋 SIGNUP: raw body", signupRawText);
     if (!res.ok) {
       const err = signupRawText ? JSON.parse(signupRawText) : null;
-      console.log("SIGNUP - /api/auth/register error payload", err);
+      console.log("📋 SIGNUP: error payload", err);
       throw new Error(err?.error ?? err?.message ?? "signup failed");
     }
     // Backend /register doesn't return a token; so we call auto-login on register success
@@ -160,13 +168,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     if(socket.connected) // need to ensure we disconnect socket on LOGOUT TO SOLVE BUG
       { 
-        console.warn("Logout - token disconnected");
         socket.disconnect();
+        console.log("👋 LOGOUT: disconnecting previously active socket");  
+      } else {
+        console.log("👋 LOGOUT: socket already disconnected");
       }
+      console.log("👋 LOGOUT: clearing local storage, logged token and user info");
       localStorage.removeItem(TOKEN_KEY);
       setToken(null);
       setUser(null);
-      console.info("Logout success");
+      console.info("LOGOUT: success");
   };
 
   return (

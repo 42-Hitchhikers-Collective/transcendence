@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:01:35 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 15:41:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
 // import registerFriendHandlers from "./friend.handlers";
 import { ChatMsgType } from "../../gameManager/chatEvents";
+import { SYSTEM_SENDER_NAME } from "../../gameManager/types";
 
 
 export function registerSocketHandlers(
@@ -27,24 +28,65 @@ export function registerSocketHandlers(
   socket: Socket
 ) {
 
- // Broadcast room state to everyone including the sender
-  function broadcastRoomState(roomId: string) {
+ // Broadcast Game Canvas to everyone including the sender
+  function broadcastGameCanvas(roomId: string) {
     const room = gameManager.getRoomById(roomId);
     if (!room) return;
     room.players.forEach((player) => {
       if (!player.socketId) return; // skip players without an active socket
-      const frontendRoomData = utils.getFrontendRoom(room, player.playerId);
-      socket.nsp.to(player.socketId).emit("room_state", frontendRoomData);
+      const gameCanvasRoom = utils.getGameCanvasRoom(room, player.playerId);
+      socket.nsp.to(player.socketId).emit("room_state", gameCanvasRoom);
     });
     gameManager.debugState();
   }
 
+  // Broadcast Game Page info to everyone in the room
+  function broadcastGamePage(roomId: string) {
+    const roomInfo = utils.getFrontedRoomInfo(roomId);
+    if (roomInfo) {
+      socket.nsp.to(roomId).emit("room_info_response", roomInfo);
+      // console.log(`<-------------  📋 ROOM INFO ${roomId} 📋 -------------> \n`, roomInfo);
+      // console.log(`<--------------------------------------------->`);
+    }
+  }
+
   // Register related event handlers
-  registerRoomHandlers(socket, broadcastRoomState);
-  registerGameHandlers(socket, broadcastRoomState, /*broadcastPlayerState*/);
-  registerConnectionHandlers(app, socket, broadcastRoomState);
+  registerConnectionHandlers(app, socket, broadcastGameCanvas /* broadcastGamePage */);
+  registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);
+  registerGameHandlers(app, socket, broadcastGameCanvas, broadcastGamePage); // JESS: I need to pass broadcastGamePage to update the gamepage on who is playing
   // registerFriendHandlers(app, socket);
-    
+
+
+  // Emits an object of the current player state (or null) on request
+  socket.on("player_info_request", () => {
+    const { playerId, userName } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    const room = roomId ? gameManager.getRoomById(roomId) : null;
+    const frontedPlayerData = utils.getFrontedPlayerInfo(playerId, userName, room);
+    socket.emit("player_info_response", frontedPlayerData);
+  });
+
+  // Emits an object of the current room state (or null) on request
+  socket.on("room_info_request", () => {
+    const { playerId, userName } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    let frontedRoomInfo = null;
+    if (roomId)
+      frontedRoomInfo = utils.getFrontedRoomInfo(roomId);
+    socket.emit("room_info_response", frontedRoomInfo);
+  });
+
+  
+  // JESS: I NEEDED THESE EVENT TO REQUEST THE CHAT HSTORY WHEN THE GAME PAGE MOUNTS
+  socket.on("chat_history_request", () => {
+    const { playerId } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const room = gameManager.getRoomById(roomId);
+    if (!room) return;
+    socket.emit("chat_history_response", room.chatHistory ?? []);
+  });
+
   // ---> Msg Events ---
   socket.on("send_msg", ({ msg }) => {
     const { playerId, userName } = getIdentity(socket);
@@ -81,6 +123,6 @@ export function systemChatMsg(playerId: string, roomId: string, socket: Socket,m
     return;
   }
   if (roomId) {
-    socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: "System" });
+    socket.nsp.to(roomId).emit("chat_message", { msg: res.msg, senderId: SYSTEM_SENDER_NAME });
   }
 }

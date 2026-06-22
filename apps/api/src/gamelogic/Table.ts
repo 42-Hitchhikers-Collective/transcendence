@@ -6,8 +6,6 @@ export class Table {
   gameID: number;
   players: Player[];
 
-  n_player: number;
-
   turnIndex: number;
   direction: 1 | -1;
 
@@ -16,24 +14,20 @@ export class Table {
 
   drawPile: Card[];
   discardPile: Card[];
+  
+  playerPlayed: boolean;
 
   currentColor: "red" | "blue" | "green" | "yellow" | "wild" | null;
-  passTurn: boolean;
-  played: boolean;
 
-  lastCard: Card | null;
-  event: "uno" | "color" | "finished" | null;
-
-  // ============================================================
-  //  initializer
-  // ============================================================
+  uno: boolean;
+  color: boolean;
+  skip: boolean;
+  finish: boolean;
 
   constructor(gameID: number, rivals: Player[]) {
     this.gameID = gameID;
 
     this.players = rivals;
-
-    this.n_player = this.players.length;
 
     this.turnIndex = Math.floor(Math.random() * this.players.length);
 
@@ -43,20 +37,20 @@ export class Table {
 
     this.draw = 1;
 
-    this.lastCard = null;
+    this.playerPlayed = false;
 
     const deck = new Deck();
 
     this.drawPile = deck.cards;
     this.discardPile = [];
     this.discardPile.push(this.drawPile.pop());
-    this.passTurn = false;
-    this.event = null;
 
     this.currentColor = this.discardPile[this.discardPile.length - 1].color;
 
-    this.played = false;
-    this.currentColor = null;
+    this.color = false; 
+    this.uno = false;
+    this.finish = false;
+    this.skip = false;
 
     this.dealCards();
   }
@@ -81,10 +75,13 @@ export class Table {
   }
 
   changeColor(color: "red" | "blue" | "green" | "yellow") {
+    console.log(`COLOR SELECTED ${color}`)
     this.currentColor = color;
-    this.setEventNext();
+    console.log(`NEW COLOR OF TABLE ${this.currentColor}`)
+
   }
 
-
+  getPlayerPlayed()
+  { return this.playerPlayed }
 }
 

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 13:28:26 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 17:24:13 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/08 16:43:22 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,20 +29,21 @@ export function setupSocket(app: FastifyInstance) {
   io.on("connection", (socket) => {
     const playerId = (socket as any).userId as string;
     const userName = (socket as any).userName as string;
-
-    app.log.info({ socketId: socket.id, playerId }, "socket connected");
+    const avatarUrl = (socket as any).avatarUrl as string;
+    console.log(`[Socket] ${userName} connected. socketId: ${socket.id}`);
 
     // Add player to online players list (or update socketId if already exists)
     const existingPlayer = gameManager.getOnlinePlayer(playerId);
     if (existingPlayer) {
-      app.log.info(`Player ${playerId} already online, updating socketId to ${socket.id}`);
+      console.log(`[online players] ${userName} is already online, updating socketId to ${socket.id}`);
       existingPlayer.socketId = socket.id;
+      existingPlayer.avatarUrl = avatarUrl; // update avatar in case it changed
       const roomId = gameManager.getPlayerRoomId(playerId);
-      if (roomId)
-        io.to(roomId).emit("playerUpdate", existingPlayer); // emiting that player is now online again to the room - neccessary?
+      // if (roomId)
+        // io.to(roomId).emit("playerUpdate", existingPlayer); // emiting that player is now online again to the room - neccessary?
     } else {
-        app.log.info(`Adding new online player: ${playerId} (${userName})`);
-        const newPlayer: Player = { playerId, socketId: socket.id, userName, isReady: false };
+        console.log(`[online players] New player: ${userName}`);
+        const newPlayer: Player = { playerId, socketId: socket.id, userName, avatarUrl };
         gameManager.addPlayerToOnlinePlayers(newPlayer);
         // socket.emit("playerUpdate", newPlayer); // not neccessary ? is there a need to be updated when a new player is in town?
     }

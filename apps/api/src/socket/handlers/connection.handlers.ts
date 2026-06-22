@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 14:00:51 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 14:05:12 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@ import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
+import { systemChatMsg } from ".";
+import { ChatMsgType } from "../../gameManager/chatEvents";
 // import { notifyFriendsPresence } from "./friend.handlers";
 import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
@@ -27,30 +29,34 @@ export function registerConnectionHandlers(
   socket: Socket,
   broadcastRoomState: (roomId: string) => void
 ) {
-    const { playerId } = getIdentity(socket);
+    const { playerId, userName } = getIdentity(socket);
+    // console.log(`socket connected: ${userName}`);
+    
     cancelDisconnectTimer(playerId);
     
     // Auto-rejoin player to their room if they were in one (handles reconnections)
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
-        app.log.info(`Player ${playerId} reconnected with new socketId: ${socket.id}`);
-        socket.join(roomId);
-        gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page
-        // updateRoomSocketId(playerId, socket.id); -- NOT NEEDED ANYMORE because I update socketId on the player object when they connect
-        app.log.info(`Player ${playerId} automatically rejoin room ${roomId}`);
+        console.log(`[Socket] ${userName} reconnected with new socketId: ${socket.id}`);
+        socket.join(roomId); // join back the room with the new socket to be able to receive room updates
+        console.log(`Player ${userName} automatically rejoin room ${roomId}`);
+        systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK); // JESS: added system message when player rejoins
+        
+        // gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page - doe sit happen somewhere else?
         broadcastRoomState(roomId);
     }
     
     // Disconnect and leave room if in any
     socket.on("disconnect", () => {
-        app.log.info(`socket disconnected: ${playerId}`);
+        console.log(`[Socket] ${userName} disconnected`);
         
         // Prevent older stale sockets (like a closed previous tab) from triggering the grace period
         const currentPlayer = gameManager.getOnlinePlayer(playerId);
         if (currentPlayer && currentPlayer.socketId !== socket.id) {
-            app.log.info(`Stale socket disconnected for ${playerId}, ignoring.`);
+            console.log(`[Socket] ${userName} Stale socket disconnected, ignoring.`);
             return; 
         }
+        // console.log(`[Grace period] ${userName}: grace period starts now`);
         // startGracePeriod(app, socket, playerId, broadcastRoomState);
     });
 }
@@ -71,11 +77,10 @@ function startGracePeriod(
         // await notifyFriendsPresence(app, socket, playerId, "offline");
         
         gameManager.removePlayerFromOnlinePlayers(playerId);
-        const userName = (socket as any).userName;
         console.log(`[Grace period] ended for player ${userName}, removed from online players and left room if in any.`);
         if (res.success) {
             broadcastRoomState(res.roomId);
-            app.log.info(`Player ${userName} removed after grace period`);       
+            console.log(`[Grace period] ${userName} removed from online players`);       
         }
     }, RECONNECTION_GRACE_PERIOD);
     gameManager.setPlayerTimeout(playerId, timeoutId); // Store the timeout in the Map
@@ -92,16 +97,3 @@ function cancelDisconnectTimer(playerId: string) {
     // If the user comes back (new socket), also cancel the room-page drop timer ??
     // gameManager.cancelDropTimer(playerId); 
 }
-
-
-
-// Update the socketId for a player who reconnected UNSED FOR NOW because I update socketId on the player object when they connect
-// function updateRoomSocketId(playerId: string, newSocketId: string) {
-//     const roomId = gameManager.getPlayerRoomId(playerId);
-//     if (!roomId) return;
-//     const room = gameManager.getRoomById(roomId);
-//     if (!room) return;
-//     const player = room.players.find(p => p.playerId === playerId);
-//     if (player)
-//         player.socketId = newSocketId;
-// }

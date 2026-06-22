@@ -11,7 +11,7 @@ export class GameMaster {
     }
 
     if (!this.validateMove(table, playerId, card)) {
-      console.log("ERROR: validateMove");
+      console.log("ERROR: validateMove(): false");
       return false;
     }
 
@@ -24,26 +24,26 @@ export class GameMaster {
     const [playedCard] = player.hand.splice(index, 1);
 
     table.discardPile.push(playedCard);
-    if (playedCard.color != "wild") table.currentColor = playedCard.color;
 
+    this.eventUpdate(table, player);
     this.applyEffect(table, playedCard);
 
-    if (this.uno(player)) table.event = "uno";
-
-    if (this.noCard(player)) table.event = "finished";
     table.draw = 0;
+    table.playerPlayed = true;
+    console.log(`Player Played: ${table.playerPlayed}`)
 
+    console.log("Alles gut, playCard Gabriel");
     return true;
   }
 
   drawCard(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
-    if (!this.isPlayerTurn(table, playerId) || !player) return false;
+    if (!this.isPlayerTurn(table, playerId)) return false;
+
+    if (table.pendingDraw == 0 && table.draw == 0) return false;
 
     let amount = table.pendingDraw;
     if (amount == 0) amount = table.draw;
-
-    if (table.pendingDraw == 0 && table.draw == 0) return false;
 
     for (let i = 0; i < amount; i++) {
       let card = table.drawPile.pop();
@@ -63,7 +63,10 @@ export class GameMaster {
 
   // ============================================================
 
-  private applyEffect(table: Table, card: Card): void {
+  public applyEffect(table: Table, card: Card): void {
+    if (card.color == "wild") table.color = true;
+    else table.currentColor = card.color;
+
     switch (card.value) {
       case "reverse":
         this.reverse(table);
@@ -78,7 +81,6 @@ export class GameMaster {
         table.pendingDraw += 4;
         break;
     }
-    if (card.color == "wild") table.event = "color";
   }
 
   private reverse(table: Table): void {
@@ -86,27 +88,31 @@ export class GameMaster {
   }
 
   private skip(table: Table): void {
-    table.turnIndex =
-      (table.turnIndex + table.direction + table.players.length) %
-      table.players.length;
+    table.skip = true;
   }
 
   // ============================================================
 
   private validateMove(table: Table, playerId: string, card: Card): boolean {
-    if (!this.isPlayerTurn(table, playerId)) return false;
-    if (!this.isCardPlayable(table, card)) return false;
-    if (!this.pendingCards(table, card)) return false;
+    if (!this.isPlayerTurn(table, playerId))  return false;
+    if (!this.isCardPlayable(table, card))    return false;
+    if (!this.pendingCards(table, card))      return false;
+    if (table.getPlayerPlayed()) {console.log(`Player Played condition: ${table.playerPlayed}`); return false;}
     return true;
   }
 
   private isPlayerTurn(table: Table, playerId: string): boolean {
+    console.log("It is not players turn");
+    console.log(`Actual Turn: ${table.players[table.turnIndex].username}`);
     return table.players[table.turnIndex].id === playerId;
   }
 
   private isCardPlayable(table: Table, card: Card): boolean {
     const top = table.discardPile.at(-1);
     if (!top) return true;
+
+    console.log(`Card played: ${card.color}, ${card.value}`);
+    console.log(`Top Card: ${table.currentColor}, ${top?.value}`);
 
     return (
       card.color === table.currentColor ||
@@ -116,6 +122,9 @@ export class GameMaster {
   }
 
   private pendingCards(table: Table, card: Card): boolean {
+    console.log(`Draw Cards: ${table.draw}`);
+    console.log(`Pend Cards: ${table.pendingDraw}`);
+
     if (table.pendingDraw == 0) return true;
     if (
       table.pendingDraw != 0 &&
@@ -132,42 +141,47 @@ export class GameMaster {
 
   advanceTurn(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
+    
     if (!player || table.draw != 0) return false;
-
+    
+    let skip = 0;
+    if (table.skip)
+      skip = 1 * table.direction;
+    
     table.turnIndex =
-      (table.turnIndex + table.direction + table.players.length) %
+      (table.turnIndex + table.direction + skip + table.players.length) %
       table.players.length;
 
     this.newTurnStats(table);
+    console.log(`New Turn: ${table.players[table.turnIndex].username}`)
     return true;
   }
 
-  /**
+  /*
    * Reset the conditon for a new player
-   */
-  newTurnStats(table: Table) {
+   * */
+  private newTurnStats(table: Table) {
     table.draw = 1;
-    table.passTurn = false;
-    table.event = null;
+    table.color = false;
+    table.skip = false;
+    table.uno = false;
+    table.playerPlayed = false;
   }
 
   getCurrentPlayer(table: Table): Player {
     return table.players[table.turnIndex];
   }
 
-  private uno(player: Player): boolean {
-    return player.hand.length === 1;
+  private eventUpdate(table: Table, player: Player) {
+    if (player.hand.length === 1) table.uno = true;
+    else if (player.hand.length === 0) table.finish = true;
   }
 
-  private noCard(player: Player): boolean {
-    return player.hand.length === 0;
-  }
-
-  /**
+  /* *
    * When there are no more cards in the draw pile,
    * it keeps the last one from discard pile,
    * shuffle the rest and use them as draw pile.
-   */
+   * */
   private reuseDiscardPile(table: Table) {
     if (table.discardPile.length <= 1) return;
 

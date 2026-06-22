@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/03 16:55:34 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 15:39:42 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,13 @@ export const MAX_MSG_LENGTH = 200;
 export const MAX_MSG_HISTORY = 50;
 export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
 export const DROP_TIMER_DURATION = 30_000; // 30 seconds
+export const SYSTEM_SENDER_NAME = "🦄";
 
 export type Player = {
   playerId: string;      // permanent identity (userId) used for game logic
   socketId: string;      // current connection used for networking
   userName: string;      // display name for UI/chat
-  isReady:  boolean;
+  avatarUrl: string;     // the avatar of the player to show in the chat
 };
 
 export type GameState = "waiting" | "playing" | "finished";
@@ -36,11 +37,12 @@ export type Room = {
   players: Player[];
   state: GameState;
   chatHistory: Array<{ username: string; msg: string }>;
+  gameDbId?: string; // id of the game in the database
   game?: Game;
 };
 
 // What the frontend sees for "other" players
-export type FrontendPlayer = {
+export type GameCanvasPlayer = {
   id: string;
   userName: string;
   isTheObserver: boolean; // true if this is the player themselves, false for other players
@@ -49,11 +51,12 @@ export type FrontendPlayer = {
 };
 
 // What the frontend sees for a Room
-export type FrontendRoom = {
+export type GameCanvasRoom = {
   id: string;
   name: string;
   state: GameState;
-  players: FrontendPlayer[];
+  current_turn: string;
+  players: GameCanvasPlayer[];
   game?: {
     currentPlayerId: string;
     discardTopCard: { color: string; value: string | number } | null;

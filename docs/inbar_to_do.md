@@ -14,8 +14,59 @@ check logs:
 docker compose logs -f api | cat -n
 
 
+sysMSG - user dropped / back from dropped
+
+
+game is on ppl leave, only 1 player left playing - emit "lonely_player"
+
+
+send db finish game details
+which details?
+
+
+
+// If a player disconnects mid-game (optional)
+socket.on("disconnect", () => {
+  const room = gameManager.getRoomForPlayer(playerId);
+  if (room && room.state === "playing") {
+    await abortGame(app.prisma, room.gameDbId);
+  }
+});
+
+
+
+
+gameId //roomid
+roomName
+players - playerId //userId
+winner
+date of finished game
+
+
+
+
+
+when a player is in a room, then leaves the website, the drop timer will start and -- ? 
+check if player returns to room in time / doesnt
+
+
+player in room
+leaves web
+returns to web
+---> counter ends in 0, player would be removed from room but UI stays on drop msg
+
+
+player in room
+leaves web
+stays out of web
+---> timer expires and user kicks out of room - good
+*but doesnt clear from online players - not good
+
+
 
 DONE
+
+polish frontend data "user request"~
 
 edge case - player cant create or join a room if already in a room
 
