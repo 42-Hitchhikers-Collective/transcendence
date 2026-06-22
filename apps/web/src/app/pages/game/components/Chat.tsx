@@ -43,6 +43,7 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
 export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[] }) {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [open, setOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,10 +53,6 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
         {
           senderId: data.senderId || "",
           msg: data.msg,
-          // time: new Date().toLocaleTimeString([], {
-          //   hour: "2-digit",
-          //   minute: "2-digit",
-          // }),
         },
       ]);
     };
@@ -64,6 +61,21 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
 
     return () => {
       socket.off("chat_message", handleChatMessage);
+    };
+  }, []);
+
+  // Request chat history on mount
+  useEffect(() => {
+    const handleHistory = (history: { username: string; msg: string }[]) => {
+      setMessages(history.map((h) => ({
+        senderId: h.username,
+        msg: h.msg,
+      })));
+    };
+    socket.on("chat_history_response", handleHistory);
+    socket.emit("chat_history_request");
+    return () => {
+      socket.off("chat_history_response", handleHistory);
     };
   }, []);
 
@@ -81,6 +93,25 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
     setChatInput("");
   };
 
+  const systemIcon = (text: string) => {
+    if (text.includes("dropped") && text.includes("30 seconds")) return "⚠️";
+    if (text.includes("is back")) return "🔄";
+    if (text.includes("joined the room") || text.includes("created the room")) return "👋";
+    if (text.includes("left the room")) return "🚪";
+    if (text.includes("won the game")) return "🏆";
+    if (text.includes("started the game")) return "🎬";
+    if (text.includes("UNO")) return "🚨";
+    return "📢";
+  };
+
+  const renderSystemMsg = (msg: string) => {
+    const space = msg.indexOf(" ");
+    if (space === -1) return <span>{msg}</span>;
+    const name = msg.slice(0, space);
+    const rest = msg.slice(space);
+    return <><span className="text-emerald-500 font-semibold">{name}</span><span className="text-slate-500">{rest}</span></>;
+  };
+
   const isSystem = (senderId: string) =>
     senderId.startsWith("👀") || senderId === "🦄";
 
@@ -91,19 +122,17 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
       </h2> */}
 
       {/* Messages area */}
-      <div className="mt-4 flex flex-1 flex-col min-h-0 rounded-2xl border border-rose-200/60 bg-white">
+      <div className=" rounded-2xl border border-rose-200/60 bg-white flex flex-col h-56 lg:h-98">
         <div
           ref={scrollRef}
-          className="flex-1 space-y-4 overflow-y-auto p-4"
+          className="flex-1 space-y-2 overflow-y-auto p-2"
         >
           {messages.map((msg, i) =>
             isSystem(msg.senderId) ? (
-              <p
-                key={i}
-                className="text-center text-xs font-medium text-rose-400"
-              >
-                {msg.msg}
-              </p>
+              <div key={i} className="text-[10px] text-center px-10 py-0.5">
+                <span>{systemIcon(msg.msg)} </span>
+                {renderSystemMsg(msg.msg)}
+              </div>
             ) : (
               <div className="flex gap-3 bg-green-100 pl-4 py-4 m-6 rounded-2xl " key={i}>
                 <MessageAvatar

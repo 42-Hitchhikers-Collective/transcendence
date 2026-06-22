@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import Fastify from "fastify";
 
+import "./plugins/prisma"; // Load Prisma module augmentation
 import { prismaPlugin } from "./plugins/prisma";
 import { authPlugin } from "./plugins/auth";
 import { rateLimitPlugin } from "./plugins/rate_limit";
@@ -11,6 +12,9 @@ import { profileRoutes } from "./routes/profiles";
 import { friendRoutes } from "./routes/friends";
 import { setupSocket } from "./socket/socket";
 import { gameManager } from "./gameManager";
+import fastifyStatic from "@fastify/static";
+import path from "path";
+
 
 dotenv.config();
 
@@ -46,6 +50,14 @@ const start = async () => {
   await app.register(authPlugin);
   await app.register(rateLimitPlugin);
   await app.register(multipartPlugin);
+
+  
+  //INBAR
+  await app.register(fastifyStatic, {
+    root: path.join(process.cwd(), "data/avatars"),
+    prefix: "/avatars/",
+  });
+  //INBAR
 
   await app.register(authRoutes, { prefix: "/api/auth" });
   await app.register(userRoutes, { prefix: "/api/users" });

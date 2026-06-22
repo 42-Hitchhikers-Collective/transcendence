@@ -1,13 +1,13 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { socket } from "@/socket/Socket";
 
 type StartGameButtonProps = {
-  disabled: boolean;
+  gameStarted: boolean;
   canvasError?: string | null;
 };
 
 export default function StartGameButton({
-  disabled,
+  gameStarted,
   canvasError,
 }: StartGameButtonProps) {
   const startGame = useCallback(() => {
@@ -15,23 +15,20 @@ export default function StartGameButton({
     console.log(`[GamePage] start_game emitted`);
   }, []);
 
-
-
+  if (!gameStarted) 
   return (
     <>
       <button
         onClick={() => {
           console.log(`[GamePage] Start Game button clicked`);
           startGame();
-     
         }}
-        disabled={disabled}
-        className={` rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white disabled:bg-gray-400`}
+        className={` rounded-lg bg-emerald-500 px-4 py-2 font-semibold text-white gameStarted:bg-gray-400 mt-3`}
       >
-        {disabled ? "Game in Progress" : "Start Game"}
+        Start Game
       </button>
-      {canvasError && !disabled && (
-        <div className="rounded text-red-500  text-sm">{canvasError}</div>
+      {canvasError && !gameStarted && (
+        <div className="rounded text-red-500  mt-2 text-xs ">{canvasError}</div>
       )}
     </>
   );

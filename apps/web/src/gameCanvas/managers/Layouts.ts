@@ -11,6 +11,6 @@ export const PLAYER = {
 export const CARDS = {
   CENTER_X: SCREEN.WIDTH / 2,
   CENTER_Y: 700,
-  SCALE: 0.35,
+  SCALE: 0.55, // JESS - i increased the cards size as they were too small
   SPACING: 40,
 };

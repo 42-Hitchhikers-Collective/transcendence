@@ -46,6 +46,7 @@ export function CreateGameCard() {
 
   const handlePlayerInfo = (data: any) => {
     // prints json data in a readable format without needing to remember the structure of the data object
+
     console.log(
       `🃏 CREATE GAME CARD: Player info received:\n` +
         Object.entries(data)

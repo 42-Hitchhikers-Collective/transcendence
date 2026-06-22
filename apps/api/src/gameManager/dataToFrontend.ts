@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/10 15:51:22 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 13:45:20 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,19 +49,19 @@ export function getGameCanvasRoom(room: Room, observerPlayerId: string): GameCan
 
 // Returns a player object for the frontend with only the relevant info NEW
 export function getFrontedPlayerInfo(playerId: string, userName: string, room: Room | null) {
-  const player = room ? room.players.find(p => p.playerId === playerId) : null; // <-------- JESS - I added this so to get the avatar of the player to show in the chat
+  const player = room ? room.players.find(p => p.playerId === playerId) : null;
   return {
     playerId,
     userName,
-    avatarUrl: player?.avatarUrl ?? "/avatars/default.png", // <-------- JESS - I Added the avatar of the player to show in the chat and player list in the game page
+    avatarUrl: player?.avatarUrl ?? "/avatars/default.png", 
     duringDrop: getDropTimeouts().has(playerId), // true if player is currently in drop timer grace period
-    activeRoom: room? 
-      {
-        roomId: room.id,
-        roomName: room.name,
-        roomState: room.state, // "waiting", "playing", or "finished"
-      }
-    : null,
+    activeRoom: room
+      ? {
+          roomId: room.id,
+          roomName: room.name,
+          roomState: room.state, // "waiting", "playing", or "finished"
+        }
+      : null,
   };
 }
 
@@ -73,10 +73,14 @@ export function getFrontedRoomInfo(roomid: string) {
     roomId: room.id,
     roomName: room.name,
     roomState: room.state, // "waiting", "playing", or "finished"
-    players: room.players.map(p => ({
-      userName: p.userName,
-      avatarUrl: p.avatarUrl ?? "/avatars/default.png", // <-------- JESS - I added the avatar of the player to show in the chat and player list in the game page
-      dropped: getDropTimeouts().has(p.playerId) // true if player is currently in drop timer grace period
-    })) || []
+    playerTurnId: room.game?.table.players[room.game.table.turnIndex]?.id || "", // JESS: I need this to update the gamepage on who is playing
+    playerTurnUserName:
+      room.game?.table.players[room.game.table.turnIndex]?.username || "", // JESS: I need this to update the gamepage on who is playing
+    players:
+      room.players.map((p) => ({
+        userName: p.userName,
+        avatarUrl: p.avatarUrl ?? "/avatars/default.png",
+        dropped: getDropTimeouts().has(p.playerId), // true if player is currently in drop timer grace period
+      })) || [],
   };
 }

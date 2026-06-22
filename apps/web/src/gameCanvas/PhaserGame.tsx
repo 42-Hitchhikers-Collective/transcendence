@@ -9,32 +9,32 @@ export default function PhaserGame() {
 
   useEffect(() => {
     const container = gameRef.current;
+    if (!container) return; // Safety check, should never happen
+
     const config = {
       type: Phaser.AUTO,
-      parent: container, //neeeded for responsive scaling to work properly
+      parent: container, //JESS: attached Phaser to the div container
       scene: [Boot, Preloader, GameScene],
       scale: {
-        mode: Phaser.Scale.RESIZE,   // canvas matches parent div exactly
-        // autoCenter: Phaser.Scale.CENTER_BOTH,
-        // width: container?.clientWidth || 800,
-        // height: container?.clientHeight || 1000,
+        mode: Phaser.Scale.FIT, // JESS: use FIT mode to maintain aspect ratio and fit the game within the container
+        autoCenter: Phaser.Scale.CENTER_BOTH, // JESS: center the game both horizontally and vertically within the container
+        width: 1000,
+        height: 800,
       },
     };
 
     const game = new Phaser.Game(config);
 
-    console.log(`[PhaserGame] Component Mounted`);
+    game.canvas.style.borderRadius = "16px"; // JESS: add rounded corners to the game canvas to match the container's rounded corners
+    const h = container?.clientHeight ?? 0; // JESS: get the height of the container to set the game canvas height, ensuring it fills the container vertically
+    console.log(
+      `[PhaserGame] Canvas: ${game.canvas.width}×${game.canvas.height}`,
+    );
 
     return () => {
       game.destroy(true);
     };
   }, []);
 
-
-  return (
-    <div
-      ref={gameRef}
-      // className="h-full w-full overflow-hidden rounded-xl"
-    />
-  );
+    return <div ref={gameRef} className="overflow-hidden" />;
 }

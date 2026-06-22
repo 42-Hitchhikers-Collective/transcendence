@@ -1,13 +1,20 @@
 import { playCard } from "../../network/gameNetwork";
+import { EventBus } from "../../events/EventBus";
 
 export class InputManager {
   private pile!: Phaser.GameObjects.Zone;
+  private canPlay = false; // JESS: WE NEED A FLAG THAT GUARDS OTHER PLAYERS TO INTERACT WITH THE GAME WHEN IT'S NOT THEIR TURN OE THE GAME WILL BEHAVE UNEXPECTEDLY
 
   constructor(
     private scene: Phaser.Scene,
     pile: Phaser.GameObjects.Zone,
   ) {
     this.pile = pile;
+  }
+
+  // JESS: ADDED THIS FUNCTION AS A GUARD THAT DISABLES OTHER PLAYERS TO SEND GAME EVENTS WHEN THEY INTERACT WITH THE GAME BUT IT'S NOT THEIR TURN
+  setCanPlay(flag: boolean) {
+    this.canPlay = flag;
   }
 
   setup() {
@@ -31,6 +38,12 @@ export class InputManager {
     obj: Phaser.GameObjects.Image,
     zone: Phaser.GameObjects.Zone,
   ) {
+    // JESS: ADDED A DISPLAY MESSAGE TO SHOW WHEN THE USER NOT IN TURN INTERACTS WITH THE GAME TO EXPLAIN WHY NOTHING HAPPENS
+    if (!this.canPlay) {
+      this.resetCard(obj);
+      EventBus.emit("not_turn", { message: "❌ Wait for your turn ❌" });
+      return;
+    }
     if (zone !== this.pile) {
       this.resetCard(obj);
       return;

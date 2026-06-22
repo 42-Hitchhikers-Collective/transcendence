@@ -299,6 +299,8 @@ export type FrontendRoom = {
   state: "waiting" | "playing" | "finished";
   players: FrontendPlayer[];
   game?: {
+    playerTurnId:string;,
+    playerTurnUserName: string;
     currentPlayerId: string;
     discardTopCard: { color: string; value: string | number } | null;
     drawPileCount: number;

@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 16:42:22 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/15 14:05:12 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@ import { Socket } from "socket.io";
 import { FastifyInstance } from "fastify";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
+import { systemChatMsg } from ".";
+import { ChatMsgType } from "../../gameManager/chatEvents";
 // import { notifyFriendsPresence } from "./friend.handlers";
 import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
@@ -36,9 +38,11 @@ export function registerConnectionHandlers(
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (roomId) {
         console.log(`[Socket] ${userName} reconnected with new socketId: ${socket.id}`);
-        socket.join(roomId); // <-------------  JESS - this was commented out, but we need it because if the player is still in the room and refreshes, they get a new socket id and we need to join them back to the room with the new socket id ( otherwise they won't receive any updates of the room or game state )
-        // gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page
-        // console.log(`Player ${userName} automatically rejoin room ${roomId}`);
+        socket.join(roomId); // join back the room with the new socket to be able to receive room updates
+        console.log(`Player ${userName} automatically rejoin room ${roomId}`);
+        systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK); // JESS: added system message when player rejoins
+        
+        // gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page - doe sit happen somewhere else?
         broadcastRoomState(roomId);
     }
     

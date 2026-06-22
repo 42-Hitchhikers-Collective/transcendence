@@ -86,5 +86,13 @@ reinstall:
 	npm install --prefix apps/api
 	npm install --prefix apps/web
 
+# Fresh start: removes all data and rebuilds everything so that is ready to run
+fresh:
+	docker compose down -v
+	docker system prune -a --volumes -f
+	rm -rf data/postgres/*
+	mkdir -p data/postgres data/avatars nginx/certs
+	$(COMPOSE) up -d --build
+
 # Phony
-.PHONY: all up down logs clean re rebuild certs host-certs deploy dirs db db-seed db-migrate db-reset api migration prune ps reinstall
+.PHONY: all up down logs clean re rebuild certs host-certs deploy dirs db db-seed db-migrate db-reset api migration prune ps reinstall fresh

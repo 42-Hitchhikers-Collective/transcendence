@@ -45,7 +45,7 @@ socket.on("room_state", (frontendRoom: FrontendRoom) => {
 });
 
 socket.on("uno", (frontendRoom: FrontendRoom) => {
-  console.log(`[EventBus] room_state: \n ${JSON.stringify(frontendRoom)}`);
+  console.log(`[EventBus] UNO! : \n ${JSON.stringify(frontendRoom)}`);
   EventBus.emit("uno", frontendRoom);
 });
 

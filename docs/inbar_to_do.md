@@ -14,8 +14,27 @@ check logs:
 docker compose logs -f api | cat -n
 
 
+sysMSG - user dropped / back from dropped
+
+
+game is on ppl leave, only 1 player left playing - emit "lonely_player"
+
+
 send db finish game details
 which details?
+
+
+
+// If a player disconnects mid-game (optional)
+socket.on("disconnect", () => {
+  const room = gameManager.getRoomForPlayer(playerId);
+  if (room && room.state === "playing") {
+    await abortGame(app.prisma, room.gameDbId);
+  }
+});
+
+
+
 
 gameId //roomid
 roomName

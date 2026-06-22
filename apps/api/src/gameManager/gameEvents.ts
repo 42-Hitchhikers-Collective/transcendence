@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/17 15:23:28 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/18 16:42:43 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_PLAYERS_PER_ROOM, MIN_PLAYERS_TO_START } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
+import { abortGame } from "../services/game.service";
 
 type Event = { color: boolean; uno: boolean; finish: boolean};
 
@@ -114,7 +115,7 @@ export function startGameButton(playerId: string): RoomResult {
       room.game = new GameInstance(playersMap); // Initialize the "Game Slot" with the actual game instance;
       return {success: true, room};
   }
-  return {success: false, roomId: roomId, error: "Start conditions aren't met"};;
+  return {success: false, roomId: roomId, error: "At least 2 players are required to start the game!"};
 }
 
 
@@ -122,14 +123,33 @@ export function endGame(roomId: string) {
   const room = gm.getRoomById(roomId);
   if (!room || !room.game)
     return {success: false, roomId: roomId, error: "Room or game not found"};
+  if (room.gameDbId === "undefined") {
+    return {success: false, roomId: roomId, error: "Game DB ID is undefined"};
+  };
   room.state = "finished";
-    return {
+  // ----- JESS : Find the winner (player with empty hand) from the game's player list and set it -----
+  const winner = room.game.players.find(p => {
+    const hand = room.game?.table.getHand(p.id);
+    return hand && hand.length === 0;
+  });
+  if (winner) {
+    room.game.finishGame(winner);
+  }
+  // ----- JESS : If no winner found (shouldn't happen in normal flow) set the game as interrupted -----
+  if (!room.game.winner) {
+    return {success: false, roomId: roomId, error: "Winner not found"};
+  }
+  if (!room.gameDbId) {
+    return {success: false, roomId: roomId, error: "Game DB ID not found"};
+  };
+  return {
     success: true,
-    winnerId: room.game.winner?.id || "undefined",
-    roomId: roomId
+    roomId: roomId,
+    room: room,
+    winnerId: room.game.winner.id,
+    gameDbId: room.gameDbId
   };
 }
-
 
 // --- Helpers ---
 

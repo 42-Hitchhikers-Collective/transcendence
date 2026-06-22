@@ -14,7 +14,7 @@ export class UIManager {
   showWildColorButtons() {
     this.hideWildColorButtons();
 
-    this.wildColorContainer = this.scene.add.container(500, 200);
+    this.wildColorContainer = this.scene.add.container(500, 290); // JESS: I improved the position of the wild color buttons
 
     const colors: ColorButton[] = [
       { color: "red", hex: 0xff0000 },
@@ -62,7 +62,7 @@ export class UIManager {
     if (this.passTurnContainer) {
       return;
     }
-    this.passTurnContainer = this.scene.add.container(700, 200);
+    this.passTurnContainer = this.scene.add.container(500, 520); // JESS: I improved the position of the pass turn button, to make it more obvious
 
     const button = this.scene.add
       .rectangle(0, 0, 140, 60, 0x444444)

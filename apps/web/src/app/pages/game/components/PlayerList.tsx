@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { PlayerListItem } from "../hooks/useGamePage";
 
 type PlayerListProps = {
@@ -6,18 +5,50 @@ type PlayerListProps = {
   clientUsername?: string;
 };
 
-
 function PlayerStatus({ dropped }: { dropped: boolean }) {
   if (dropped) {
     return (
       <div className="">
         <span className="flex items-center justify-center gap-1 text-xs font-medium text-slate-500">
           Dropped
-          {/* <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" /> */}
+          {/* <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" /> */}
         </span>
       </div>
     );
   }
+}
+
+function TurnStatus({ turnPlayer }: { turnPlayer: PlayerListItem | undefined }) {
+  if (!turnPlayer) return null;
+
+  // if (turnPlayer.dropped) {
+  //   return (
+  //     <div>
+  //       <p className="mt-10 text-2xl font-medium">
+  //         <span className="animate-bounce text-slate-200">
+  //           {turnPlayer.userName}
+  //         </span>{" "}
+  //         was playing but dropped from the game!
+  //       </p>
+  //       <p className="mt-4 text-xs text-red-500">
+  //         Player will be kicked out and removed from the game if not
+  //         returning within{" "}
+  //         <span className="font-semibold text-red-600">30 seconds.</span>
+  //       </p>
+  //     </div>
+  //   );
+  // }
+
+  return (
+    <div>
+      <p className="mt-10 text-2xl font-medium">
+        <span className="animate-bounce text-emerald-500">
+          {turnPlayer.userName}
+        </span>{" "}
+        is playing
+      </p>
+    </div>
+  );
 }
 
 function PlayerItem({
@@ -31,67 +62,86 @@ function PlayerItem({
 
   return (
     <div
-      className={`flex w-[88px] flex-col items-center gap-2 rounded-xl border-2 px-5 py-3 shadow-md ${
-        player.dropped ? "border-slate-200" : "border-emerald-300"
+      className={`flex w-22 flex-col items-center gap-2 rounded-xl border-2 px-5 py-3 my-2 shadow-md ${
+        player.dropped
+          ? "border-slate-200"
+          : player.isPlayerTurn
+            ? "border-emerald-300 animate-bounce bg-emerald-200 shadow-emerald-200 text-emerald-900" // ← turn highlight
+            : ""
       }`}
     >
+      {/* avatar */}
       <img
-        src={player.avatarUrl }
+        src={player.avatarUrl}
         alt={player.userName}
         className={`h-12 w-12 rounded-full object-cover ${
           player.dropped ? "grayscale opacity-50" : ""
         }`}
         onError={(e) => {
-          console.warn(`Failed to load avatar for ${player.userName}, using default.`, e);
+           console.warn(`Failed to load avatar for ${player.userName}, using default.`, e);
           (e.target as HTMLImageElement).src = "/avatars/default.png";
+
+          // Inbar -> THIS IS A BANDAID, DOES NOT SOLVE THE PROBLEM
+          // const img = e.currentTarget;
+          // console.log("Failed URL:", img.src);
+          // if (img.src.includes("/avatars/default.png")) {
+          //   console.log("Default avatar missing too, aborting.");
+          //   return;
+          // }
+          // img.src = "/avatars/default.png";
         }}
       />
+
+      {/* username */}
       <p
         className={`text-center text-s font-semibold leading-tight wrap-break-word w-full ${
-          player.dropped ? "text-slate-300" : "text-slate-600"
+          player.dropped
+            ? "text-slate-300"
+            : player.isPlayerTurn
+              ? " text-emerald-800" // ← turn name color
+              : "text-slate-600"
         }`}
       >
-        {isYou ? (
-            `You`
-        ) : (
-          player.userName
-        )}
+        {isYou ? `You` : player.userName}
       </p>
       <PlayerStatus dropped={player.dropped} />
     </div>
   );
 }
 
+// Runs at every time useGamePage gets updated playerList and re-renders
 export default function PlayerList({
   playerList,
   clientUsername,
 }: PlayerListProps) {
-  // reloads component when list of players updates
-  useEffect(() => {
-    if (playerList.length > 0) {
-      console.log(`👤👤👤👤 PLAYER LIST UPDATED`);
-      let i = 0;
-      playerList.map((p) =>
-        console.log(
-          ` ${i++}. ${p.userName} - ${p.dropped ? "(dropped)" : "in room"}`,
-        ),
+  const turnPlayer = playerList.find((p) => p.isPlayerTurn);
+  const droppedPlayers = playerList.filter((p) => p.dropped);
+
+
+
+      if (playerList.length > 0) {
+      // Debugging logs to track changes
+        console.log(`👤👤👤👤 PLAYER LIST UPDATED`);
+        playerList.forEach((p, i) =>{
+          console.log(
+            ` ${i++}. ${p.userName} - ${p.dropped ? "(dropped)" : "in room"} - Is player turn: ${p.isPlayerTurn}`,
+          );
+        }
       );
     }
-  }, [playerList]);
 
   return (
-    // <div className="mb-4 bg-white rounded-xl p-4 my-2 shadow-sm">
-    <div className="mb-4 p-4 my-2">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.2em]">
+    <div className="">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.2em] py-2 ">
         Joined:
         <span className="ml-2 rounded-full bg-emerald-100 p-2 text-xs font-medium text-emerald-800">
-        {playerList.length}
-          </span>
+          {playerList.length}
+        </span>
       </h2>
       {playerList.length === 0 && (
         <p className="text-sm text-slate-400">Waiting for someone to join...</p>
-      )}{" "}
-      <div className="mt-4 flex flex-wrap gap-3 ">
+      )}
+      <div className="flex flex-wrap gap-3 justify-center">
         {/* Sorts list before rendering, so that clientUser is set first */}
         {[...playerList]
           .sort((a, b) => {
@@ -107,6 +157,26 @@ export default function PlayerList({
             />
           ))}
       </div>
+      <TurnStatus turnPlayer={turnPlayer} />
+      {droppedPlayers.length > 0 && (
+        <div className="mt-4 space-y-6">
+          {droppedPlayers.map((p) => (
+            <div key={p.userName}>
+              <p className="text-2xl font-medium">
+                <span className="animate-bounce text-slate-200">
+                  {p.userName}
+                </span>
+                {" "}dropped from the game!
+              </p>
+              <p className="mt-4 text-xs text-red-500">
+                Player will be kicked out and removed from the game if not
+                returning within{" "}
+                <span className="font-semibold text-red-600">30 seconds.</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
