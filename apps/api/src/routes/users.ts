@@ -2,7 +2,7 @@ type RankedUser = {
   userId: string;
   wins: number;
   losses: number;
-  rank: number; // 0 = has losses but no wins; 1+ = ranked by win count
+  rank: number; // sequential rank — every player who has played is ranked
 };
 
 async function computeRankedUsers(prisma: any): Promise<RankedUser[]> {
@@ -18,24 +18,44 @@ async function computeRankedUsers(prisma: any): Promise<RankedUser[]> {
       GROUP BY gp."userId"
     `;
 
-  const withWins = rows.filter((r) => r.wins > 0).sort((a, b) => b.wins - a.wins);
-  const withoutWins = rows.filter((r) => r.wins === 0);
+
+  // JESS -  I changed it so we rank users by wins first, if users share the same wins they do not share the same rank
+  // to avoid too many ranks repeating in the leaderboard and make it more competitive. 
+  const withMatches = [...rows].sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;   // users with higher wins rank fist
+    return a.totalGames - b.totalGames;              // if users share the same wins, the one with fewer games ranks higher
+  });
 
   const ranked: RankedUser[] = [];
-
   let rank = 1;
-  for (let i = 0; i < withWins.length; i++) {
-    if (i > 0 && withWins[i].wins < withWins[i - 1].wins) rank = i + 1;
+  for (let i = 0; i < withMatches.length; i++) {
+    if (i > 0) {
+      const prev = withMatches[i - 1];
+
+      // Two players share the same rank only if BOTH wins AND totalGames match.
+      // Any difference in either metric, assigns a new descending rank number.
+      const tied =
+        withMatches[i].wins === prev.wins &&
+        withMatches[i].totalGames === prev.totalGames;
+      if (!tied) rank++;                        // increment only when stats differ
+    }
     ranked.push({
-      userId: withWins[i].userId,
-      wins: withWins[i].wins,
-      losses: withWins[i].totalGames - withWins[i].wins,
+      userId: withMatches[i].userId,
+      wins: withMatches[i].wins,
+      losses: withMatches[i].totalGames - withMatches[i].wins, // losses = games played - wins
       rank,
     });
   }
 
-  for (const r of withoutWins) {
-    ranked.push({ userId: r.userId, wins: 0, losses: r.totalGames, rank: 0 });
+  // Includes users who haven't played any games (it shows rank 0)
+  const playedIds = new Set(rows.map((r) => r.userId));
+  const allProfiles = await prisma.profile.findMany({
+    select: { userId: true },
+  });
+  for (const p of allProfiles) {
+    if (!playedIds.has(p.userId)) {
+      ranked.push({ userId: p.userId, wins: 0, losses: 0, rank: 0 });
+    }
   }
 
   return ranked;
@@ -67,6 +87,8 @@ export async function userRoutes(app: any) {
       rank: r.rank,
       username: profileMap.get(r.userId)?.username ?? "Unknown",
       avatarUrl: profileMap.get(r.userId)?.avatarUrl ?? null,
+      wins: r.wins, // JESS - added to show win data on the leaderboard
+      losses: r.losses, // JESS - added to show win data on the leaderboard
     }));
 
     return { data };
