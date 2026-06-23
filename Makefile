@@ -94,5 +94,20 @@ fresh:
 	mkdir -p data/postgres data/avatars nginx/certs
 	$(COMPOSE) up -d --build
 
+# Run this on the school pc, make sure to follow the points in this file first /home/jslusark/sgoinfre/transcendence/docs/how_to_start_on_42.md
+setup: certs
+	$(COMPOSE) down -v 2>/dev/null; true
+	docker system prune -a --volumes -f
+	rm -rf data/postgres/*
+	mkdir -p data/postgres data/avatars
+	$(COMPOSE) up -d --build
+	@echo "Waiting for database to be healthy..."
+	@until docker compose -f docker-compose.yml exec -T db pg_isready -U transcendence 2>/dev/null; do sleep 1; done
+	sleep 2
+	$(COMPOSE) exec -T api npm run db:seed
+	@echo ""
+	@echo "  Setup complete — app running at https://localhost:8443"
+	@echo ""
+
 # Phony
-.PHONY: all up down logs clean re rebuild certs host-certs deploy dirs db db-seed db-migrate db-reset api migration prune ps reinstall fresh
+.PHONY: all up down logs clean re rebuild certs host-certs deploy dirs db db-seed db-migrate db-reset api migration prune ps reinstall fresh setup
