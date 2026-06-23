@@ -4,6 +4,8 @@ import {
   TrophyIcon,
   PuzzlePieceIcon,
   GlobeAmericasIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/solid";
 import {
   Avatar,
@@ -25,26 +27,39 @@ type LeaderboardModalProps = {
   onClose: () => void;
 };
 
-export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const fetchedRef = useRef(false); // use ref to track if we've already fetched the leaderboard to avoid redundant calls on open/close
+const PAGE_SIZE = 10;
 
+export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
+  const [allData, setAllData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const fetchedRef = useRef(false);
+
+  // Fetch all data once when modal opens
   useEffect(() => {
     if (!open || fetchedRef.current) return;
     setLoading(true);
     fetch("/api/users/leaderboard")
       .then(async (res) => {
         if (!res.ok) throw new Error("leaderboard fetch failed");
-        const data = await res.json();
-        return data?.data ?? [];
+        const json = await res.json();
+        return json.data ?? [];
       })
       .then((entries) => {
-        setLeaderboard(entries);
+        setAllData(entries);
         fetchedRef.current = true;
       })
-      .catch(() => setLeaderboard([]))
+      .catch(() => setAllData([]))
       .finally(() => setLoading(false));
+  }, [open]);
+
+  // Paginate client-side
+  const totalPages = Math.max(1, Math.ceil(allData.length / PAGE_SIZE));
+  const leaderboard = allData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Reset to page 1 when modal closes/reopens
+  useEffect(() => {
+    if (!open) setPage(1);
   }, [open]);
 
   if (!open) return null;
@@ -169,6 +184,28 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                   </div>
                 );
               })}
+            </div>
+          )}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 px-6 pb-6">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="rounded-full p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              >
+                <ChevronLeftIcon className="size-5" />
+              </button>
+              <span className="text-xs font-medium text-gray-500">
+                {page} of  {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="rounded-full p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+              >
+                <ChevronRightIcon className="size-5" />
+              </button>
             </div>
           )}
         </div>
