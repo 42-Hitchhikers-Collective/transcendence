@@ -15,7 +15,7 @@ export class BoardManager {
     /* ---- JESS ---- */
     const bg = this.scene.add.image(500, 400, "background"); //  adds a background image to the game scene, centered at (500, 400) with the key "background"
     bg.setDisplaySize(1000, 800); //  scales the background image to fit the game scene dimensions (1000x800)
-    bg.setDepth(-1); //  sets the rendering depth of the background image to -1, ensuring it is rendered behind all other game objects
+    bg.setDepth(0); //  sets the rendering depth of the background image to -1, ensuring it is rendered behind all other game objects
     this.boardContainer.add(bg); //  adds the background image to the boardContainer, which is the main container for all game objects in the scene
     /* ------------------- */
 

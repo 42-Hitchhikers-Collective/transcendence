@@ -61,6 +61,6 @@ socket.on("show_colors", (frontendRoom: FrontendRoom) => {
 
 socket.on("error", (err) => {
   console.log(`[EventBus] SOCKET_ERROR \n Error Message: ${err.message}`);
-  EventBus.emit("SOCKET_ERROR", err);
+  EventBus.emit("error", err);
 });
 

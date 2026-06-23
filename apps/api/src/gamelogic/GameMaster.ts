@@ -30,9 +30,8 @@ export class GameMaster {
 
     table.draw = 0;
     table.playerPlayed = true;
-    console.log(`Player Played: ${table.playerPlayed}`)
+    console.log(`Player Played: ${table.playerPlayed}`);
 
-    console.log("Alles gut, playCard Gabriel");
     return true;
   }
 
@@ -94,10 +93,13 @@ export class GameMaster {
   // ============================================================
 
   private validateMove(table: Table, playerId: string, card: Card): boolean {
-    if (!this.isPlayerTurn(table, playerId))  return false;
-    if (!this.isCardPlayable(table, card))    return false;
-    if (!this.pendingCards(table, card))      return false;
-    if (table.getPlayerPlayed()) {console.log(`Player Played condition: ${table.playerPlayed}`); return false;}
+    if (!this.isPlayerTurn(table, playerId)) return false;
+    if (!this.isCardPlayable(table, card)) return false;
+    if (!this.pendingCards(table, card)) return false;
+    if (table.getPlayerPlayed()) {
+      console.log(`Player Played condition: ${table.playerPlayed}`);
+      return false;
+    }
     return true;
   }
 
@@ -141,19 +143,18 @@ export class GameMaster {
 
   advanceTurn(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
-    
+
     if (!player || table.draw != 0) return false;
-    
+
     let skip = 0;
-    if (table.skip)
-      skip = 1 * table.direction;
-    
+    if (table.skip) skip = 1 * table.direction;
+
     table.turnIndex =
       (table.turnIndex + table.direction + skip + table.players.length) %
       table.players.length;
 
     this.newTurnStats(table);
-    console.log(`New Turn: ${table.players[table.turnIndex].username}`)
+    console.log(`New Turn: ${table.players[table.turnIndex].username}`);
     return true;
   }
 
@@ -200,4 +201,54 @@ export class GameMaster {
   shuffle = <T>(array: T[]): void => {
     array.sort(() => Math.random() - 0.5);
   };
+
+  public playerLeftGame(playerId: string, table: Table): boolean {
+    const player = table.players.find((p) => p.id === playerId);
+    if (!player) {
+      return false;
+    }
+
+    this.returnCards(playerId, table);
+
+    this.removePlayer(table.players, player, table);
+
+    if (table.color) {
+      // send select_color to next player
+    }
+
+    return true;
+  }
+
+  private removePlayer(players: Player[], player: Player, table: Table) {
+    const index = players.indexOf(player);
+    const CurrentTurn = this.getCurrentPlayer(table);
+
+    if (index !== -1) {
+      players.splice(index, 1);
+    }
+
+    if (CurrentTurn == player) {
+      this.forcePassTurn(table);
+    } else {
+      table.turnIndex = players.indexOf(CurrentTurn);
+    }
+  }
+
+  private returnCards(playerId: string, table: Table) {
+    const cards = table.getHand(playerId) || [];
+
+    for (const card of cards) {
+      table.drawPile.push(card);
+    }
+
+    // table.setHand(playerId, []); // set to null?
+
+    this.shuffle(table.drawPile);
+  }
+
+  private forcePassTurn(table: Table) {
+    table.turnIndex =
+      (table.turnIndex + table.direction + table.players.length) %
+      table.players.length;
+  }
 }

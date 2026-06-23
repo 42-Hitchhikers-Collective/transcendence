@@ -57,6 +57,7 @@ export class GameScene extends Scene {
     EventBus.on("show_colors", this.selectColor, this);
     EventBus.on("display_pass_button", this.passTurn, this);
     EventBus.on("uno", this.uno_announcemente, this);
+    //EventBus.on("error", this.error_announcemente, this);
     EventBus.on("not_turn", this.showNotTurn, this); // JESS: WE NEED AN EVENT BUS ALSO 
     LOG("  EventBus listeners registered");
 
@@ -76,7 +77,7 @@ export class GameScene extends Scene {
   private onRoomState(room: FrontendRoom) {
     // Guard: prevent render before scene is fully initialized
     // if (!this.scene.isActive()) return;
-    this.uiManager.hidePassTurnButtons(); // <---- MERGE CONFLICT: was added to resolve
+    this.uiManager.hidePassTurnButtons(); 
 
     this.room = room;
 
@@ -110,7 +111,7 @@ export class GameScene extends Scene {
   }
 
   private selectColor() {
-    if (this.myPlayerId !== this.room?.current_turn) return; // JESS: put a guard to prevent other players to see and interact with the wild color buttons if it's not their turn
+    //if (this.myPlayerId !== this.room?.current_turn) return; // JESS: put a guard to prevent other players to see and interact with the wild color buttons if it's not their turn
     LOG("Wild card played — showing color picker");
     this.uiManager.showWildColorButtons();
   }
@@ -135,7 +136,7 @@ export class GameScene extends Scene {
       strokeThickness: 4,
     });
     txt.setOrigin(0.5);
-    txt.setDepth(100);
+    txt.setDepth(9000);
     this.tweens.add({
       targets: txt,
       alpha: 0,

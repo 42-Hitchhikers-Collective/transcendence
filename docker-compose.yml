@@ -35,7 +35,8 @@ services:
       - ./apps/api:/app
       - api_node_modules:/app/node_modules
       - ./data/avatars:/app/data/avatars
-    command:  sh -lc "npx prisma migrate deploy && npm run db:seed && npm run dev"
+    #command:  sh -lc "npx prisma migrate deploy && npm run db:seed && npm run dev"
+    command: sh -lc "npx prisma db push && npm run db:seed && npm run dev"
     #command: sh -lc "npx prisma db push --accept-data-loss && npm run db:seed && npm run dev"
     networks: [transcendence]
 

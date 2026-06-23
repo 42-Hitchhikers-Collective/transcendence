@@ -13,8 +13,8 @@ export class Table {
   draw: number;
 
   drawPile: Card[];
-  discardPile: Card[];
-  
+  discardPile: Card[] | undefined;
+
   playerPlayed: boolean;
 
   currentColor: "red" | "blue" | "green" | "yellow" | "wild" | null;
@@ -43,14 +43,14 @@ export class Table {
 
     this.drawPile = deck.cards;
     this.discardPile = [];
-    this.discardPile.push(this.drawPile.pop());
-
-    this.currentColor = this.discardPile[this.discardPile.length - 1].color;
-
-    this.color = false; 
+    
+    
+    this.color = false;
     this.uno = false;
     this.finish = false;
     this.skip = false;
+    this.discardPile.push(this.initialCard());
+    this.currentColor = this.discardPile[this.discardPile.length - 1].color;
 
     this.dealCards();
   }
@@ -64,6 +64,20 @@ export class Table {
     }
   }
 
+  initialCard() {
+    let card = this.drawPile.pop();
+
+    while (card?.value === "4plus") {
+      this.drawPile.unshift(card);
+      card = this.drawPile.pop();
+    }
+
+    if (card?.value == "color")
+      this.color = true;
+
+    return card;
+  }
+
   getHand(playerId: string): Card[] | null {
     const player = this.players.find((p) => p.id === playerId);
     return player?.hand ?? null;
@@ -75,13 +89,10 @@ export class Table {
   }
 
   changeColor(color: "red" | "blue" | "green" | "yellow") {
-    console.log(`COLOR SELECTED ${color}`)
     this.currentColor = color;
-    console.log(`NEW COLOR OF TABLE ${this.currentColor}`)
-
   }
 
-  getPlayerPlayed()
-  { return this.playerPlayed }
+  getPlayerPlayed() {
+    return this.playerPlayed;
+  }
 }
-

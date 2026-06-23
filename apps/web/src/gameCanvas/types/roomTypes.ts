@@ -13,9 +13,11 @@ export type FrontendRoom = {
   state: "waiting" | "playing" | "finished";
   players: FrontendPlayer[];
   current_turn: string | undefined;
+  cardsToDraw: number;
   game?: {
     currentPlayerId: string;
     discardTopCard: { color: string; value: string };
     drawPileCount: number;
+    currentColor: string;
   };
 };

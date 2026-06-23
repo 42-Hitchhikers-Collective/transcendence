@@ -2,6 +2,7 @@ import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
 import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
 import { drawCard } from "../../network/gameNetwork";
 import { EventBus } from "../../events/EventBus";
+import { AlignCenter } from "lucide-react";
 
 type Position = { x: number; y: number; p: "v" | "h" };
 
@@ -10,6 +11,7 @@ export class RenderManager {
   private myPlayerId: string = "";
   private boardContainer!: Phaser.GameObjects.Container;
   private drawPileSprite: Phaser.GameObjects.Image | null = null;
+  private pendingDrawText: Phaser.GameObjects.Text | null = null;
   private canDraw = false; // JESS: we need a flag to disable the draw pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
 
   constructor(
@@ -24,16 +26,14 @@ export class RenderManager {
     this.myPlayerId = id;
   }
 
-
   setCanDraw(canDraw: boolean) {
-
     this.canDraw = canDraw; // JESS: added flag to disable the draw pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
-    if (!this.drawPileSprite) return; 
-      if (canDraw) {
-      // this.drawPileSprite.setInteractive(); // JESS: this is not needed 
+    if (!this.drawPileSprite) return;
+    if (canDraw) {
+      // this.drawPileSprite.setInteractive(); // JESS: this is not needed
       this.drawPileSprite.setAlpha(1);
     } else {
-      // this.drawPileSprite.disableInteractive(); // JESS: this is not needed 
+      // this.drawPileSprite.disableInteractive(); // JESS: this is not needed
       this.drawPileSprite.setAlpha(0.4); // JESS: we just need set alpha
     }
   }
@@ -48,11 +48,51 @@ export class RenderManager {
 
     this.renderDiscardPile(room);
     this.renderDrawPile();
-    
+    this.renderText(room.cardsToDraw);
     orderedPlayers.forEach((player, i) => {
       this.renderPlayer(player, positions[i], room.current_turn);
     });
+    this.renderCurrentColor(room.game?.currentColor);
+  }
 
+  private currentColorText: Phaser.GameObjects.Text | null = null;
+
+  private renderCurrentColor(color: string | undefined) {
+    this.currentColorText?.destroy();
+
+    let currentColor = "#ffffff";
+    console.log(`Current Color: ${color}`)
+
+    if (color === "red") currentColor = "#ff0000";
+    else if (color === "blue") currentColor = "#0000ff";
+    else if (color === "green") currentColor = "#00ff00";
+    else if (color === "yellow") currentColor = "#ffff00";
+
+    this.currentColorText = this.scene.add.text(
+      SCREEN.WIDTH / 2,
+      SCREEN.HEIGHT / 2 - 100,
+      `Current Color`,
+      {
+        fontSize: "24px",
+        color: currentColor,
+      },
+    );
+
+    this.currentColorText.setOrigin(0.5);
+  }
+  private renderText(numberOfCards: number) {
+    this.pendingDrawText?.destroy();
+
+    this.pendingDrawText = this.scene.add.text(
+      SCREEN.WIDTH / 2,
+      SCREEN.HEIGHT / 2 + 100,
+      `Cards to draw ${numberOfCards.toString()}`,
+      {
+        fontSize: "24px",
+        color: "#ffffff",
+      },
+    );
+    this.pendingDrawText.setOrigin(0.5);
   }
 
   private renderDiscardPile(room: FrontendRoom) {
@@ -61,6 +101,7 @@ export class RenderManager {
       SCREEN.HEIGHT / 2, // y
       `${room.game?.discardTopCard.value}_${room.game?.discardTopCard.color}`,
     );
+    sprite.setDepth(0);
 
     sprite.setScale(CARDS.SCALE);
     sprite.setInteractive();
@@ -109,14 +150,16 @@ export class RenderManager {
     let color = "#ffffff"; // JESS: white has to be the default color for the names
     if (current_turn === player.id) color = "#22c55e"; // JESS: green is the color for the player that has to play (like on the website graphics)
 
-    const nameX = pos.p === "v" ? (pos.x < 500 ? pos.x + 80 : pos.x - 80) : pos.x; // JESS: added for vertical players, the name is displayed on the right for the left player and on the left for the right player
+    const nameX =
+      pos.p === "v" ? (pos.x < 500 ? pos.x + 80 : pos.x - 80) : pos.x; // JESS: added for vertical players, the name is displayed on the right for the left player and on the left for the right player
     const nameY = pos.p === "v" ? pos.y : pos.y < 200 ? pos.y + 80 : pos.y - 80; // JESS: added for horizontal players, the name is displayed below for the top player and above for the bottom player
-    const title = this.scene.add.text(nameX, nameY, player.userName, { // JESS: considers different name position for each player
+    const title = this.scene.add.text(nameX, nameY, player.userName, {
+      // JESS: considers different name position for each player
       fontSize: "24px",
       color: color,
     });
     title.setOrigin(0.5); // JESS: centers the name text on its position
-    title.setDepth(10); // JESS: ensures that the name is always displayed above the cards
+    title.setDepth(1000); // JESS: ensures that the name is always displayed above the cards
     if (pos.p === "v") title.setAngle(pos.x < 500 ? 90 : -90); // JESS: rotates names of L and R player toward center
 
     const isMe = player.id === this.myPlayerId;
@@ -133,6 +176,7 @@ export class RenderManager {
         sprite.setScale(CARDS.SCALE);
         sprite.setData("cardIndex", cardIndex);
         sprite.setInteractive();
+        sprite.setDepth(9998);
         this.scene.input.setDraggable(sprite);
 
         container.add(sprite);
@@ -152,7 +196,7 @@ export class RenderManager {
         sprite.setScale(CARDS.SCALE); // JESS: we use the same scale for the back of the cards to keep the same size as the front cards
         container.add(sprite);
         if (pos.p === "h") offsetX += 40; // JESS: for horizontal players, cards are displayed from left to right, so we increase the x offset
-        if (pos.p === "v") offsetY += 40;   // JESS: for vertical players, cards are displayed from top to bottom, so we increase the y offset
+        if (pos.p === "v") offsetY += 40; // JESS: for vertical players, cards are displayed from top to bottom, so we increase the y offset
       }
     }
     container.add(title); // JESS: we add the name title to the player container to ensure it moves with the cards if needed
@@ -168,24 +212,24 @@ export class RenderManager {
     const cy = SCREEN.HEIGHT / 2; // JESS: center y is the same for all players, but the x position is different based on the number of players and their position (top, left, right, bottom)
     switch (count) {
       case 1:
-        return [{ x: cx, y: 710, p: "h" }]; // JESS: Keep this position 
+        return [{ x: cx, y: 710, p: "h" }]; // JESS: Keep this position
       case 2:
         return [
-          { x: cx, y: 90, p: "h" }, // JESS: Keep this position  
-          { x: cx, y: 710, p: "h" }, // JESS: Keep this position  
+          { x: cx, y: 90, p: "h" }, // JESS: Keep this position
+          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
         ];
       case 3:
         return [
-          { x: 60, y: cy, p: "v" }, // JESS: Keep this position 
-          { x: 940, y: cy, p: "v" }, // JESS: Keep this position 
-          { x: cx, y: 710, p: "h" }, // JESS: Keep this position 
+          { x: 60, y: cy, p: "v" }, // JESS: Keep this position
+          { x: 940, y: cy, p: "v" }, // JESS: Keep this position
+          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
         ];
       case 4:
         return [
-          { x: cx, y: 120, p: "h" }, // JESS: Keep this position 
-          { x: 60, y: cy, p: "v" }, // JESS: Keep this position 
-          { x: 940, y: cy, p: "v" }, // JESS: Keep this position 
-          { x: cx, y: 710, p: "h" }, // JESS: Keep this position 
+          { x: cx, y: 120, p: "h" }, // JESS: Keep this position
+          { x: 60, y: cy, p: "v" }, // JESS: Keep this position
+          { x: 940, y: cy, p: "v" }, // JESS: Keep this position
+          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
         ];
 
       default:
