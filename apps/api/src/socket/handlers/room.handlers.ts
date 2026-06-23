@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   room.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 16:49:57 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/22 16:58:05 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,11 @@ export function registerRoomHandlers(
     gameManager.cancelDropTimer(playerId);
     console.log("[room:user_dropped] timer cancelled for", playerId);
     systemChatMsg(playerId, res.roomId, socket, ChatMsgType.LEFT_ROOM);
+
     socket.leave(res.roomId);
+    
+    gameManager.playerLeft(res.roomId, playerId);
+
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId);
     console.log("[room:leave_room] success", {

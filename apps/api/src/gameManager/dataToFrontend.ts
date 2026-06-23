@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   dataToFrontend.ts                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 14:56:40 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 13:45:20 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/23 12:09:51 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,13 @@ export function getGameCanvasRoom(room: Room, observerPlayerId: string): GameCan
     name: room.name,
     state: room.state,
     current_turn: room.game?.table.players[room.game?.table.turnIndex].id || "",
+    cardsToDraw: room.game?.cardsToDraw(),
     players: gameCanvasPlayers,
     game: room.game ? {
       currentPlayerId: room.game.table.players[room.game.table.turnIndex]?.id || "",
       discardTopCard: room.game.table.discardPile[room.game.table.discardPile.length - 1] || null,
       drawPileCount: room.game.table.drawPile.length || 0,
+      currentColor: room.game.table.currentColor || "",
     } : undefined
   };
 }

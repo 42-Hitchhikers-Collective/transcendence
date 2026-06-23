@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   types.ts                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 15:39:42 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/06/23 11:50:11 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,13 @@ export type GameCanvasRoom = {
   name: string;
   state: GameState;
   current_turn: string;
+  cardsToDraw: number;
   players: GameCanvasPlayer[];
   game?: {
     currentPlayerId: string;
     discardTopCard: { color: string; value: string | number } | null;
     drawPileCount: number;
+    currentColor: string | undefined;
   };
 };
 
