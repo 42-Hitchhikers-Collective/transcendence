@@ -4,11 +4,11 @@ sleep 2
 
 
 # 2 Create Docker's daemon config pointing to goinfre:
-
+chmod +x ~/.config
 mkdir -p ~/.config/docker
 cat > ~/.config/docker/daemon.json << 'EOF'
 {
-  "data-root": "/goinfre/goinfre/Perso/jslusark/docker"
+  "data-root": "/goinfre/goinfre/Perso/${USER}/docker"
 }
 EOF
 
