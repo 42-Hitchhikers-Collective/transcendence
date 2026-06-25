@@ -41,45 +41,62 @@ export class RenderManager {
   render(room: FrontendRoom) {
     this.clearPlayers();
 
-    const orderedPlayers = this.reorderPlayersWithObserverAtBottom(
-      room.players,
-    );
-    const positions = this.getPlayerPositions(orderedPlayers.length);
+    const positions = this.getPlayerPositions(room.players.length);
 
     this.renderDiscardPile(room);
     this.renderDrawPile();
     this.renderText(room.cardsToDraw);
-    orderedPlayers.forEach((player, i) => {
-      this.renderPlayer(player, positions[i], room.current_turn);
-    });
+
+    const startIndex = room.players.findIndex(
+      (player) => player.id === this.myPlayerId,
+    );
+    if (startIndex === -1) {
+      console.error("Player not found");
+      return;
+    }
+
+    for (let i = 0; i < room.players.length; i++) {
+      this.renderPlayer(
+        room.players[(i + startIndex) % room.players.length],
+        positions[i],
+        room.current_turn,
+      );
+    }
     this.renderCurrentColor(room.game?.currentColor);
   }
 
   private currentColorText: Phaser.GameObjects.Text | null = null;
+  private currentColorCircle: Phaser.GameObjects.Graphics | null = null;
 
   private renderCurrentColor(color: string | undefined) {
     this.currentColorText?.destroy();
+    this.currentColorCircle?.destroy();
 
-    let currentColor = "#ffffff";
-    console.log(`Current Color: ${color}`)
+    let currentColor = 0xffffff;
 
-    if (color === "red") currentColor = "#ff0000";
-    else if (color === "blue") currentColor = "#0000ff";
-    else if (color === "green") currentColor = "#00ff00";
-    else if (color === "yellow") currentColor = "#ffff00";
+    if (color === "red") currentColor = 0xff0000;
+    else if (color === "blue") currentColor = 0x0000ff;
+    else if (color === "green") currentColor = 0x00ff00;
+    else if (color === "yellow") currentColor = 0xffff00;
 
-    this.currentColorText = this.scene.add.text(
-      SCREEN.WIDTH / 2,
-      SCREEN.HEIGHT / 2 - 100,
-      `Current Color`,
-      {
+    // Texto
+    this.currentColorText = this.scene.add
+      .text(SCREEN.WIDTH / 2, SCREEN.HEIGHT / 2 - 100, "Current Color", {
         fontSize: "24px",
-        color: currentColor,
-      },
-    );
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
 
-    this.currentColorText.setOrigin(0.5);
+    this.currentColorCircle = this.scene.add.graphics();
+
+    this.currentColorCircle.fillStyle(currentColor, 1);
+    this.currentColorCircle.fillCircle(
+      SCREEN.WIDTH / 2 + 110,
+      SCREEN.HEIGHT / 2 - 100,
+      10,
+    );
   }
+
   private renderText(numberOfCards: number) {
     this.pendingDrawText?.destroy();
 
@@ -127,20 +144,10 @@ export class RenderManager {
     this.drawPileSprite = sprite; // JESS: we store the draw pile sprite in a variable to be able to disable it when it's not the player's turn
   }
 
-  private reorderPlayersWithObserverAtBottom(
-    players: FrontendPlayer[],
-  ): FrontendPlayer[] {
-    const observer = players.find((p) => p.isTheObserver);
-    if (!observer) return players;
-
-    const others = players.filter((p) => !p.isTheObserver);
-    return [...others, observer];
-  }
-
   private renderPlayer(
     player: FrontendPlayer,
     pos: Position,
-    current_turn: string,
+    current_turn: string | undefined,
   ) {
     const container = this.scene.add.container(0, 0);
 
@@ -215,21 +222,21 @@ export class RenderManager {
         return [{ x: cx, y: 710, p: "h" }]; // JESS: Keep this position
       case 2:
         return [
-          { x: cx, y: 90, p: "h" }, // JESS: Keep this position
           { x: cx, y: 710, p: "h" }, // JESS: Keep this position
+          { x: cx, y: 90, p: "h" }, // JESS: Keep this position
         ];
       case 3:
         return [
+          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
           { x: 60, y: cy, p: "v" }, // JESS: Keep this position
           { x: 940, y: cy, p: "v" }, // JESS: Keep this position
-          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
         ];
       case 4:
         return [
-          { x: cx, y: 120, p: "h" }, // JESS: Keep this position
-          { x: 60, y: cy, p: "v" }, // JESS: Keep this position
-          { x: 940, y: cy, p: "v" }, // JESS: Keep this position
           { x: cx, y: 710, p: "h" }, // JESS: Keep this position
+          { x: 60, y: cy, p: "v" }, // JESS: Keep this position
+          { x: cx, y: 120, p: "h" }, // JESS: Keep this position
+          { x: 940, y: cy, p: "v" }, // JESS: Keep this position
         ];
 
       default:
