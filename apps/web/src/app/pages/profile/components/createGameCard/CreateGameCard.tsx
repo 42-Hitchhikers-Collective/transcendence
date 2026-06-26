@@ -2,7 +2,12 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket";
 import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import PendingGameCard from "./PendingGameCard/PendingGameCard";
 import CreateRoom from "./CreateRoom";
 import JoinRoom from "./JoinRoom";
@@ -30,7 +35,6 @@ export function CreateGameCard() {
     socket.on("player_info_response", handlePlayerInfo);
 
     socket.emit("player_info_request");
-    console.warn(`User ${hasPendingRoom}`);
 
     return () => {
       socket.off("leave_room");
@@ -40,9 +44,12 @@ export function CreateGameCard() {
   }, []);
 
   useEffect(() => {
-      console.warn(`User pensing room: ${hasPendingRoom}`);
+    if (!hasPendingRoom) {
+      console.log("User has no pending room: room was pending or dropout timer just expired.");
+    } else {
+      console.warn(`⏰ User has a pending active room: ${hasPendingRoom}. \n They can rejoin as long as the dropout timer is active.`);
+    }
   }, [hasPendingRoom]); // placeholder to avoid "defined but not used" warnings for now; we will use these in the ProfileSection component
-
 
   const handlePlayerInfo = (data: any) => {
     // prints json data in a readable format without needing to remember the structure of the data object
@@ -166,4 +173,3 @@ export function CreateGameCard() {
     </>
   );
 }
-

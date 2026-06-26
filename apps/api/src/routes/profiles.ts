@@ -6,7 +6,11 @@ import sharp from "sharp";
 
 const AVATAR_DIR = process.env.AVATAR_DIR || "/app/data/avatars";
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
-const EXT: Record<string, string> = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" };
+const EXT: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+};
 
 mkdirSync(AVATAR_DIR, { recursive: true });
 
@@ -39,7 +43,11 @@ export async function profileRoutes(app: any) {
       const payload = request.user as { sub?: string };
       if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
 
-      const body = request.body as { username?: string; avatarUrl?: string; bio?: string };
+      const body = request.body as {
+        username?: string;
+        avatarUrl?: string;
+        bio?: string;
+      };
 
       const profile = await app.prisma.profile.upsert({
         where: { userId: payload.sub },
@@ -54,12 +62,31 @@ export async function profileRoutes(app: any) {
       });
 
       return reply.send({ profile });
-    }
+    },
   );
 
   app.post(
     "/me/avatar",
-    { preHandler: [app.auth] },
+    {
+      preHandler: [app.auth],
+      config: {
+        //Rate limit to prevent abuse of avatar uploads that can exhaust server responses
+        rateLimit: {
+          max: 5,
+          timeWindow: "5 minutes",
+          hook: "preHandler", // makes shure that the check runs after authentication, so request.user exists
+          keyGenerator: (request: any) => {
+            return (request.user as { sub?: string })?.sub ?? request.ip;
+          },
+          // Added custom error messages to provdie better feedback for the client when rate limit is exceeded
+          errorResponseBuilder: (_req: any, ctx: any) => ({
+            statusCode: 429,
+            error: "Too Many Requests",
+            message: `Too many uploads. \n Wait ${ctx.after} cooldown`,
+          }),
+        },
+      },
+    },
     async (request: any, reply: any) => {
       const payload = request.user as { sub?: string };
       if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
@@ -72,10 +99,11 @@ export async function profileRoutes(app: any) {
       // Buffer the entire upload so we can inspect dimensions before writing
       const buffer = await file.toBuffer();
 
-      // JESS: Remove this as too restrictive for users (frontend also makes the image squared, no matter what aspects ration the original image has).
-      // const metadata = await sharp(buffer).metadata();
-      // if (!metadata.width || !metadata.height || metadata.width !== metadata.height)
-      //   return reply.code(400).send({ error: "image must have a 1:1 aspect ratio" });
+      // Rejects files larger than 2 MB (multipart & nginx enforce 5 MB globally)
+      if (buffer.length > 2 * 1024 * 1024)
+        return reply
+          .code(400)
+          .send({ error: "avatar image must be under 2 MB" });
 
       // Clean up old avatar before saving the new one
       const existing = await app.prisma.profile.findUnique({
@@ -96,7 +124,7 @@ export async function profileRoutes(app: any) {
       });
 
       return reply.send({ avatarUrl });
-    }
+    },
   );
 
   app.delete(
@@ -119,6 +147,6 @@ export async function profileRoutes(app: any) {
       });
 
       return reply.send({ avatarUrl: null });
-    }
+    },
   );
 }
