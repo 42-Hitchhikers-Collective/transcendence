@@ -5,8 +5,6 @@ import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import PendingGameCard from "./PendingGameCard/PendingGameCard";
 import CreateRoom from "./CreateRoom";
@@ -146,10 +144,6 @@ export function CreateGameCard() {
         />
       ) : (
         <Tabs defaultValue="create" className="h-full">
-          <TabsList className="mx-auto mb-4 w-fit">
-            <TabsTrigger value="create">Create room</TabsTrigger>
-            <TabsTrigger value="join">Join room</TabsTrigger>
-          </TabsList>
           <TabsContent value="create" className="h-full">
             <CreateRoom
               roomNameInput={roomNameInput}

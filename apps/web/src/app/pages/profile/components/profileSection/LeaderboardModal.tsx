@@ -65,7 +65,7 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -73,18 +73,18 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-lg max-h-[80vh] overflow-hidden rounded-3xl bg-stone-100 shadow-2xl flex flex-col">
+      <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl max-h-[80vh] overflow-hidden rounded-3xl bg-stone-100 shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="relative flex items-center justify-center border-b bg-sky-400 px-6 py-4">
-          <GlobeAmericasIcon className="size-8 text-sky-900 shrink-0 mx-2" />
-          <h2 className="text-xl font-semibold text-sky-900">
+        <div className="relative flex items-center justify-center border-b bg-sky-400 px-4 py-3 md:px-6 md:py-4">
+          <GlobeAmericasIcon className="size-5 md:size-6 lg:size-8 text-sky-900 shrink-0 mx-1 md:mx-2" />
+          <h2 className="text-base md:text-lg lg:text-xl font-semibold text-sky-900">
             Global Leaderboard
           </h2>
           <button
             onClick={onClose}
             className="absolute right-4 rounded-full p-1 text-gray-500 hover:bg-stone-300 hover:text-gray-800 transition"
           >
-            <XMarkIcon className="size-5" />
+            <XMarkIcon className="size-4 md:size-5" />
           </button>
         </div>
 
@@ -126,19 +126,19 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                   >
                     {/* Left colored panel — rank number */}
                     <div
-                      className={`flex items-center justify-center w-20 p-2 shrink-0 ${rankColors.bg}`}
+                      className={`flex items-center justify-center w-12 md:w-16 lg:w-20 p-1 md:p-2 shrink-0 ${rankColors.bg}`}
                     >
                       <span
-                        className={`text-lg font-extrabold ${rankColors.text}`}
+                        className={`text-sm md:text-base lg:text-lg font-extrabold ${rankColors.text}`}
                       >
                         {entry.rank === 0 ? "" : entry.rank}
                       </span>
                     </div>
                     {/* Right content panel */}
-                    <div className="flex-1 flex items-center gap-3 px-3 py-4">
-                      {/* Col 2: Avatar with badge overlaid on top */}
+                    <div className="flex-1 flex items-center gap-2 md:gap-3 px-2 py-3 md:px-3 md:py-4">
+                      {/* Col 2: Avatar */}
                       <div className="relative shrink-0">
-                        <Avatar className="size-12 shrink-0 ring-2 ring-white">
+                        <Avatar className="size-8 md:size-10 lg:size-12 shrink-0 ring-2 ring-white">
                           <AvatarImage
                             src={entry.avatarUrl ?? "/avatars/default.png"}
                             alt={entry.username}
@@ -147,7 +147,7 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                             <img
                               src="/avatars/default.png"
                               alt={entry.username}
-                              className="size-10 rounded-full"
+                              className="size-8 md:size-10 rounded-full"
                             />
                           </AvatarFallback>
                         </Avatar>
@@ -156,10 +156,10 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                       {/* Col 3: Username + stats */}
                       <div className="flex-1 flex flex-col justify-center min-w-0 ">
                         <div className="flex items-center ">
-                          <p className="text-lg font-semibold text-gray-900 truncate">
+                          <p className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 truncate">
                             {entry.username}
                           </p>
-                          <div className="scale-70 mb-5">
+                          <div className="scale-[0.55] md:scale-[0.6] lg:scale-[0.65] xl:scale-70 mb-5">
                           <ExperienceBadge
                             gamesPlayed={entry.wins + entry.losses}
                             winRate={
@@ -171,12 +171,12 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                           </div>
                         </div>
 
-                        <p className="flex items-center gap-1 text-[10px] text-gray-400 leading-tight">
-                          <TrophyIcon className="size-4  text-amber-300 shrink-0" />
+                        <p className="flex items-center gap-1 text-[8px] md:text-[10px] text-gray-400 leading-tight">
+                          <TrophyIcon className="size-3 md:size-4 text-amber-300 shrink-0" />
                           <span>{entry.wins} wins</span>
                         </p>
-                        <p className="flex items-center gap-1 text-[10px] text-gray-400 leading-tight">
-                          <PuzzlePieceIcon className="size-4 text-purple-300 shrink-0" />
+                        <p className="flex items-center gap-1 text-[8px] md:text-[10px] text-gray-400 leading-tight">
+                          <PuzzlePieceIcon className="size-3 md:size-4 text-purple-300 shrink-0" />
                           <span>{entry.wins + entry.losses} games</span>
                         </p>
                       </div>
@@ -188,15 +188,15 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
           )}
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 px-6 pb-6">
+            <div className="flex items-center justify-center gap-3 md:gap-4 px-4 md:px-6 pb-4 md:pb-6">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="rounded-full p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                className="rounded-full p-1 md:p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
               >
-                <ChevronLeftIcon className="size-5" />
+                <ChevronLeftIcon className="size-4 md:size-5" />
               </button>
-              <span className="text-xs font-medium text-gray-500">
+              <span className="text-[10px] md:text-xs font-medium text-gray-500">
                 {page} of  {totalPages}
               </span>
               <button
@@ -204,7 +204,7 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                 disabled={page >= totalPages}
                 className="rounded-full p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
               >
-                <ChevronRightIcon className="size-5" />
+                <ChevronRightIcon className="size-4 md:size-5" />
               </button>
             </div>
           )}

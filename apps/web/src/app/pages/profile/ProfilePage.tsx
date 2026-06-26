@@ -45,7 +45,7 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
+      className="bg-neutral-800 px-[clamp(1rem,4vw,12.5rem)] py-[clamp(2rem,4vw,5rem)] overflow-auto h-screen"
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -64,7 +64,7 @@ export default function ProfilePage() {
         </button>
       </div>
       <ProfileSection user={user} stats={stats} onLogout={logout} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+      <div className="grid grid-cols-1 gap-[clamp(1rem,1.5vw,2rem)] lg:grid-cols-[1fr_2fr]">
           {/* switches view order between children */}
         <div className="order-2 lg:order-1">
           <GamesHistorySection games={historyLoading ? [] : history} />
@@ -73,8 +73,8 @@ export default function ProfilePage() {
           <CreateGameCard />
         </div>
       </div>
-      <div className="mt-6 flex justify-end">
-        <div className="max-w-md">
+      <div className="mt-[clamp(1rem,2vw,2rem)] flex justify-end">
+        <div className="w-full max-w-[clamp(16rem,30vw,28rem)]">
           <Footer />
         </div>
       </div>

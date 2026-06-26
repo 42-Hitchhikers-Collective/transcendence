@@ -36,11 +36,11 @@ export function ProfileSection({
   return (
     <div
       {...props}
-      className="relative w-full bg-stone-100 rounded-3xl shadow-2xl p-10 md:p-6 xl:p-10 mb-8"
+      className="relative w-full bg-stone-100 rounded-3xl shadow-2xl p-[clamp(1rem,3vw,2.5rem)] mb-[clamp(1rem,2vw,2rem)]"
     >
-      <div className="relative flex flex-col md:grid md:grid-cols-[1fr_1.2fr] lg:grid-cols-[0.7fr_1.5fr] xl:grid-cols-[0.6fr_1.7fr] items-stretch gap-6 xl:gap-10">
+      <div className="relative flex flex-col sm:grid sm:grid-cols-[0.7fr_1.5fr] lg:grid-cols-[0.6fr_1.7fr] items-stretch gap-[clamp(1rem,2.5vw,2.5rem)]">
         {/* left content */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-start sm:items-center justify-center">
           <ProfileAvatar avatarUrl={user?.profile?.avatarUrl ?? undefined}  /> 
         </div>
 
@@ -49,11 +49,11 @@ export function ProfileSection({
           <div className="flex items-start">
             <div>
               <ExperienceBadge gamesPlayed={wins + losses} winRate={winRate} />
-              <h2 className="text-left text-4xl md:text-5xl font-extrabold text-gray-900 drop-shadow-md">
+              <h2 className="text-left text-[clamp(1.5rem,5vw,3.75rem)] font-extrabold text-gray-900 drop-shadow-md">
                 {username}
               </h2>
               {memberSince && (
-                <h1 className="text-left text-sm text-gray-400 italic ">
+                <h1 className="text-left text-[clamp(0.7rem,1.2vw,1rem)] text-gray-400 italic ">
                   Shuffling cards since{" "}
                   {memberSince
                     .toLocaleDateString(undefined, {

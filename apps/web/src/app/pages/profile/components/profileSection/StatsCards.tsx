@@ -51,29 +51,29 @@ export function StatsCards({
 
 function EmptyStats() {
   return (
-    <div className="w-full my-6">
-      <div className="flex items-center gap-4 rounded-2xl bg-black/90 px-6 py-5 shadow-lg ring-1 ring-white/10">
+    <div className="w-full my-3 md:my-4 lg:my-5 xl:my-6">
+      <div className="flex items-center gap-2 md:gap-3 lg:gap-4 rounded-2xl bg-black/90 px-4 py-3 md:px-5 md:py-4 lg:px-6 lg:py-5 shadow-lg ring-1 ring-white/10">
         <div className="flex items-center justify-center rounded-xl bg-white/10">
           <img
             src={skipCard}
             alt="Skip card"
-            className="h-30  shadow-slate-50/20 rounded-lg  "
+            className="h-20 md:h-24 lg:h-28 xl:h-30 shadow-slate-50/20 rounded-lg"
           />
         </div>
         <div className="text-left">
-          <h1 className="text-sm font-semibold uppercase tracking-wide text-yellow-400">
+          <h1 className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-yellow-400">
             No player stats available
           </h1>
-          <h2 className="text-sm text-white font-semibold">
+          <h2 className="text-xs md:text-sm lg:text-base text-white font-semibold">
             It seems we found a new player!
           </h2>
-          <p className="text-xs text-white font-extralight my-5">
+          <p className="text-[10px] md:text-xs lg:text-sm text-white font-extralight my-2 md:my-3 lg:my-4 xl:my-5">
             Your player stats will be available as soon as you log your first
             game.
           </p>
         </div>
       </div>
-      <p className="text-xs text-end text-slate-300 font-extralight mt-1 mr-3">
+      <p className="text-[10px] md:text-xs text-end text-slate-300 font-extralight mt-1 mr-1 md:mr-2 lg:mr-3">
         * If you are not a new user, please bear with us as we fix this
         technical problem!
       </p>
@@ -130,35 +130,35 @@ function Stats({
   ];
 
   return (
-    <div className="w-full my-5">
-      <div className={`grid md:grid-cols-1 xl:grid-cols-3 gap-6  md:gap-3`}>
+    <div className="w-full my-[clamp(0.75rem,1.2vw,1.5rem)]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[clamp(0.75rem,1.2vw,1.5rem)]">
         {cardStats.map(({ label, value, color, bgColor, icon: Icon }, idx) => (
           <div
             key={idx}
-            className={`flex rounded-xl shadow-md border overflow-hidden min-h-17.5 bg-white  md:min-h-15`}
+            className={`flex rounded-xl shadow-md border overflow-hidden min-h-[clamp(3rem,4vw,4.5rem)] bg-white`}
           >
             <div
-              className={`flex items-center justify-center w-16 p-2 md:w-14 md:p-1 xl:w-20 xl:p-4 ${bgColor}`}
+              className={`flex items-center justify-center w-[clamp(3.5rem,5vw,5rem)] p-[clamp(0.25rem,0.5vw,1rem)] ${bgColor}`}
             >
               <Icon
-                className={`w-6 h-6 md:w-5 md:h-5 xl:w-8 xl:h-8 ${color}`}
+                className={`w-[clamp(1.25rem,1.8vw,2rem)] h-[clamp(1.25rem,1.8vw,2rem)] ${color}`}
               />
             </div>
-            <div className="flex-1 flex flex-col justify-center px-2 py-1 md:px-1 md:py-1 xl:px-4 xl:py-2">
+            <div className="flex-1 flex flex-col justify-center px-[clamp(0.5rem,0.8vw,1rem)] py-[clamp(0.25rem,0.4vw,0.5rem)]">
               <p
-                className={`text-xs font-semibold mb-1 md:text-[10px] xl:text-xs ${color}`}
+                className={`text-[clamp(0.5rem,0.9vw,0.9rem)] font-semibold mb-[clamp(0.1rem,0.2vw,0.25rem)] ${color}`}
               >
                 {label}
               </p>
               <p
-                className={`text-lg md:text-base xl:text-2xl font-extrabold ${color}`}
+                className={`text-[clamp(0.9rem,1.6vw,1.5rem)] font-extrabold ${color}`}
               >
                 {value}
               </p>
               {label === "Global rank" && (
                 <button
                   onClick={onOpenLeaderboard}
-                  className="text-[10px] md:text-[8px] xl:text-[10px] font-medium text-sky-600 hover:text-sky-300 underline mt-0.5 cursor-pointer"
+                  className="text-[clamp(0.5rem,0.8vw,0.9rem)] font-medium text-sky-600 hover:text-sky-300 underline mt-0.5 cursor-pointer"
                 >
                   See leaderboard
                 </button>

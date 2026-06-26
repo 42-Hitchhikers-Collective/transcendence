@@ -234,21 +234,21 @@ export const ProfileAvatar = ({
                avatar or overlay does nothing; only the explicit "Change"
                button inside the overlay opens the file picker) ── */}
           <div
-            className="group relative size-24 cursor-default md:size-32"
+            className="group relative size-[clamp(5rem,20vw,10rem)] sm:size-[clamp(10rem,18vw,18rem)] lg:size-[clamp(14rem,16vw,22rem)] cursor-default"
           >
             {/* ── Hover overlay: darkens the whole avatar and shows two
                   actions. "Change" (top) opens the file picker via
                   FileUploadTrigger. "Remove" (bottom) deletes the avatar
                   — only shown when avatar is not the default. ── */}
             {!isBusy && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-between bg-black/50 py-5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-between bg-black/50 py-[clamp(0.75rem,1.5vw,1.25rem)] opacity-0 group-hover:opacity-100 transition-opacity">
                 <FileUploadTrigger asChild>
                   <button
                     type="button"
                     disabled={isBusy}
-                    className="inline-flex items-center gap-1.5 text-white text-sm hover:text-gray-200 cursor-pointer transition-colors"
+                    className="inline-flex items-center gap-[clamp(0.25rem,0.4vw,0.4rem)] text-white text-[clamp(0.7rem,1.4vw,1rem)] hover:text-gray-200 cursor-pointer transition-colors"
                   >
-                    <Camera className="size-5" />
+                    <Camera className="size-[clamp(0.9rem,1.2vw,1.25rem)]" />
                     Change
                   </button>
                 </FileUploadTrigger>
@@ -256,10 +256,10 @@ export const ProfileAvatar = ({
                   <button
                     type="button"
                     onClick={handleDeleteAvatar}
-                    className="inline-flex items-center gap-1.5 text-red-300 hover:text-red-100 text-sm cursor-pointer transition-colors"
+                    className="inline-flex items-center gap-[clamp(0.25rem,0.4vw,0.4rem)] text-red-300 hover:text-red-100 text-[clamp(0.7rem,1.4vw,1rem)] cursor-pointer transition-colors"
                     aria-label="Reset to default avatar"
                   >
-                    <Trash2 className="size-5" />
+                    <Trash2 className="size-[clamp(0.9rem,1.2vw,1.25rem)]" />
                     Remove
                   </button>
                 )}
@@ -268,11 +268,11 @@ export const ProfileAvatar = ({
             {/* ── Spinner overlay: shown during upload OR delete ── */}
             {isBusy && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 bg-black/50 text-white">
-                <svg className="animate-spin size-6" viewBox="0 0 24 24">
+                <svg className="animate-spin size-[clamp(1.25rem,1.6vw,1.5rem)]" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                <p className="text-xs">{isDeleting ? "Removing..." : "Uploading..."}</p>
+                <p className="text-[clamp(0.6rem,0.8vw,0.75rem)]">{isDeleting ? "Removing..." : "Uploading..."}</p>
               </div>
             )}
             <Avatar className="size-full rounded-none ring-2 ring-gray-300 ring-offset-2 ring-offset-white">

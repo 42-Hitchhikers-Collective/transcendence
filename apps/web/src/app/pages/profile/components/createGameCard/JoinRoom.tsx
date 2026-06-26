@@ -1,4 +1,8 @@
 import cardBack from "@/assets/icons/uno_card_back.png";
+import {
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 
 type JoinRoomProps = {
   roomNameInput: string;
@@ -16,12 +20,28 @@ export default function JoinRoom({
   onJoinRoom,
 }: JoinRoomProps) {
   return (
-    <div className="relative h-full overflow-hidden rounded-2xl border bg-linear-to-br from-rose-50 via-white to-amber-50 p-12">
+    <div className="relative h-full overflow-hidden rounded-2xl border bg-linear-to-br from-rose-50 via-white to-amber-50 p-[clamp(1rem,3vw,3rem)]">
       <style>{cardAnimation}</style>
-      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-2xl" />
-      <div className="absolute -bottom-16 -left-10 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
+      <div className="absolute -right-6 -top-6 md:-right-8 md:-top-8 lg:-right-10 lg:-top-10 h-24 w-24 md:h-32 md:w-32 lg:h-40 lg:w-40 rounded-full bg-rose-200/40 blur-2xl" />
+      <div className="absolute -bottom-8 -left-6 md:-bottom-12 md:-left-8 lg:-bottom-16 lg:-left-10 h-28 w-28 md:h-36 md:w-36 lg:h-48 lg:w-48 rounded-full bg-amber-200/40 blur-2xl" />
 
-      <div className="relative flex h-full flex-col items-center justify-center gap-8 p-24">
+      {/* ── Tab switcher inside card ── */}
+      <TabsList className="mx-auto mb-[clamp(0.75rem,1.2vw,1.5rem)] min-[450px]:mb-[clamp(1rem,2vw,2rem)] lg:mb-[clamp(0.75rem,1.2vw,1.5rem)] w-fit h-auto rounded-xl bg-slate-100 p-1 shadow-inner">
+        <TabsTrigger
+          value="create"
+          className="h-auto px-[clamp(0.85rem,1.5vw,1.5rem)] min-[450px]:px-[clamp(1.75rem,2.5vw,2.5rem)] lg:px-[clamp(0.85rem,1.5vw,1.5rem)] py-[clamp(0.5rem,0.8vw,0.75rem)] min-[450px]:py-[clamp(0.75rem,1.2vw,1.25rem)] lg:py-[clamp(0.5rem,0.8vw,0.75rem)] text-[clamp(0.8rem,1vw,1rem)] min-[450px]:text-[clamp(1.05rem,1.4vw,1.4rem)] lg:text-[clamp(0.8rem,1vw,1rem)] rounded-lg font-semibold data-[state=active]:bg-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:scale-105 transition-all duration-200"
+        >
+          Create room
+        </TabsTrigger>
+        <TabsTrigger
+          value="join"
+          className="h-auto px-[clamp(0.85rem,1.5vw,1.5rem)] min-[450px]:px-[clamp(1.75rem,2.5vw,2.5rem)] lg:px-[clamp(0.85rem,1.5vw,1.5rem)] py-[clamp(0.5rem,0.8vw,0.75rem)] min-[450px]:py-[clamp(0.75rem,1.2vw,1.25rem)] lg:py-[clamp(0.5rem,0.8vw,0.75rem)] text-[clamp(0.8rem,1vw,1rem)] min-[450px]:text-[clamp(1.05rem,1.4vw,1.4rem)] lg:text-[clamp(0.8rem,1vw,1rem)] rounded-lg font-semibold data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md hover:scale-105 transition-all duration-200"
+        >
+          Join room
+        </TabsTrigger>
+      </TabsList>
+
+      <div className="relative flex h-full flex-col items-center justify-center gap-[clamp(1rem,1.8vw,2rem)] p-[clamp(1rem,6vw,6rem)]">
         <div
           className={`fan-wrapper${isJoining ? " is-active" : ""}`}
           style={{ "--card-back": `url(${cardBack})` } as React.CSSProperties}
@@ -32,35 +52,35 @@ export default function JoinRoom({
           ))}
         </div>
 
-        <div className="space-y-3 text-center">
-          <h3 className="text-5xl font-extrabold tracking-tight text-slate-900">
+        <div className="space-y-[clamp(0.5rem,0.8vw,0.75rem)] text-center">
+          <h3 className="text-[clamp(1.5rem,5vw,3rem)] font-extrabold tracking-tight text-slate-900">
             Join a room
           </h3>
-          <p className="max-w-xl text-lg text-slate-600">
+          <p className="max-w-xl text-[clamp(0.85rem,1.2vw,1.125rem)] text-slate-600">
             Enter a room code to join your friends.
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-[clamp(0.5rem,0.8vw,0.75rem)]">
           <input
             type="text"
             value={roomNameInput}
             onChange={(e) => onRoomNameChange(e.target.value)}
             placeholder="Room name"
             disabled={isJoining}
-            className="h-12 w-72 rounded-lg border border-slate-300 px-4 text-lg"
+            className="h-[clamp(2.5rem,2.8vw,3rem)] w-full max-w-[clamp(12rem,18vw,18rem)] rounded-lg border border-slate-300 px-[clamp(0.75rem,1vw,1rem)] text-[clamp(0.85rem,1.1vw,1.125rem)]"
           />
 
           <button
             type="button"
             onClick={onJoinRoom}
             disabled={isJoining || !roomNameInput.trim()}
-            className="h-14 rounded-lg bg-emerald-500 px-8 text-lg font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-[clamp(2.5rem,3.2vw,3.5rem)] px-[clamp(1.5rem,2vw,2rem)] text-[clamp(0.85rem,1.2vw,1.125rem)] rounded-lg bg-emerald-500 font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isJoining ? "Joining..." : "Join room"}
           </button>
 
-          {error && <p className="text-sm text-rose-600">{error}</p>}
+          {error && <p className="text-[clamp(0.7rem,0.85vw,0.875rem)] text-rose-600">{error}</p>}
         </div>
       </div>
     </div>
@@ -72,6 +92,18 @@ const cardAnimation = `
   position: relative;
   width: 320px;
   height: 240px;
+  transform-origin: center center;
+}
+
+/* Scale down the card fan on smaller screens so it doesn't overflow */
+@media (max-width: 480px) {
+  .fan-wrapper { transform: scale(0.55); }
+}
+@media (min-width: 481px) and (max-width: 640px) {
+  .fan-wrapper { transform: scale(0.7); }
+}
+@media (min-width: 641px) and (max-width: 768px) {
+  .fan-wrapper { transform: scale(0.85); }
 }
 
 .fan-card {
