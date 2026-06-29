@@ -1,41 +1,61 @@
 import type { PlayerListItem } from "../hooks/useGamePage";
+import { useRef, useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 
 type PlayerListProps = {
   playerList: PlayerListItem[];
   clientUsername?: string;
 };
 
-function PlayerStatus({ dropped }: { dropped: boolean }) {
-  if (dropped) {
-    return (
-      <div className="">
-        <span className="flex items-center justify-center gap-1 text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-slate-500 truncate">
-          Dropped
-          {/* <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" /> */}
-        </span>
-      </div>
-    );
-  }
-}
-
-function TurnStatus({
-  turnPlayer,
+function PlayerStatus({
+  dropped,
+  isPlayerTurn,
 }: {
-  turnPlayer: PlayerListItem | undefined;
+  dropped: boolean;
+  isPlayerTurn: boolean;
 }) {
-  if (!turnPlayer) return null;
-
   return (
-    <div className="mt-[clamp(0.4rem,0.8vw,0.6rem)]">
-      <p className="lg:mt-[clamp(0.25rem,0.5vw,0.5rem)] text-[clamp(0.8rem,3vw,1rem)] lg:text-[clamp(1rem,2.5vw,1.5rem)] 2xl:text-[clamp(1.5rem,1.5vw,2.2rem)] font-normal wrap-break-word overflow-hidden">
-        <span className="animate-bounce text-emerald-500">
-          {turnPlayer.userName}
-        </span>{" "}
-        is playing
-      </p>
+    <div className="flex flex-col items-center justify-center gap-0.5 min-h-[clamp(1.1rem,2.8vw,1.4rem)] lg:min-h-[clamp(1.2rem,2vw,1.5rem)] 2xl:min-h-[clamp(1.6rem,1.5vw,2rem)]">
+      {dropped && (
+        <>
+          <span className="flex items-center justify-center gap-[clamp(0.15rem,0.3vw,0.25rem)] text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-slate-500">
+            <Clock className="size-[clamp(0.5rem,1vw,0.6rem)] lg:size-[clamp(0.55rem,0.7vw,0.7rem)] 2xl:size-[clamp(0.75rem,0.6vw,0.9rem)]" />
+            Dropped
+          </span>
+        </>
+      )}
+      {!dropped && isPlayerTurn && (
+        <span className="text-[clamp(0.4rem,1vw,0.5rem)] lg:text-[clamp(0.45rem,0.7vw,0.55rem)] 2xl:text-[clamp(0.6rem,0.6vw,0.8rem)] font-medium text-emerald-600 animate-pulse">
+          Is playing
+        </span>
+      )}
+      {dropped && isPlayerTurn && (
+        <span className="text-[clamp(0.4rem,1vw,0.5rem)] lg:text-[clamp(0.45rem,0.7vw,0.55rem)] 2xl:text-[clamp(0.6rem,0.6vw,0.8rem)] font-medium text-emerald-600 animate-pulse">
+          Dropped while playing
+        </span>
+      )}
     </div>
   );
 }
+
+// function TurnStatus({
+//   turnPlayer,
+// }: {
+//   turnPlayer: PlayerListItem | undefined;
+// }) {
+//   if (!turnPlayer) return null;
+
+//   return (
+//     <div className="mt-[clamp(0.4rem,0.8vw,0.6rem)]">
+//       <p className="lg:mt-[clamp(0.25rem,0.5vw,0.5rem)] text-[clamp(0.8rem,3vw,1rem)] lg:text-[clamp(1rem,2.5vw,1.5rem)] 2xl:text-[clamp(1.5rem,1.5vw,2.2rem)] font-normal wrap-break-word overflow-hidden">
+//         <span className="animate-bounce text-emerald-500">
+//           {turnPlayer.userName}
+//         </span>{" "}
+//         is playing
+//       </p>
+//     </div>
+//   );
+// }
 
 function PlayerItem({
   player,
@@ -44,9 +64,11 @@ function PlayerItem({
   player: PlayerListItem;
   clientUsername?: string;
 }) {
+  const cacheBuster = useRef(Date.now()); // cache buster to force reload the avatar image when the src changes
   const isYou = player.userName === clientUsername;
 
   return (
+    /* player item */
     <div
       className={`flex w-[clamp(3.5rem,10vw,4.5rem)] lg:w-[clamp(4.5rem,7vw,5.5rem)] 2xl:w-[clamp(5.5rem,5vw,7rem)] min-w-0 flex-col items-center justify-center gap-[clamp(0.15rem,0.4vw,0.3rem)] rounded-xl border-2 p-[clamp(0.3rem,0.7vw,0.5rem)] shadow-md ${
         player.dropped
@@ -56,9 +78,21 @@ function PlayerItem({
             : ""
       }`}
     >
+      {/* username */}
+      <p
+        className={`text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight truncate w-full ${
+          player.dropped
+            ? "text-slate-300"
+            : player.isPlayerTurn
+              ? " text-emerald-800" // ← turn name color
+              : "text-slate-600"
+        }`}
+      >
+        {isYou ? `You` : player.userName}
+      </p>
       {/* avatar */}
       <img
-        src={player.avatarUrl}
+        src={`${player.avatarUrl}?t=${cacheBuster.current}`} // add cache buster to force reload the image when the src changes
         alt={player.userName}
         className={`h-[clamp(1.3rem,5vw,2rem)] lg:h-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:h-[clamp(2.5rem,3vw,3.5rem)] w-[clamp(1.3rem,5vw,2rem)] lg:w-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:w-[clamp(2.5rem,3vw,3.5rem)] max-w-full shrink-0 rounded-full object-cover ${
           player.dropped ? "grayscale opacity-50" : ""
@@ -89,20 +123,36 @@ function PlayerItem({
           // img.src = "/avatars/default.png";
         }}
       />
+      <PlayerStatus
+        dropped={player.dropped}
+        isPlayerTurn={player.isPlayerTurn}
+      />
+    </div>
+  );
+}
 
-      {/* username */}
-      <p
-        className={`text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight wrap-break-word w-full overflow-hidden ${
-          player.dropped
-            ? "text-slate-300"
-            : player.isPlayerTurn
-              ? " text-emerald-800" // ← turn name color
-              : "text-slate-600"
-        }`}
-      >
-        {isYou ? `You` : player.userName}
+// Leaving player with red fade-out animation
+function LeavingPlayerItem({ player }: { player: PlayerListItem }) {
+  const cacheBuster = useRef(Date.now());
+
+  return (
+    <div className="flex w-[clamp(3.5rem,10vw,4.5rem)] lg:w-[clamp(4.5rem,7vw,5.5rem)] 2xl:w-[clamp(5.5rem,5vw,7rem)] min-w-0 flex-col items-center justify-center gap-[clamp(0.15rem,0.4vw,0.3rem)] rounded-xl border-2 border-red-300 bg-red-100 p-[clamp(0.3rem,0.7vw,0.5rem)] shadow-md animate-[fadeOut_1.5s_ease-out_forwards]">
+      <img
+        src={`${player.avatarUrl}?t=${cacheBuster.current}`}
+        alt={player.userName}
+        className="h-[clamp(1.3rem,5vw,2rem)] lg:h-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:h-[clamp(2.5rem,3vw,3.5rem)] w-[clamp(1.3rem,5vw,2rem)] lg:w-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:w-[clamp(2.5rem,3vw,3.5rem)] max-w-full shrink-0 rounded-full object-cover grayscale opacity-50"
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "/avatars/default.png";
+        }}
+      />
+      <p className="text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight truncate w-full text-red-400">
+        {player.userName}
       </p>
-      <PlayerStatus dropped={player.dropped} />
+      <div className="flex flex-col items-center justify-center gap-0.5 min-h-[clamp(1.1rem,2.8vw,1.4rem)] lg:min-h-[clamp(1.2rem,2vw,1.5rem)] 2xl:min-h-[clamp(1.6rem,1.5vw,2rem)]">
+        <span className="text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-red-400">
+          Left
+        </span>
+      </div>
     </div>
   );
 }
@@ -112,8 +162,37 @@ export default function PlayerList({
   playerList,
   clientUsername,
 }: PlayerListProps) {
-  const turnPlayer = playerList.find((p) => p.isPlayerTurn);
-  const droppedPlayers = playerList.filter((p) => p.dropped);
+  const prevPlayersRef = useRef<PlayerListItem[]>([]); // Store previous player list to detect leaving players
+  const [leavingPlayers, setLeavingPlayers] = useState<PlayerListItem[]>([]);// Store players who are leaving to animate them out
+
+  // Detects players who disappeared and animate them out
+  useEffect(() => {
+    const currentNames = new Set(playerList.map((p) => p.userName)); // creates a set that stores the player names before changes are applied
+
+    const newlyLeft = prevPlayersRef.current.filter(
+      // filters players0.
+      (p) =>
+        !currentNames.has(p.userName) &&
+        !leavingPlayers.some((lp) => lp.userName === p.userName),
+    );
+
+    if (newlyLeft.length > 0) {
+      setLeavingPlayers((prev) => [...prev, ...newlyLeft]);
+      // Remove from leaving list after animation ends
+      setTimeout(() => {
+        setLeavingPlayers((prev) =>
+          prev.filter(
+            (lp) => !newlyLeft.some((nl) => nl.userName === lp.userName),
+          ),
+        );
+      }, 1600);
+    }
+
+    prevPlayersRef.current = playerList;
+  }, [playerList]);
+
+  // Combine current + leaving players for rendering
+  const allPlayers = [...playerList, ...leavingPlayers];
 
   if (playerList.length > 0) {
     // Debugging logs to track changes
@@ -133,49 +212,39 @@ export default function PlayerList({
           {playerList.length}
         </span>
       </h2>
-      {playerList.length === 0 && (
+      {allPlayers.length === 0 && (
         <p className="text-[clamp(0.6rem,2vw,0.7rem)] lg:text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.2rem,1vw,1.5rem)] text-slate-400">
           Waiting for someone to join...
         </p>
       )}
       <div
-        className={`${playerList.length === 4 ? "lg:grid lg:grid-cols-2 [&>*:nth-child(odd)]:justify-self-end [&>*:nth-child(even)]:justify-self-start" : ""} flex flex-nowrap gap-[clamp(0.25rem,1.5vw,0.5rem)] lg:gap-[clamp(0.5rem,1vw,0.75rem)] justify-center items-center my-[clamp(0.75rem,1.5vw,1.25rem)]`}
+        className={`${allPlayers.length === 4 ? "lg:grid lg:grid-cols-2 [&>*:nth-child(odd)]:justify-self-end [&>*:nth-child(even)]:justify-self-start" : ""} flex flex-nowrap gap-[clamp(0.25rem,1.5vw,0.5rem)] lg:gap-[clamp(0.5rem,1vw,0.75rem)] justify-center items-center my-[clamp(0.75rem,1.5vw,1.25rem)]`}
       >
         {/* Sorts list before rendering, so that clientUser is set first */}
-        {[...playerList]
+        {[...allPlayers]
           .sort((a, b) => {
             if (a.userName === clientUsername) return -1;
             if (b.userName === clientUsername) return 1;
             return 0;
           })
-          .map((player, index) => (
-            <PlayerItem
-              key={index}
-              player={player}
-              clientUsername={clientUsername}
-            />
-          ))}
+          .map((player) => {
+            const isLeaving = leavingPlayers.some(
+              (lp) => lp.userName === player.userName,
+            );
+            return isLeaving ? (
+              <LeavingPlayerItem
+                key={`leaving-${player.userName}`}
+                player={player}
+              />
+            ) : (
+              <PlayerItem
+                key={player.userName}
+                player={player}
+                clientUsername={clientUsername}
+              />
+            );
+          })}
       </div>
-      <TurnStatus turnPlayer={turnPlayer} />
-      {droppedPlayers.length > 0 && (
-        <div className="mt-[clamp(0.4rem,1.5vw,0.75rem)] lg:mt-[clamp(0.75rem,1.5vw,1rem)] space-y-[clamp(0.5rem,2vw,1rem)] lg:space-y-[clamp(1rem,2vw,1.5rem)]">
-          {droppedPlayers.map((p) => (
-            <div key={p.userName}>
-              <p className="text-[clamp(0.75rem,3vw,1rem)] lg:text-[clamp(1rem,2.5vw,1.5rem)] 2xl:text-[clamp(1.5rem,1.5vw,2.2rem)] font-medium wrap-break-word overflow-hidden">
-                <span className="animate-bounce text-slate-200">
-                  {p.userName}
-                </span>{" "}
-                dropped from the game!
-              </p>
-              <p className="mt-[clamp(0.4rem,1.5vw,0.75rem)] lg:mt-[clamp(0.75rem,1.5vw,1rem)] text-[clamp(0.5rem,1.5vw,0.65rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1.1rem,1vw,1.4rem)] text-red-500 wrap-break-word overflow-hidden">
-                Player will be kicked out and removed from the game if not
-                returning within{" "}
-                <span className="font-semibold text-red-600">30 seconds.</span>
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
