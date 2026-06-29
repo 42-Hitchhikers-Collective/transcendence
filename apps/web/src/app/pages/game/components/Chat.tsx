@@ -5,11 +5,13 @@ import type { PlayerListItem } from "../hooks/useGamePage";
 type ChatMessage = {
   senderId: string;
   msg: string;
-  time: string;
+  time?: string;
+  avatarUrl?: string;
 };
 
 // Avatar: loads real user avatar, falls back to initials
 function MessageAvatar({ name, src }: { name: string; src?: string }) {
+  const cacheBuster = useRef(Date.now()); //used to force reload the image when the src changes
   const initial = name.charAt(0).toUpperCase();
   const colors = [
     "bg-rose-400", "bg-emerald-400", "bg-amber-400", "bg-sky-400",
@@ -23,7 +25,7 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
     >
       {src ? (
         <img
-          src={src}
+          src={src ? `${src}?t=${cacheBuster.current}` : undefined} // add cache buster to force reload the image when the src changes
           alt={name}
           className="h-full w-full object-cover"
           onError={(e) => {
@@ -47,12 +49,13 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleChatMessage = (data: { msg: string; senderId?: string }) => {
+    const handleChatMessage = (data: { msg: string; senderId?: string; avatarUrl?: string }) => {
       setMessages((prev) => [
         ...prev,
         {
           senderId: data.senderId || "",
           msg: data.msg,
+          avatarUrl: data.avatarUrl,
         },
       ]);
     };
@@ -66,10 +69,11 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
 
   // Request chat history on mount
   useEffect(() => {
-    const handleHistory = (history: { username: string; msg: string }[]) => {
+    const handleHistory = (history: { username: string; msg: string; avatarUrl?: string }[]) => {
       setMessages(history.map((h) => ({
         senderId: h.username,
         msg: h.msg,
+        avatarUrl: h.avatarUrl,
       })));
     };
     socket.on("chat_history_response", handleHistory);
@@ -133,7 +137,7 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
               <div className="flex gap-[clamp(0.5rem,0.8vw,0.75rem)] 2xl:gap-[clamp(0.75rem,1vw,1.25rem)] bg-green-100 pl-[clamp(0.75rem,1.5vw,1rem)] 2xl:pl-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.75rem,1vw,1rem)] 2xl:py-[clamp(1rem,1.5vw,1.5rem)] m-[clamp(0.75rem,2vw,1.5rem)] rounded-2xl " key={i}>
                 <MessageAvatar
                   name={msg.senderId}
-                  src={playerList.find(p => p.userName === msg.senderId)?.avatarUrl}
+                  src={msg.avatarUrl}
                 />
                 <div className="flex-1 min-w-0 ">
                   <div className="flex items-baseline gap-2">

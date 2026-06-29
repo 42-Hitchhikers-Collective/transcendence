@@ -241,7 +241,7 @@ export const ProfileAvatar = ({
                   FileUploadTrigger. "Remove" (bottom) deletes the avatar
                   — only shown when avatar is not the default. ── */}
             {!isBusy && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-between bg-black/50 py-[clamp(0.75rem,1.5vw,1.25rem)] opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-[clamp(0.5rem,1vw,0.75rem)] bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                 <FileUploadTrigger asChild>
                   <button
                     type="button"
