@@ -154,24 +154,33 @@ export class RenderManager {
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    let color = "#ffffff"; // JESS: white has to be the default color for the names
-    if (current_turn === player.id) color = "#22c55e"; // JESS: green is the color for the player that has to play (like on the website graphics)
+    let color = "#ffffff";
+    if (current_turn === player.id) color = "#22c55e";
 
     const nameX =
-      pos.p === "v" ? (pos.x < 500 ? pos.x + 80 : pos.x - 80) : pos.x; // JESS: added for vertical players, the name is displayed on the right for the left player and on the left for the right player
-    const nameY = pos.p === "v" ? pos.y : pos.y < 200 ? pos.y + 80 : pos.y - 80; // JESS: added for horizontal players, the name is displayed below for the top player and above for the bottom player
+      pos.p === "v" ? (pos.x < 500 ? pos.x + 80 : pos.x - 80) : pos.x;
+
+    const nameY = pos.p === "v" ? pos.y : pos.y < 200 ? pos.y + 80 : pos.y - 80;
+
     const title = this.scene.add.text(nameX, nameY, player.userName, {
-      // JESS: considers different name position for each player
       fontSize: "24px",
       color: color,
     });
-    title.setOrigin(0.5); // JESS: centers the name text on its position
-    title.setDepth(1000); // JESS: ensures that the name is always displayed above the cards
-    if (pos.p === "v") title.setAngle(pos.x < 500 ? 90 : -90); // JESS: rotates names of L and R player toward center
+
+    title.setOrigin(0.5);
+    title.setDepth(1000);
+
+    if (pos.p === "v") title.setAngle(pos.x < 500 ? 90 : -90);
+
+    // Reduce spacing when there are more than 20 cards
+    const cardCount = player.cards?.length ?? player.cardCount;
+
+    const spacing = cardCount > 20 ? Math.max(15, 40 - (cardCount - 5)) : 40;
 
     const isMe = player.id === this.myPlayerId;
+
     if (isMe && player.cards) {
-      let offsetX = -(player.cards.length * 20);
+      let offsetX = -((player.cards.length - 1) * spacing) / 2;
 
       player.cards.forEach((card, cardIndex) => {
         const sprite = this.scene.add.image(
@@ -184,29 +193,42 @@ export class RenderManager {
         sprite.setData("cardIndex", cardIndex);
         sprite.setInteractive();
         sprite.setDepth(9998);
+
         this.scene.input.setDraggable(sprite);
 
         container.add(sprite);
-        offsetX += 40;
+
+        offsetX += spacing;
       });
     } else {
       let offsetX = 0;
       let offsetY = 0;
-      if (pos.p === "h") offsetX = -(player.cardCount * 20); // JESS: for horizontal players, cards are centered on the position, so we need to offset them to the left by half of the total width of the cards
-      if (pos.p === "v") offsetY = -(player.cardCount * 20); // JESS: for vertical players, cards are centered on the position, so we need to offset them to the top by half of the total height of the cards
+
+      if (pos.p === "h") {
+        offsetX = -((player.cardCount - 1) * spacing) / 2;
+      }
+
+      if (pos.p === "v") {
+        offsetY = -((player.cardCount - 1) * spacing) / 2;
+      }
+
       for (let i = 0; i < player.cardCount; i++) {
         const sprite = this.scene.add.image(
           pos.x + offsetX,
           pos.y + offsetY,
-          `back`,
+          "back",
         );
-        sprite.setScale(CARDS.SCALE); // JESS: we use the same scale for the back of the cards to keep the same size as the front cards
+
+        sprite.setScale(CARDS.SCALE);
+
         container.add(sprite);
-        if (pos.p === "h") offsetX += 40; // JESS: for horizontal players, cards are displayed from left to right, so we increase the x offset
-        if (pos.p === "v") offsetY += 40; // JESS: for vertical players, cards are displayed from top to bottom, so we increase the y offset
+
+        if (pos.p === "h") offsetX += spacing;
+        if (pos.p === "v") offsetY += spacing;
       }
     }
-    container.add(title); // JESS: we add the name title to the player container to ensure it moves with the cards if needed
+
+    container.add(title);
   }
 
   private clearPlayers() {
