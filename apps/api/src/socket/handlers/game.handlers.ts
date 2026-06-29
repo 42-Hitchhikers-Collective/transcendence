@@ -77,6 +77,7 @@ export function registerGameHandlers(
     if (!res.success) socket.emit("error", { message: res.error });
 
     broadcastGameCanvas(res.roomId);
+    broadcastGamePage(res.roomId); // JESS: I need this to update the gamepage on who is playing 
   });
 
   // Pass the turn to the next player by pressing a button

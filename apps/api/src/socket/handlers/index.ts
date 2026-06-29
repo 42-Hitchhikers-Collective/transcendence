@@ -102,7 +102,10 @@ export function registerSocketHandlers(
       return;
     }
     console.log("[send_msg] Broadcasting message to room:", res.roomId);
-    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName });
+    // JESS: I added avatarUrl to the chat message so the frontend can display it
+    const onlinePlayer = gameManager.getOnlinePlayer(playerId);
+    const avatarUrl = onlinePlayer?.avatarUrl ?? "/avatars/default.png";
+    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName, avatarUrl }); // JESS: added avatarUrl to chat message so the frontend can display it
   });
 
 

@@ -13,7 +13,7 @@
 export const MAX_PLAYERS_PER_ROOM = 4;
 export const MIN_PLAYERS_TO_START = 2;
 export const MAX_ROOM_NAME_LENGTH = 20;
-export const MAX_MSG_LENGTH = 200;
+export const MAX_MSG_LENGTH = 200; // prevents DOS attacks and keeps chat readable
 export const MAX_MSG_HISTORY = 50;
 export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
 export const DROP_TIMER_DURATION = 30_000; // 30 seconds
@@ -36,7 +36,7 @@ export type Room = {
   name: string;
   players: Player[];
   state: GameState;
-  chatHistory: Array<{ username: string; msg: string }>;
+  chatHistory: Array<{ username: string; msg: string; avatarUrl?: string }>; // JESS: added avatarUrl to chat history so the frontend can display it
   gameDbId?: string; // id of the game in the database
   game?: Game;
 };
