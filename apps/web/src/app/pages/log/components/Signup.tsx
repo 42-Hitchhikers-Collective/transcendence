@@ -23,25 +23,23 @@ export function Signup({
   };
 
   return (
-    <div className="w-lg mx-auto">
-      <Card>
-        <Header
-          cardTitle={"Sign up"}
-          cardDescription="Already have an account?"
-          togglePageName="Login"
-          toggleTarget="login"
-          onRequestMode={onRequestMode}
+    <Card className="h-full rounded-2xl border-2 border-gray-900 shadow-2xl shadow-slate-900 bg-black text-white justify-center">
+      <Header
+        cardTitle={"Sign up"}
+        cardDescription="Already have an account?"
+        togglePageName="Login"
+        toggleTarget="login"
+        onRequestMode={onRequestMode}
+      />
+      <CardContent className="flex flex-col gap-[clamp(0.5rem,2vw,1rem)] px-[clamp(1rem,5vw,5rem)]">
+        <Form
+          formFields={formFields}
+          onSubmit={handleSubmit}
+          submitLabel="Sign up"
+          isLoading={false}
+          error={error}
         />
-        <CardContent className="flex flex-col gap-4">
-          <Form
-            formFields={formFields}
-            onSubmit={handleSubmit}
-            submitLabel="Sign up"
-            isLoading={false}
-            error={error}
-          />
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

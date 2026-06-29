@@ -23,18 +23,18 @@ export function GamesHistorySection({
     </div>
   );
 
-  const foundHistory = () => (
-    <div>
-      <p className="text-[10px] md:text-xs font-semibold uppercase tracking-widest text-amber-300 drop-shadow-[0_1px_2px_rgba(252,211,77,0.4)] mb-2 md:mb-3">
-        Your recent Matches
-      </p>
-      {gamesPlayed.map((game) => (
-        <HistoryCard key={game.id} game={game} />
-      ))}
-    </div>
-  );
-
   return (
-    <div>{gamesPlayed.length === 0 ? emptyHistory() : foundHistory()}</div>
+    <div>
+      <div className="inline-flex bg-amber-500 rounded-2xl backdrop-blur-sm p-1 shadow-xl shadow-slate-900/20 mb-4">
+        <span className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white">
+          Your recent Matches
+        </span>
+      </div>
+      {gamesPlayed.length === 0
+        ? emptyHistory()
+        : gamesPlayed.map((game) => (
+            <HistoryCard key={game.id} game={game} />
+          ))}
+    </div>
   );
 }

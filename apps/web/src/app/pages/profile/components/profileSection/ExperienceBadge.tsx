@@ -76,9 +76,9 @@ export function ExperienceBadge({
 
   return (
     <div
-      className={`inline-flex gap-[clamp(0.2rem,0.3vw,0.25rem)] rounded-full px-[clamp(0.5rem,1vw,1rem)] py-[clamp(0.1rem,0.3vw,0.4rem)] text-[clamp(0.5rem,0.9vw,0.9rem)] font-semibold uppercase ${match.bgColor} ${match.textColor}`}
+      className={`inline-flex items-center gap-[clamp(0.1rem,0.3vw,0.25rem)] rounded-full px-[clamp(0.25rem,1vw,1rem)] py-[clamp(0.05rem,0.3vw,0.4rem)] text-[clamp(0.4rem,0.9vw,0.9rem)] font-semibold uppercase ${match.bgColor} ${match.textColor}`}
     >
-      <match.icon className="h-[clamp(0.7rem,1vw,1.25rem)] w-[clamp(0.7rem,1vw,1.25rem)]" />
+      <match.icon className="size-[clamp(0.5rem,1vw,1.25rem)]" />
       <p>{match.level}</p>
     </div>
   );

@@ -66,10 +66,10 @@ export default function ProfilePage() {
       <ProfileSection user={user} stats={stats} onLogout={logout} />
       <div className="grid grid-cols-1 gap-[clamp(1rem,1.5vw,2rem)] lg:grid-cols-[1fr_2fr]">
           {/* switches view order between children */}
-        <div className="order-2 lg:order-1">
+        <div className="order-2 lg:order-1 h-full">
           <GamesHistorySection games={historyLoading ? [] : history} />
         </div>
-        <div className="order-1 lg:order-2">
+        <div className="order-1 lg:order-2 flex flex-col" style={{ minHeight: "clamp(400px, 60vh, 700px)" }}>
           <CreateGameCard />
         </div>
       </div>

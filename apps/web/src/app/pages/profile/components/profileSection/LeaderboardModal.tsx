@@ -73,40 +73,40 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
       />
 
       {/* Panel */}
-      <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl max-h-[80vh] overflow-hidden rounded-3xl bg-stone-100 shadow-2xl flex flex-col">
+      <div className="relative w-[clamp(150px,90vw,600px)] max-h-[80vh] overflow-hidden rounded-3xl bg-stone-100 shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="relative flex items-center justify-center border-b bg-sky-400 px-4 py-3 md:px-6 md:py-4">
-          <GlobeAmericasIcon className="size-5 md:size-6 lg:size-8 text-sky-900 shrink-0 mx-1 md:mx-2" />
-          <h2 className="text-base md:text-lg lg:text-xl font-semibold text-sky-900">
+        <div className="relative flex items-center justify-center border-b bg-sky-400 px-[clamp(0.25rem,2vw,1.5rem)] py-[clamp(0.25rem,1.5vw,1rem)]">
+          <GlobeAmericasIcon className="size-[clamp(0.75rem,3vw,2rem)] text-sky-900 shrink-0 mx-[clamp(0.1rem,0.5vw,0.5rem)]" />
+          <h2 className="text-[clamp(0.5rem,3vw,1.25rem)] font-semibold text-sky-900">
             Global Leaderboard
           </h2>
           <button
             onClick={onClose}
-            className="absolute right-4 rounded-full p-1 text-gray-500 hover:bg-stone-300 hover:text-gray-800 transition"
+            className="absolute right-[clamp(0.25rem,1.5vw,1rem)] rounded-full p-[clamp(0.1rem,0.5vw,0.25rem)] text-gray-500 hover:bg-stone-300 hover:text-gray-800 transition"
           >
-            <XMarkIcon className="size-4 md:size-5" />
+            <XMarkIcon className="size-[clamp(0.5rem,1.5vw,1.25rem)]" />
           </button>
         </div>
 
         {/* Body */}
         <div className="overflow-y-auto flex-1">
           {loading ? (
-            <div className="space-y-3 p-6">
+            <div className="space-y-[clamp(0.25rem,1.5vw,0.75rem)] p-[clamp(0.5rem,3vw,1.5rem)]">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-12 animate-pulse rounded-xl bg-stone-200"
+                  className="h-[clamp(1rem,4vw,3rem)] animate-pulse rounded-xl bg-stone-200"
                 />
               ))}
             </div>
           ) : leaderboard.length === 0 ? (
-            <div className="p-10 text-center">
-              <p className="text-gray-500 font-semibold">
+            <div className="p-[clamp(0.75rem,4vw,2.5rem)] text-center">
+              <p className="text-[clamp(0.4rem,2vw,0.875rem)] text-gray-500 font-semibold">
                 No ranked players available at the moment. Check again soon!
               </p>
             </div>
           ) : (
-            <div className="divide-y py-3 px-6">
+            <div className="divide-y py-[clamp(0.25rem,1.5vw,0.75rem)] px-[clamp(0.5rem,3vw,1.5rem)]">
               {leaderboard.map((entry) => {
                 const rankColors =
                   entry.rank === 1
@@ -122,23 +122,23 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                 return (
                   <div
                     key={entry.username}
-                    className="flex rounded-xl shadow-md border overflow-hidden bg-white my-3"
+                    className="flex rounded-xl shadow-md border overflow-hidden bg-white my-[clamp(0.2rem,1vw,0.75rem)]"
                   >
                     {/* Left colored panel — rank number */}
                     <div
-                      className={`flex items-center justify-center w-12 md:w-16 lg:w-20 p-1 md:p-2 shrink-0 ${rankColors.bg}`}
+                      className={`flex items-center justify-center w-[clamp(1.5rem,8vw,5rem)] p-[clamp(0.05rem,0.5vw,0.5rem)] shrink-0 ${rankColors.bg}`}
                     >
                       <span
-                        className={`text-sm md:text-base lg:text-lg font-extrabold ${rankColors.text}`}
+                        className={`text-[clamp(0.4rem,2.5vw,1.125rem)] font-extrabold ${rankColors.text}`}
                       >
                         {entry.rank === 0 ? "" : entry.rank}
                       </span>
                     </div>
                     {/* Right content panel */}
-                    <div className="flex-1 flex items-center gap-2 md:gap-3 px-2 py-3 md:px-3 md:py-4">
-                      {/* Col 2: Avatar */}
+                    <div className="flex-1 flex items-center gap-[clamp(0.15rem,1vw,0.75rem)] px-[clamp(0.15rem,1vw,0.75rem)] py-[clamp(0.25rem,1.5vw,1rem)]">
+                      {/* Avatar */}
                       <div className="relative shrink-0">
-                        <Avatar className="size-8 md:size-10 lg:size-12 shrink-0 ring-2 ring-white">
+                        <Avatar className="size-[clamp(1rem,5vw,3rem)] shrink-0 ring-2 ring-white">
                           <AvatarImage
                             src={entry.avatarUrl ?? "/avatars/default.png"}
                             alt={entry.username}
@@ -147,36 +147,36 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
                             <img
                               src="/avatars/default.png"
                               alt={entry.username}
-                              className="size-8 md:size-10 rounded-full"
+                              className="size-[clamp(1rem,5vw,3rem)] rounded-full"
                             />
                           </AvatarFallback>
                         </Avatar>
                       </div>
 
-                      {/* Col 3: Username + stats */}
-                      <div className="flex-1 flex flex-col justify-center min-w-0 ">
-                        <div className="flex items-center ">
-                          <p className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 truncate">
+                      {/* Username + stats */}
+                      <div className="flex-1 flex flex-col justify-center min-w-0">
+                        <div className="flex items-center">
+                          <p className="text-[clamp(0.4rem,2.5vw,1.125rem)] font-semibold text-gray-900 truncate">
                             {entry.username}
                           </p>
-                          <div className="scale-[0.55] md:scale-[0.6] lg:scale-[0.65] xl:scale-70 mb-5">
-                          <ExperienceBadge
-                            gamesPlayed={entry.wins + entry.losses}
-                            winRate={
-                              entry.wins + entry.losses > 0
-                                ? (entry.wins / (entry.wins + entry.losses)) * 100
-                                : 0
-                            }
-                          />
+                          <div className="scale-[clamp(0.25,0.2vw,0.65)] mb-[clamp(0.5rem,2vw,1.25rem)]">
+                            <ExperienceBadge
+                              gamesPlayed={entry.wins + entry.losses}
+                              winRate={
+                                entry.wins + entry.losses > 0
+                                  ? (entry.wins / (entry.wins + entry.losses)) * 100
+                                  : 0
+                              }
+                            />
                           </div>
                         </div>
 
-                        <p className="flex items-center gap-1 text-[8px] md:text-[10px] text-gray-400 leading-tight">
-                          <TrophyIcon className="size-3 md:size-4 text-amber-300 shrink-0" />
+                        <p className="flex items-center gap-[clamp(0.05rem,0.3vw,0.25rem)] text-[clamp(0.3rem,1.5vw,0.625rem)] text-gray-400 leading-tight">
+                          <TrophyIcon className="size-[clamp(0.35rem,1.5vw,1rem)] text-amber-300 shrink-0" />
                           <span>{entry.wins} wins</span>
                         </p>
-                        <p className="flex items-center gap-1 text-[8px] md:text-[10px] text-gray-400 leading-tight">
-                          <PuzzlePieceIcon className="size-3 md:size-4 text-purple-300 shrink-0" />
+                        <p className="flex items-center gap-[clamp(0.05rem,0.3vw,0.25rem)] text-[clamp(0.3rem,1.5vw,0.625rem)] text-gray-400 leading-tight">
+                          <PuzzlePieceIcon className="size-[clamp(0.35rem,1.5vw,1rem)] text-purple-300 shrink-0" />
                           <span>{entry.wins + entry.losses} games</span>
                         </p>
                       </div>
@@ -188,23 +188,23 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
           )}
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 md:gap-4 px-4 md:px-6 pb-4 md:pb-6">
+            <div className="flex items-center justify-center gap-[clamp(0.25rem,1.5vw,1rem)] px-[clamp(0.25rem,2vw,1.5rem)] pb-[clamp(0.25rem,2vw,1.5rem)]">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="rounded-full p-1 md:p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                className="rounded-full p-[clamp(0.1rem,0.5vw,0.375rem)] text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
               >
-                <ChevronLeftIcon className="size-4 md:size-5" />
+                <ChevronLeftIcon className="size-[clamp(0.5rem,1.5vw,1.25rem)]" />
               </button>
-              <span className="text-[10px] md:text-xs font-medium text-gray-500">
-                {page} of  {totalPages}
+              <span className="text-[clamp(0.35rem,1.5vw,0.75rem)] font-medium text-gray-500">
+                {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
-                className="rounded-full p-1.5 text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                className="rounded-full p-[clamp(0.1rem,0.5vw,0.375rem)] text-gray-500 hover:bg-stone-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
               >
-                <ChevronRightIcon className="size-4 md:size-5" />
+                <ChevronRightIcon className="size-[clamp(0.5rem,1.5vw,1.25rem)]" />
               </button>
             </div>
           )}

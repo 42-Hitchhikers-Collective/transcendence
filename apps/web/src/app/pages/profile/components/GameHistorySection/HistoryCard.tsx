@@ -57,7 +57,6 @@ export function HistoryCard({ game }: HistoryCardProps) {
         <MatchResult resultView={resultView} game={game} />
         <OpponentsList opponent={game.opponents} />
       </div>
-
     </div>
   );
 }

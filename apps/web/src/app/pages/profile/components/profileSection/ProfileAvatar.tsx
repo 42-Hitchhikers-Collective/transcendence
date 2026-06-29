@@ -234,7 +234,7 @@ export const ProfileAvatar = ({
                avatar or overlay does nothing; only the explicit "Change"
                button inside the overlay opens the file picker) ── */}
           <div
-            className="group relative size-[clamp(5rem,20vw,10rem)] sm:size-[clamp(10rem,18vw,18rem)] lg:size-[clamp(14rem,16vw,22rem)] cursor-default"
+            className="group relative size-[clamp(10rem,28vw,14rem)] sm:size-[clamp(10rem,18vw,18rem)] lg:size-[clamp(14rem,16vw,22rem)] cursor-default"
           >
             {/* ── Hover overlay: darkens the whole avatar and shows two
                   actions. "Change" (top) opens the file picker via
