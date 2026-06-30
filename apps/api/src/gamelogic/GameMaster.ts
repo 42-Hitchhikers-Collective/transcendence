@@ -30,12 +30,13 @@ export class GameMaster {
 
     table.draw = 0;
     table.playerPlayed = true;
-    console.log(`Player Played: ${table.playerPlayed}`);
 
     return true;
   }
 
   drawCard(table: Table, playerId: string): boolean {
+    if (table.playerPlayed) return false;
+
     const player = table.players.find((p) => p.id === playerId);
     if (!this.isPlayerTurn(table, playerId)) return false;
 
@@ -104,17 +105,12 @@ export class GameMaster {
   }
 
   private isPlayerTurn(table: Table, playerId: string): boolean {
-    console.log("It is not players turn");
-    console.log(`Actual Turn: ${table.players[table.turnIndex].username}`);
     return table.players[table.turnIndex].id === playerId;
   }
 
   private isCardPlayable(table: Table, card: Card): boolean {
     const top = table.discardPile.at(-1);
     if (!top) return true;
-
-    console.log(`Card played: ${card.color}, ${card.value}`);
-    console.log(`Top Card: ${table.currentColor}, ${top?.value}`);
 
     return (
       card.color === table.currentColor ||
@@ -124,12 +120,8 @@ export class GameMaster {
   }
 
   private pendingCards(table: Table, card: Card): boolean {
-    console.log(`Draw Cards: ${table.draw}`);
-    console.log(`Pend Cards: ${table.pendingDraw}`);
-
     if (table.pendingDraw == 0) return true;
-    if (
-      table.pendingDraw != 0 &&
+    if (table.pendingDraw != 0 &&
       (card.value == "4plus" || card.value == "2plus")
     )
       return true;
@@ -142,9 +134,16 @@ export class GameMaster {
   // ============================================================
 
   advanceTurn(table: Table, playerId: string): boolean {
+
     const player = table.players.find((p) => p.id === playerId);
 
+    console.log(`Player: ${player?.username}, Draw: ${table.draw}`)
+
     if (!player || table.draw != 0) return false;
+
+    console.log(`Color flag: ${table.color}`)
+
+    if (table.color == true) return false;
 
     let skip = 0;
     if (table.skip) skip = 1 * table.direction;
@@ -154,7 +153,6 @@ export class GameMaster {
       table.players.length;
 
     this.newTurnStats(table);
-    console.log(`New Turn: ${table.players[table.turnIndex].username}`);
     return true;
   }
 

@@ -90,6 +90,7 @@ export class Table {
 
   changeColor(color: "red" | "blue" | "green" | "yellow") {
     this.currentColor = color;
+    this.color = false;
   }
 
   getPlayerPlayed() {

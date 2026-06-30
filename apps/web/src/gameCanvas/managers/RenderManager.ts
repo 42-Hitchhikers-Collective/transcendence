@@ -41,45 +41,62 @@ export class RenderManager {
   render(room: FrontendRoom) {
     this.clearPlayers();
 
-    const orderedPlayers = this.reorderPlayersWithObserverAtBottom(
-      room.players,
-    );
-    const positions = this.getPlayerPositions(orderedPlayers.length);
+    const positions = this.getPlayerPositions(room.players.length);
 
     this.renderDiscardPile(room);
     this.renderDrawPile();
     this.renderText(room.cardsToDraw);
-    orderedPlayers.forEach((player, i) => {
-      this.renderPlayer(player, positions[i], room.current_turn);
-    });
+
+    const startIndex = room.players.findIndex(
+      (player) => player.id === this.myPlayerId,
+    );
+    if (startIndex === -1) {
+      console.error("Player not found");
+      return;
+    }
+
+    for (let i = 0; i < room.players.length; i++) {
+      this.renderPlayer(
+        room.players[(i + startIndex) % room.players.length],
+        positions[i],
+        room.current_turn,
+      );
+    }
     this.renderCurrentColor(room.game?.currentColor);
   }
 
   private currentColorText: Phaser.GameObjects.Text | null = null;
+  private currentColorCircle: Phaser.GameObjects.Graphics | null = null;
 
   private renderCurrentColor(color: string | undefined) {
     this.currentColorText?.destroy();
+    this.currentColorCircle?.destroy();
 
-    let currentColor = "#ffffff";
-    console.log(`Current Color: ${color}`)
+    let currentColor = 0xffffff;
 
-    if (color === "red") currentColor = "#ff0000";
-    else if (color === "blue") currentColor = "#0000ff";
-    else if (color === "green") currentColor = "#00ff00";
-    else if (color === "yellow") currentColor = "#ffff00";
+    if (color === "red") currentColor = 0xff0000;
+    else if (color === "blue") currentColor = 0x0000ff;
+    else if (color === "green") currentColor = 0x00ff00;
+    else if (color === "yellow") currentColor = 0xffff00;
 
-    this.currentColorText = this.scene.add.text(
-      SCREEN.WIDTH / 2,
-      SCREEN.HEIGHT / 2 - 100,
-      `Current Color`,
-      {
+    // Texto
+    this.currentColorText = this.scene.add
+      .text(SCREEN.WIDTH / 2, SCREEN.HEIGHT / 2 - 100, "Current Color", {
         fontSize: "24px",
-        color: currentColor,
-      },
-    );
+        color: "#ffffff",
+      })
+      .setOrigin(0.5);
 
-    this.currentColorText.setOrigin(0.5);
+    this.currentColorCircle = this.scene.add.graphics();
+
+    this.currentColorCircle.fillStyle(currentColor, 1);
+    this.currentColorCircle.fillCircle(
+      SCREEN.WIDTH / 2 + 110,
+      SCREEN.HEIGHT / 2 - 100,
+      10,
+    );
   }
+
   private renderText(numberOfCards: number) {
     this.pendingDrawText?.destroy();
 
@@ -127,44 +144,43 @@ export class RenderManager {
     this.drawPileSprite = sprite; // JESS: we store the draw pile sprite in a variable to be able to disable it when it's not the player's turn
   }
 
-  private reorderPlayersWithObserverAtBottom(
-    players: FrontendPlayer[],
-  ): FrontendPlayer[] {
-    const observer = players.find((p) => p.isTheObserver);
-    if (!observer) return players;
-
-    const others = players.filter((p) => !p.isTheObserver);
-    return [...others, observer];
-  }
-
   private renderPlayer(
     player: FrontendPlayer,
     pos: Position,
-    current_turn: string,
+    current_turn: string | undefined,
   ) {
     const container = this.scene.add.container(0, 0);
 
     this.playerContainers.set(player.id, container);
     this.boardContainer.add(container);
 
-    let color = "#ffffff"; // JESS: white has to be the default color for the names
-    if (current_turn === player.id) color = "#22c55e"; // JESS: green is the color for the player that has to play (like on the website graphics)
+    let color = "#ffffff";
+    if (current_turn === player.id) color = "#22c55e";
 
     const nameX =
-      pos.p === "v" ? (pos.x < 500 ? pos.x + 80 : pos.x - 80) : pos.x; // JESS: added for vertical players, the name is displayed on the right for the left player and on the left for the right player
-    const nameY = pos.p === "v" ? pos.y : pos.y < 200 ? pos.y + 80 : pos.y - 80; // JESS: added for horizontal players, the name is displayed below for the top player and above for the bottom player
+      pos.p === "v" ? (pos.x < 500 ? pos.x + 80 : pos.x - 80) : pos.x;
+
+    const nameY = pos.p === "v" ? pos.y : pos.y < 200 ? pos.y + 80 : pos.y - 80;
+
     const title = this.scene.add.text(nameX, nameY, player.userName, {
-      // JESS: considers different name position for each player
       fontSize: "24px",
       color: color,
     });
-    title.setOrigin(0.5); // JESS: centers the name text on its position
-    title.setDepth(1000); // JESS: ensures that the name is always displayed above the cards
-    if (pos.p === "v") title.setAngle(pos.x < 500 ? 90 : -90); // JESS: rotates names of L and R player toward center
+
+    title.setOrigin(0.5);
+    title.setDepth(1000);
+
+    if (pos.p === "v") title.setAngle(pos.x < 500 ? 90 : -90);
+
+    // Reduce spacing when there are more than 20 cards
+    const cardCount = player.cards?.length ?? player.cardCount;
+
+    const spacing = cardCount > 20 ? Math.max(15, 40 - (cardCount - 5)) : 40;
 
     const isMe = player.id === this.myPlayerId;
+
     if (isMe && player.cards) {
-      let offsetX = -(player.cards.length * 20);
+      let offsetX = -((player.cards.length - 1) * spacing) / 2;
 
       player.cards.forEach((card, cardIndex) => {
         const sprite = this.scene.add.image(
@@ -177,29 +193,42 @@ export class RenderManager {
         sprite.setData("cardIndex", cardIndex);
         sprite.setInteractive();
         sprite.setDepth(9998);
+
         this.scene.input.setDraggable(sprite);
 
         container.add(sprite);
-        offsetX += 40;
+
+        offsetX += spacing;
       });
     } else {
       let offsetX = 0;
       let offsetY = 0;
-      if (pos.p === "h") offsetX = -(player.cardCount * 20); // JESS: for horizontal players, cards are centered on the position, so we need to offset them to the left by half of the total width of the cards
-      if (pos.p === "v") offsetY = -(player.cardCount * 20); // JESS: for vertical players, cards are centered on the position, so we need to offset them to the top by half of the total height of the cards
+
+      if (pos.p === "h") {
+        offsetX = -((player.cardCount - 1) * spacing) / 2;
+      }
+
+      if (pos.p === "v") {
+        offsetY = -((player.cardCount - 1) * spacing) / 2;
+      }
+
       for (let i = 0; i < player.cardCount; i++) {
         const sprite = this.scene.add.image(
           pos.x + offsetX,
           pos.y + offsetY,
-          `back`,
+          "back",
         );
-        sprite.setScale(CARDS.SCALE); // JESS: we use the same scale for the back of the cards to keep the same size as the front cards
+
+        sprite.setScale(CARDS.SCALE);
+
         container.add(sprite);
-        if (pos.p === "h") offsetX += 40; // JESS: for horizontal players, cards are displayed from left to right, so we increase the x offset
-        if (pos.p === "v") offsetY += 40; // JESS: for vertical players, cards are displayed from top to bottom, so we increase the y offset
+
+        if (pos.p === "h") offsetX += spacing;
+        if (pos.p === "v") offsetY += spacing;
       }
     }
-    container.add(title); // JESS: we add the name title to the player container to ensure it moves with the cards if needed
+
+    container.add(title);
   }
 
   private clearPlayers() {
@@ -215,21 +244,21 @@ export class RenderManager {
         return [{ x: cx, y: 710, p: "h" }]; // JESS: Keep this position
       case 2:
         return [
-          { x: cx, y: 90, p: "h" }, // JESS: Keep this position
           { x: cx, y: 710, p: "h" }, // JESS: Keep this position
+          { x: cx, y: 90, p: "h" }, // JESS: Keep this position
         ];
       case 3:
         return [
+          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
           { x: 60, y: cy, p: "v" }, // JESS: Keep this position
           { x: 940, y: cy, p: "v" }, // JESS: Keep this position
-          { x: cx, y: 710, p: "h" }, // JESS: Keep this position
         ];
       case 4:
         return [
-          { x: cx, y: 120, p: "h" }, // JESS: Keep this position
-          { x: 60, y: cy, p: "v" }, // JESS: Keep this position
-          { x: 940, y: cy, p: "v" }, // JESS: Keep this position
           { x: cx, y: 710, p: "h" }, // JESS: Keep this position
+          { x: 60, y: cy, p: "v" }, // JESS: Keep this position
+          { x: cx, y: 120, p: "h" }, // JESS: Keep this position
+          { x: 940, y: cy, p: "v" }, // JESS: Keep this position
         ];
 
       default:
