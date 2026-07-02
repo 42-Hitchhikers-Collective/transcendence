@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/30 17:29:48 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/02 15:02:10 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,29 +104,21 @@ export function registerRoomHandlers(
     systemChatMsg(playerId, res.roomId, socket, ChatMsgType.LEFT_ROOM);
 
     socket.leave(res.roomId);
-
+    
     const action_pend = gameManager.playerLeft(res.roomId, playerId);
 
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId);
-    if (action_pend.action == "color") {
-      let room = getRoomById(res.roomId);
-      let currentPlayer = room?.players.findIndex(
-        (player) => player.playerId === action_pend.action,
+    if (action_pend.success) {
+      const room = getRoomById(res.roomId);
+      const currentPlayer = room?.players.findIndex(
+        (player) => player.playerId === action_pend.currentPlayer,
       );
       if (currentPlayer) {
         let player = room?.players[currentPlayer];
         if (player)
-          socket.nsp
-            .to(player.socketId)
-            .emit("show_colors", { roomId: res.roomId });
+          socket.nsp.to(player.socketId).emit("show_colors", { roomId: res.roomId });
       }
-
-      //room.players.forEach((player) => {
-      //  if (!player.socketId) return; // skip players without an active socket
-      //  const gameCanvasRoom = utils.getGameCanvasRoom(room, player.playerId);
-      //  socket.nsp.to(player.socketId).emit("room_state", gameCanvasRoom);
-      //});
     }
     console.log("[room:leave_room] success", {
       playerId,

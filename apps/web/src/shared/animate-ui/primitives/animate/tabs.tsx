@@ -9,7 +9,7 @@ import {
   type HighlightItemProps,
   type HighlightProps,
 } from '@/shared/animate-ui/primitives/effects/highlight';
-import { getStrictContext } from '@/lib/get-strict-context';
+import { getStrictContext } from '@/shared/lib/get-strict-context';
 import { Slot, type WithAsChild } from '@/shared/animate-ui/primitives/animate/slot';
 
 type TabsContextType = {

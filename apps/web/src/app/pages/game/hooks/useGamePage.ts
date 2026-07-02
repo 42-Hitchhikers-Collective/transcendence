@@ -145,6 +145,14 @@ export function useGamePage(roomName: string) {
       setGameStarted(true);
     }
 
+    // LONELY PLAYER EDGECASE - it's mostly the frontend that should handle this check but it was added in the backend and doing so does not handle edgecases where player does not follow standard navigation flow
+    if (
+      RoomDataRef.current?.roomState === "playing" &&
+      playerList.length === 1
+    ) {
+      setGameOver({ reason: "lonely" });
+    }
+
     setTimeout(() => {
       socket.emit("canvas_ready");
       console.warn(`🎨 Refreshing canvas: ${gameStarted}`);

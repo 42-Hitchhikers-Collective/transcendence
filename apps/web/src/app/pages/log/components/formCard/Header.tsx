@@ -27,11 +27,13 @@ export function Header({
 }) {
   return (
     <CardHeader className="text-center">
-      <CardTitle className="text-xl">{cardTitle}</CardTitle>
-      <CardDescription>{cardDescription}
+      <CardTitle className="text-[clamp(1.4rem,5.5vw,2.25rem)]">{cardTitle}</CardTitle>
+      <CardDescription
+      className="text-[clamp(0.65rem,2.2vw,0.875rem)] text-slate-400"
+      >{cardDescription}
       <Button
         variant="link"
-        className="px-2"
+        className="text-[clamp(0.65rem,2.2vw,0.875rem)] px-2 text-orange-400 hover:text-orange-500 transition-transform"
         onClick={() => onRequestMode(toggleTarget)}
       >
         {togglePageName}

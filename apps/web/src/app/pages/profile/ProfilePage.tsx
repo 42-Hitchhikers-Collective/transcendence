@@ -35,16 +35,17 @@ export default function ProfilePage() {
       .finally(() => setHistoryLoading(false));
   }, [token]);
 
-  // compute stats from history; memoize to avoid unnecessary recalculations on re-renders
+  // compute wins/losses from history; rank comes from the API (via /api/users/me stored in auth context)
   const stats = useMemo(() => {
     const wins = history.filter((game) => game.result === "win").length;
     const losses = history.filter((game) => game.result === "loss").length;
-    return { wins, losses };
-  }, [history]);
+    const rank = user?.stats?.rank ?? null;
+    return { wins, losses, rank };
+  }, [history, user?.stats?.rank]);
 
   return (
     <div
-      className="bg-neutral-800 px-50 py-20 overflow-auto h-screen"
+      className="bg-neutral-800 px-[clamp(1rem,4vw,12.5rem)] py-[clamp(2rem,4vw,5rem)] overflow-auto h-screen"
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -63,17 +64,17 @@ export default function ProfilePage() {
         </button>
       </div>
       <ProfileSection user={user} stats={stats} onLogout={logout} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+      <div className="grid grid-cols-1 gap-[clamp(1rem,1.5vw,2rem)] lg:grid-cols-[1fr_2fr]">
           {/* switches view order between children */}
-        <div className="order-2 lg:order-1">
+        <div className="order-2 lg:order-1 h-full">
           <GamesHistorySection games={historyLoading ? [] : history} />
         </div>
-        <div className="order-1 lg:order-2">
+        <div className="order-1 lg:order-2 flex flex-col" style={{ minHeight: "clamp(400px, 60vh, 700px)" }}>
           <CreateGameCard />
         </div>
       </div>
-      <div className="mt-6 flex justify-end">
-        <div className="max-w-md">
+      <div className="mt-[clamp(1rem,2vw,2rem)] flex justify-end">
+        <div className="w-full max-w-[clamp(16rem,30vw,28rem)]">
           <Footer />
         </div>
       </div>

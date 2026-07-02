@@ -1,6 +1,4 @@
-import {
-  Card,
-} from "@/shared/components/ui/card";
+import { Card } from "@/shared/components/ui/card";
 
 import { Header } from "./formCard/Header";
 import { CardContent } from "@/shared/components/ui/card";
@@ -24,25 +22,23 @@ export function Login({
   };
 
   return (
-    <div className="w-lg mx-auto">
-      <Card>
-        <Header
-          cardTitle={"Log in"}
-          cardDescription="Don't have an account?"
-          togglePageName="Sign up for free"
-          toggleTarget="signup"
-          onRequestMode={onRequestMode}
+    <Card className="h-full rounded-2xl border-2 border-gray-200 bg-white shadow-2xl shadow-slate-900 justify-center">
+      <Header
+        cardTitle={"Log in"}
+        cardDescription="Don't have an account?"
+        togglePageName="Sign up for free"
+        toggleTarget="signup"
+        onRequestMode={onRequestMode}
+      />
+      <CardContent className="flex flex-col gap-[clamp(0.5rem,2vw,1rem)] px-[clamp(1rem,5vw,5rem)]">
+        <Form
+          formFields={formFields}
+          onSubmit={handleSubmit}
+          submitLabel="Log in"
+          isLoading={false}
+          error={error}
         />
-        <CardContent className="flex flex-col gap-4">
-          <Form
-            formFields={formFields}
-            onSubmit={handleSubmit}
-            submitLabel="Log in"
-            isLoading={false}
-            error={error}
-          />
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
