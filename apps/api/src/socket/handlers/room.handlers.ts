@@ -6,7 +6,7 @@
 /*   By: grial <grial@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/02 14:28:46 by grial            ###   ########.fr       */
+/*   Updated: 2026/07/02 14:55:26 by grial            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,23 +110,15 @@ export function registerRoomHandlers(
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId);
     if (action_pend.success) {
-      let room = getRoomById(res.roomId);
-      let currentPlayer = room?.players.findIndex(
+      const room = getRoomById(res.roomId);
+      const currentPlayer = room?.players.findIndex(
         (player) => player.playerId === action_pend.currentPlayer,
       );
       if (currentPlayer) {
         let player = room?.players[currentPlayer];
         if (player)
-          socket.nsp
-            .to(player.socketId)
-            .emit("show_colors", { roomId: res.roomId });
+          socket.nsp.to(player.socketId).emit("show_colors", { roomId: res.roomId });
       }
-
-      //room.players.forEach((player) => {
-      //  if (!player.socketId) return; // skip players without an active socket
-      //  const gameCanvasRoom = utils.getGameCanvasRoom(room, player.playerId);
-      //  socket.nsp.to(player.socketId).emit("room_state", gameCanvasRoom);
-      //});
     }
     console.log("[room:leave_room] success", {
       playerId,
