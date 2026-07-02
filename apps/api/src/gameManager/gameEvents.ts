@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/22 17:54:51 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/02 13:21:54 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ import {
   RoomIdResult,
   MAX_PLAYERS_PER_ROOM,
   MIN_PLAYERS_TO_START,
+  msgLeftRoom,
 } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
@@ -237,15 +238,18 @@ function startGameCondition(room: Room): boolean {
 
 
 // Does the function need to return something?
-export function playerLeft(roomId: string, playerId: string) {
+export function playerLeft(roomId: string, playerId: string) : msgLeftRoom {
   
   const room = gm.getRoomById(roomId);
   if (!room || !room.game)
-    return { success: false, roomId: roomId, error: "Room or game not found" };
+    return false;
   
   if (!room.game.playerLeft(playerId))
     return false;
 
-  return true
+  if (room.game.table.color)
+    return { success: true, roomId: roomId, action: "color", currentPlayer: room.game.table.players[room.game.table.turnIndex].id};
+
+  return true;
   
 }

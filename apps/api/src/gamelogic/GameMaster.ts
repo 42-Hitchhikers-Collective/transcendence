@@ -1,24 +1,26 @@
 import { Card } from "./Card.ts";
 import { Table } from "./Table.ts";
 import { Player } from "./Player.ts";
+import { msgResult } from "../gameManager/types.ts";
 
 export class GameMaster {
-  playCard(table: Table, playerId: string, card: Card): boolean {
-    const player = table.players.find((p) => p.id === playerId);
+  playCard(table: Table, playerId: string, card: Card): msgResult {
+    let player = table.players.find((p) => p.id === playerId);
     if (!player) {
-      console.log("ERROR: Not players turn");
-      return false;
+      return {
+        success: false,
+        error: "Player not found",
+      };
     }
 
-    if (!this.validateMove(table, playerId, card)) {
-      console.log("ERROR: validateMove(): false");
-      return false;
+    let res = this.validateMove(table, playerId, card);
+    if (!res.success) {
+      return res;
     }
 
     const index = player.hand.findIndex((c) => c.id === card.id);
     if (index === -1) {
-      console.warn("Card not found in hand", card);
-      return false;
+      return { success: false, error: "Card not found" };
     }
 
     const [playedCard] = player.hand.splice(index, 1);
@@ -31,7 +33,7 @@ export class GameMaster {
     table.draw = 0;
     table.playerPlayed = true;
 
-    return true;
+    return { success: true, msg: "" };
   }
 
   drawCard(table: Table, playerId: string): boolean {
@@ -93,15 +95,15 @@ export class GameMaster {
 
   // ============================================================
 
-  private validateMove(table: Table, playerId: string, card: Card): boolean {
-    if (!this.isPlayerTurn(table, playerId)) return false;
-    if (!this.isCardPlayable(table, card)) return false;
-    if (!this.pendingCards(table, card)) return false;
-    if (table.getPlayerPlayed()) {
-      console.log(`Player Played condition: ${table.playerPlayed}`);
-      return false;
-    }
-    return true;
+  private validateMove(table: Table, playerId: string, card: Card): msgResult {
+    if (!this.isPlayerTurn(table, playerId))
+      return { success: false, error: "Is not your turn" };
+    if (!this.isCardPlayable(table, card))
+      return { success: false, error: "Card not playable" };
+    if (!this.pendingCards(table, card))
+      return { success: false, error: "Draw cards first" };
+
+    return { success: true, msg: "" };
   }
 
   private isPlayerTurn(table: Table, playerId: string): boolean {
@@ -121,7 +123,8 @@ export class GameMaster {
 
   private pendingCards(table: Table, card: Card): boolean {
     if (table.pendingDraw == 0) return true;
-    if (table.pendingDraw != 0 &&
+    if (
+      table.pendingDraw != 0 &&
       (card.value == "4plus" || card.value == "2plus")
     )
       return true;
@@ -134,14 +137,13 @@ export class GameMaster {
   // ============================================================
 
   advanceTurn(table: Table, playerId: string): boolean {
-
     const player = table.players.find((p) => p.id === playerId);
 
-    console.log(`Player: ${player?.username}, Draw: ${table.draw}`)
+    console.log(`Player: ${player?.username}, Draw: ${table.draw}`);
 
     if (!player || table.draw != 0) return false;
 
-    console.log(`Color flag: ${table.color}`)
+    console.log(`Color flag: ${table.color}`);
 
     if (table.color == true) return false;
 

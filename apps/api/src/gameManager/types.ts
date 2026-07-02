@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/23 11:50:11 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/06/30 17:08:24 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,3 +79,6 @@ export type RoomIdResult =
 export type msgResult =
   | { success: true ; msg: string }
   | { success: false; error: string | undefined };
+
+export type msgLeftRoom =
+  | { success: true ; roomId: string, action: string, currentPlayer: string }
