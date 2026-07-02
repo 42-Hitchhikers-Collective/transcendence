@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   types.ts                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: grial <grial@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/23 11:50:11 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/02 14:16:34 by grial            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export const MAX_PLAYERS_PER_ROOM = 4;
 export const MIN_PLAYERS_TO_START = 2;
 export const MAX_ROOM_NAME_LENGTH = 20;
-export const MAX_MSG_LENGTH = 200; // prevents DOS attacks and keeps chat readable
+export const MAX_MSG_LENGTH = 200;
 export const MAX_MSG_HISTORY = 50;
 export const RECONNECTION_GRACE_PERIOD = 15000; // 15 seconds
 export const DROP_TIMER_DURATION = 30_000; // 30 seconds
@@ -36,7 +36,7 @@ export type Room = {
   name: string;
   players: Player[];
   state: GameState;
-  chatHistory: Array<{ username: string; msg: string; avatarUrl?: string }>; // JESS: added avatarUrl to chat history so the frontend can display it
+  chatHistory: Array<{ username: string; msg: string }>;
   gameDbId?: string; // id of the game in the database
   game?: Game;
 };
@@ -79,3 +79,7 @@ export type RoomIdResult =
 export type msgResult =
   | { success: true ; msg: string }
   | { success: false; error: string | undefined };
+
+export type msgLeftRoom =
+  | { success: true ; roomId: string, action: string, currentPlayer: string }
+  | { success: false};
