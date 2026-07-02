@@ -67,13 +67,11 @@ export class Table {
   initialCard() {
     let card = this.drawPile.pop();
 
-    while (card?.value === "4plus") {
+    while (card?.value === "4plus" || card?.value === "2plus" || card?.value === "color"
+    ) {
       this.drawPile.unshift(card);
       card = this.drawPile.pop();
     }
-
-    if (card?.value == "color")
-      this.color = true;
 
     return card;
   }

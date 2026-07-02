@@ -100,10 +100,6 @@ export class Game {
     };
   }
 
-  public first_play() {
-    this.gameMaster.applyEffect(this.table, this.table.discardPile[0]);
-  }
-
   public playerLeft(playerID: string) : boolean {
 
     if (this.gameMaster.playerLeftGame(playerID, this.table))
