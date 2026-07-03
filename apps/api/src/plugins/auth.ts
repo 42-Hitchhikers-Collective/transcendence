@@ -15,7 +15,13 @@ export const authPlugin = fp(async (app) => {
   }
 
   app.register(cookie);
-  app.register(jwt, { secret: jwtSecret });
+  app.register(jwt, {
+    secret: jwtSecret,
+    // we store the token in a cookie
+    cookie: { cookieName: "token", 
+      signed: false // false as we are using JWT signature and verification mechanism by default to make it cryptographically secure
+    },
+  });
 
   app.decorate("auth", async (request: any, reply: any) => {
     try {

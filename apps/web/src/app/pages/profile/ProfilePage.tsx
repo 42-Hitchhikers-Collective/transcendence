@@ -10,20 +10,20 @@ import { Footer } from "@/shared/components/footer";
 import background from "@/assets/backgrounds/unocards_gemini.png";
 
 export default function ProfilePage() {
-  /* This should be isolated in its own hook file and imported */
-  const { user, logout, token } = useAuthContext(); // pulls the auth state
+  const { user, logout, isAuthenticated } = useAuthContext(); // pulls the auth state every time the profile page is mounted (or re-mounted) and sets the user state in the auth context
   const [history, setHistory] = useState<GameHistory[]>([]); // stores the game history for the user
   const [historyLoading, setHistoryLoading] = useState(false); // tracks loading state for the history fetch
 
-  // use effect where we re-fetch the hstory if it changes (after the user completed a game for example)
+  // useEffect to fetch the user's game history only when we get the isAuthenticated state (which happens on every mount of the profile page) )
   useEffect(() => {
-    if (!token) {
+    console.log("isAuthenticated changed:", isAuthenticated);
+    if (!isAuthenticated) {
       setHistory([]);
       return;
     }
     setHistoryLoading(true);
     fetch("/api/users/me/history", {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include", // includes the token in the request so that the server can authenticate the user
     })
       .then(async (res) => {
         if (!res.ok) throw new Error("history fetch failed");
@@ -33,7 +33,7 @@ export default function ProfilePage() {
       .then((items) => setHistory(items))
       .catch(() => setHistory([]))
       .finally(() => setHistoryLoading(false));
-  }, [token]);
+  }, [isAuthenticated]);
 
   // compute wins/losses from history; rank comes from the API (via /api/users/me stored in auth context)
   const stats = useMemo(() => {

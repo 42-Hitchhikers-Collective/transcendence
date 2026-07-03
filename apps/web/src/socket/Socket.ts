@@ -2,25 +2,12 @@ import { io } from "socket.io-client";
 import { EventBus } from "../events/EventBus";
 import type { FrontendRoom } from "../gameCanvas/types/roomTypes";
 
-/* 
-When calling io() we do not need to specify the URL because it uses the frontend's localhost by deafault
-Also super important -> we need to make sure the socket opens the connection before we try to emit any events
-*/
 export const socket = io({
   path: "/socket.io",
-  autoConnect: false, // it is needed to enforce when we want to connect or the socket will always try to connect
-  auth: (cb) => cb({ token: localStorage.getItem("auth_token") ?? "" }), //  reading from localStorage could be a bit brittle and break things if we have BE changes, JESS will change thie later
+  autoConnect: false, // IMPORTANT: this is false because Jess' AuthContext is what controls socket connection base on the authentication state of the user
+  withCredentials: true, // we need this to send the cookie with the socket connection so that the server can authenticate the user
 });
 
-// connection starts at login (check AuthContext.tsx)
-socket.on("connect", () => {
-  // we dont need this as we get this info on the authcontext (jess' code for login)
-  // console.log(
-  //   `[socket] connected \n
-  //   id: ${socket.id} \n
-  //   transport: ${socket.io.engine.transport.name}`,
-  // );
-});
 
 socket.on("connect_error", (err) => {
   console.warn(`[socket] connect_error \n Error Message ${err.message}`);

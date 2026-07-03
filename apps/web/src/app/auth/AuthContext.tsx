@@ -1,32 +1,20 @@
-/* 
-ABOUT: AuthContext owns the token and user info (isAuthenticated, user object) and exposes login/signup/logout methods that update them. 
-It also runs the effect that fetches the user on app boot and whenever the token changes, so that the rest of the app can just read from context and not worry about syncing with the backend.
-
-WHY: It's important that every component gets informed about the authentication status so that they can react accordingly (show/hide UI, redirect, etc).
-Instead of having multiple fetch calls across to check through the app if the user is authenticated (through multiple fetches and prop drilling),
-we use just a single fetch call on app boot to get the user info, and then we centralize this information in a global context that can be read from anywhere.
-For example: this prevents to non-signeup users to access the /game route and profile page.
-
+/*
+ABOUT: AuthContext manages authentication state via HttpOnly cookies (XSS-safe).
+On mount it checks /api/users/me — if the cookie is valid, the user is authenticated.
+login/signup set the cookie via the backend; logout clears it.
 
 HOW:
-- Boot: reads token from localStorage.
-- When token changes: fetch /api/users/me to hydrate user.
-- login(): POST /api/auth/login, store token, trigger user fetch.
+- Boot: fetch /api/users/me (cookie sent automatically).
+- login(): POST /api/auth/login → cookie set → fetch user.
 - signup(): POST /api/auth/register, then login().
-- logout(): POST /api/auth/logout and clear local state.
-Components call useLogHandlersContext() to read state or call actions.
+- logout(): POST /api/auth/logout → cookie cleared → disconnect socket → clear state.
 
 WHAT:
-- token: string | null
 - user: User | null
-- isAuthenticated: boolean (derived from token)
+- isAuthenticated: boolean
 - login(email, password)
 - signup(email, password, username)
 - logout()
-
-HttpOnly, Secure cookies (best for most apps): JS can’t read them, so XSS can’t steal the token directly. Pair with CSRF protection (same‑site cookies + CSRF token).
-In‑memory access token + HttpOnly refresh token: access token lives in memory (lost on refresh), refresh token in HttpOnly cookie.
-
 */
 
 import {
@@ -34,6 +22,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useCallback,
   type ReactNode,
 } from "react";
 import { socket } from "@/socket/Socket";
@@ -55,7 +44,6 @@ type User = {
 }; /* TODO: put null rendering case */
 
 type AuthContextValue = {
-  token: string | null;
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -64,62 +52,55 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-// storage key name for the token; in a real app -> TODO : consider more secure storage than localStorage (e.g. HttpOnly cookies or in-memory with refresh tokens)
-const TOKEN_KEY = "auth_token"; 
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem(TOKEN_KEY),
-  );
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // state to track if the user is authenticated
+  const [loading, setLoading] = useState(true); // true until initial check completes
 
-  // Fetches user whenever token changes; self-clean on failure
+  // Fetches the current user on component mount so that the profile page is loaded if the user stayed logged in and/or token did not expire
+  // useEffect would run again and again, so we use useCallback to memoize (cache) the function and prevent unnecessary re-renders
+  // IMPORTANT: if fetch users /me fails  it is expected behaviour, it just means that the user is not logged in!
+  const fetchUser = useCallback(async () => {
+    try {
+      const res = await fetch("/api/users/me", { credentials: "include" /* includes the token */});
+      if (!res.ok) throw new Error("not authenticated");
+      const raw = await res.text();
+      const data = raw ? JSON.parse(raw) : null;
+      const fetchedUser = data?.user ?? data;
+      if (fetchedUser) {
+        setUser(fetchedUser);
+        setIsAuthenticated(true);
+      }
+    } catch {
+      console.log("👤 AUTHENTICATION: profile could not load due to user not being logged in or token session expiration");
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  // When fetchUser state changes the loadin state that we set to true when lo
   useEffect(() => {
-    if (!token) {
-      console.log("👤 AUTHENTICATION: token not found, user not authenticated");  
+    fetchUser().finally(() => setLoading(false));
+  }, [fetchUser]);
+
+  // Connects/disconnects socket based on authentication state
+  useEffect(() => {
+    if (isAuthenticated) {
+      if (!socket.connected) {
+        socket.once("connect", () => {
+          console.log(`👤 AUTHENTICATION: socket connected, ID: ${socket.id}`);
+        });
+        socket.connect();
+      }
+    } else {
       if (socket.connected) {
         socket.disconnect();
-        console.log("👤 AUTHENTICATION: disconnecting previously active socket");  
-      } else {
-        console.log("👤 AUTHENTICATION: socket already disconnected");
+        console.log("👤 AUTHENTICATION: socket disconnected");
       }
-      setUser(null); // free the user info
-      console.log("👤 AUTHENTICATION: user cleared");
-      return;
+      setUser(null);
     }
-
-    console.log("👤 AUTHENTICATION: token found " + token);
-    socket.auth = { token };
-    if (!socket.connected) {
-      socket.once("connect", () => { // listener to log successful socket connection after login/signup
-        console.log(`👤 AUTHENTICATION: socket connected, ID: ${socket.id}`);
-      });
-      socket.connect();  //  connects AFTER registering the listener
-    } else {
-      console.log("👤 AUTHENTICATION: socket was already connected");
-    }
-
-    fetch("/api/users/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(async (res) => {
-        const rawText = await res.text();
-        // console.log("Auth[token] - /api/users/me raw body", rawText);
-        if (!res.ok) throw new Error("invalid token");
-        const data = rawText ? JSON.parse(rawText) : null;
-        return data;
-      })
-      .then((data) => {
-        console.log("👤 AUTHENTICATION: fetched user data", data);
-        if (data) setUser(data.user ?? data);
-      })
-      .catch(() => {
-        console.warn("👤 AUTHENTICATION: fetching user data failed");
-        localStorage.removeItem(TOKEN_KEY);
-        setToken(null);
-        setUser(null);
-      });
-  }, [token]);
+  }, [isAuthenticated]);
 
   const login = async (email: string, password: string) => {
     console.log("🚪 LOGIN: sending request to backend");
@@ -129,20 +110,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
       body: JSON.stringify({ email, password }),
     });
-    const loginRawText = await res.text();
-    // console.log("🚪 LOGIN: token created ", loginRawText);
+    const raw = await res.text();
     if (!res.ok) {
-      const err = loginRawText ? JSON.parse(loginRawText) : null;
+      const err = raw ? JSON.parse(raw) : null;
       console.log("🚪 LOGIN: failed with error ", err);
-      throw new Error(err?.error ?? err?.message ?? "generic fail error");
+      throw new Error(err?.error ?? err?.message ?? "login failed");
     }
-    const parsed = loginRawText ? JSON.parse(loginRawText) : null;
-    const newToken = parsed?.token ?? null;
-    console.log("🚪 LOGIN: user logged in with new token ", !!newToken);
-    localStorage.setItem(TOKEN_KEY, newToken);
-    setToken(newToken);
+    console.log("🚪 LOGIN: success, cookie set");
+    // Cookie is now set — fetch user to hydrate state
+    await fetchUser();
   };
 
+  // signup first registers the user, then logs them in to set the cookie
   const signup = async (email: string, password: string, username: string) => {
     const res = await fetch("/api/auth/register", {
       method: "POST",
@@ -151,14 +130,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password, username }),
     });
     console.log("📋 SIGNUP: status", res.status);
-    const signupRawText = await res.text();
-    console.log("📋 SIGNUP: raw body", signupRawText);
+    const signupRawText = await res.text(); 
+    console.log("📋 SIGNUP: signupRawText body", signupRawText);
     if (!res.ok) {
       const err = signupRawText ? JSON.parse(signupRawText) : null;
       console.log("📋 SIGNUP: error payload", err);
       throw new Error(err?.error ?? err?.message ?? "signup failed");
     }
-    // Backend /register doesn't return a token; so we call auto-login on register success
+    // Register succeeded, awaits login to set the cookie and fetches user
     await login(email, password);
   };
 
@@ -169,25 +148,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
     } catch {
-      // Ignoring network errors; clear client state regardless
+      // Ignore network errors; clear client state regardless
     }
-    if(socket.connected) // need to ensure we disconnect socket on LOGOUT TO SOLVE BUG
-      { 
-        socket.disconnect();
-        console.log("👋 LOGOUT: disconnecting previously active socket");  
-      } else {
-        console.log("👋 LOGOUT: socket already disconnected");
-      }
-      console.log("👋 LOGOUT: clearing local storage, logged token and user info");
-      localStorage.removeItem(TOKEN_KEY);
-      setToken(null);
-      setUser(null);
-      console.info("LOGOUT: success");
+    console.log("👋 LOGOUT: clearing auth state");
+    setIsAuthenticated(false);
+    setUser(null);
+    console.info("LOGOUT: success");
   };
 
+  // Don't render children until initial auth check completes
+  if (loading) return null;
+
   return (
+    // auth context provider that provides the user, isAuthenticated, 
+    // login, signup, and logout functions to its children
+    // we do this so that we can access the auth context from any component in the app
     <AuthContext.Provider
-      value={{ token, user, isAuthenticated: !!token, login, signup, logout }}
+      value={{ user, isAuthenticated, login, signup, logout }}
     >
       {children}
     </AuthContext.Provider>
@@ -197,6 +174,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 // Hook that checks the authentication state
 export function useAuthContext() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useLogHandlersContext must be used inside AuthProvider");
+  if (!ctx) throw new Error("useAuthContext must be used inside AuthProvider");
   return ctx;
 }

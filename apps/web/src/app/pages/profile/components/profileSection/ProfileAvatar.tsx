@@ -95,13 +95,12 @@ export const ProfileAvatar = ({
     setAvatar(localPreview);
 
     try {
-      const token = localStorage.getItem("auth_token");
       const formData = new FormData();
       formData.append("file", file);
 
       const res = await fetch("/api/profiles/me/avatar", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
         body: formData,
       });
 
@@ -133,9 +132,7 @@ export const ProfileAvatar = ({
       // ── Refresh the auth context's cached /api/users/me response so that
       //     other components (navbar, friends list, etc.) pick up the new URL
       //     and stop referencing the old (now‑deleted) avatar ──
-      fetch("/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      fetch("/api/users/me", { credentials: "include" })
         .then((r) => r.json())
         .catch(() => {});
     } catch (err) {
@@ -169,10 +166,9 @@ export const ProfileAvatar = ({
     setErrorMessage(null);
 
     try {
-      const token = localStorage.getItem("auth_token");
       const res = await fetch("/api/profiles/me/avatar", {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
 
       if (!res.ok) {
@@ -191,9 +187,7 @@ export const ProfileAvatar = ({
       setFiles([]);
 
       // ── Refresh auth context so other components pick up the null avatarUrl ──
-      fetch("/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      fetch("/api/users/me", { credentials: "include" })
         .then((r) => r.json())
         .catch(() => {});
     } catch (err) {
