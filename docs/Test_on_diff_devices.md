@@ -10,7 +10,7 @@ Run this command to get your local IP:
 ipconfig getifaddr en0
 ```
 
-(If it returns blank, your Wi-Fi interface might be different. Try: ``` networksetup -getinfo Wi-Fi | grep "IP address:")```
+If it returns blank, your Wi-Fi interface might be different. Try: ``` networksetup -getinfo Wi-Fi | grep "IP address:"```
 
 ## 🐧 Linux (Ubuntu, Fedora, Debian, etc.)
 Run this command to find your active local IP:
