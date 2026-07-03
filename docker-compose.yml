@@ -22,7 +22,7 @@ services:
     environment:
       PORT: "3000"
       DATABASE_URL: "postgresql://app:app@db:5432/appdb?schema=public"
-      JWT_SECRET: "dev_secret"
+      # JWT_SECRET: "dev_secret" # JESS: i removed this not only for security reasons but also because it cause the "Player" logged problem
       EXPOSE_DEV_TOKENS: "true"
     depends_on:
       db:
@@ -36,7 +36,9 @@ services:
       - api_node_modules:/app/node_modules
       - ./data/avatars:/app/data/avatars
     #command:  sh -lc "npx prisma migrate deploy && npm run db:seed && npm run dev"
-    command: sh -lc "npx prisma db push && npm run db:seed && npm run dev"
+    # JESS: i commented the JWT_SECRET and assed this crypto randomBytes command to generate a new secret
+    # each time the container is started, this is for security reasons and also to fix the "Player" logged problem
+    command: sh -lc "export JWT_SECRET=$(node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\") && npx prisma db push && npm run db:seed && npm run dev"
     #command: sh -lc "npx prisma db push --accept-data-loss && npm run db:seed && npm run dev"
     networks: [transcendence]
 
