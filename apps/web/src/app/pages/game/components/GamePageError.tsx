@@ -22,7 +22,7 @@ export default function GamePageError({ roomError }: { roomError: string }) {
           <p className="text-[clamp(1.5rem,4vw,3rem)] font-semibold text-rose-700">An error occured!</p>
           <p className="text-white mb-[clamp(1rem,2.5vw,2.5rem)] text-[clamp(0.8rem,1.2vw,1.25rem)]">{roomError}</p>
           <a
-            href="/profile"
+            href="/"
             className="inline-block rounded-lg bg-rose-600 px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.4rem,0.8vw,0.6rem)] text-[clamp(0.7rem,1vw,0.875rem)] font-semibold text-white hover:bg-rose-500 transition"
           >
             Back to Profile

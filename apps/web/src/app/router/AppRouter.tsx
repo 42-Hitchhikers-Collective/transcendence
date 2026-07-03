@@ -11,32 +11,27 @@ https://reactrouter.com/start/data/navigating
 
 */
 
-import { createBrowserRouter, RouterProvider } from "react-router";
-import HomePage from "../pages/home/HomePage.tsx"; // dynamic home page 
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
+import HomePage from "../pages/home/HomePage.tsx"; // renders LogPage or ProfilePage based on auth
 import GamePage from "../pages/game/GamePage";
-import ProfilePage from "../pages/profile/ProfilePage";
 import { AuthGuard } from "../auth/AuthGuard.tsx"; // guard wrapper
 
 const router = createBrowserRouter([
   {
     path: "/",
-    Component: HomePage, /* HomePage redirects to /profile form if user is logged in, if not to login/signup form  */
+    Component: HomePage, /* renders LogPage (login/signup) if not authenticated, ProfilePage if authenticated */
   },
   {
-    path: "/profile",
-    element: (
-      <AuthGuard> {/* Guard wrapped around page components that need to show only if logged in */}
-        <ProfilePage />
-      </AuthGuard>
-    ),
-  },
-  {
-    path: "/game", // to be changed to "/game/:roomId" later
+    path: "/game",
     element: (
       <AuthGuard>  {/* Guard wrapped around page components that need to show only if logged in */}
         <GamePage />
       </AuthGuard>
     ),
+  },
+  {
+    path: "*",
+    element: <Navigate to="/" replace />,  // redirects all unknown paths  to home
   },
 ]);
 

@@ -10,7 +10,7 @@ export default function GameOver({ isWinner }: Props) {
 
   const handleBack = () => {
     socket.emit("leave_room");
-    navigate("/profile", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

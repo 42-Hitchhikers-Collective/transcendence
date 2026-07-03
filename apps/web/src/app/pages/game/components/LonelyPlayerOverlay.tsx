@@ -6,7 +6,7 @@ export default function LonelyPlayerOverlay({ roomId }: { roomId: string }) {
 
   const handleBack = () => {
     socket.emit("leave_room");
-    navigate("/profile", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (

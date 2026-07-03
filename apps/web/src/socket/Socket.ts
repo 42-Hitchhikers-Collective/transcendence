@@ -10,20 +10,20 @@ export const socket = io({
 
 
 socket.on("connect_error", (err) => {
-  console.warn(`[socket] connect_error \n Error Message ${err.message}`);
+  console.log(`[socket] connect_error \n Error Message ${err.message}`);
 });
 
 // disconnection happens in logout (check AuthContext.tsx)
 socket.on("disconnect", (message) => {
-  console.warn(`[socket] disconnect \n Disconnect Message: ${message}`);
+  console.log(`[socket] disconnect \n Disconnect Message: ${message}`);
 });
 
 socket.io.on("reconnect_attempt", (message) => {
-  console.warn(`[socket] reconnect_attempt \n Reconnect Message: ${message}`);
+  console.log(`[socket] reconnect_attempt \n Reconnect Message: ${message}`);
 });
 
 socket.io.engine?.on("upgradeError", (err) => {
-  console.warn(`[socket] upgradeError \n Upgrade Error Message: ${err.message}`);
+  console.log(`[socket] upgradeError \n Upgrade Error Message: ${err.message}`);
 });
 
 socket.on("room_state", (frontendRoom: FrontendRoom) => {
