@@ -2,15 +2,15 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: appdb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5434:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -21,9 +21,9 @@ services:
       context: ./apps/api
     environment:
       PORT: "3000"
-      DATABASE_URL: "postgresql://app:app@db:5432/appdb?schema=public"
-      JWT_SECRET: "dev_secret"
-      EXPOSE_DEV_TOKENS: "true"
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      EXPOSE_DEV_TOKENS: ${EXPOSE_DEV_TOKENS}
     depends_on:
       db:
         condition: service_healthy
@@ -76,4 +76,4 @@ networks:
 volumes:
   api_node_modules:
   web_node_modules:
-  postgres_data: {} # // Changed by Inbar during inbar/welf merge to make it work on school pcs
+  postgres_data: {}

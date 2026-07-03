@@ -1,5 +1,4 @@
 .env
-.env.*
 nginx/certs
 node_modules/
 cookies.txt
