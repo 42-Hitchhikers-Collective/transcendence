@@ -4,20 +4,20 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 const USERS = [
-  { email: "alice@example.com",   password: "alice1234",   username: "alice",   avatarUrl: "/avatars/alice.png" },
-  { email: "bob@example.com",     password: "bob1234",     username: "bob",     avatarUrl: "/avatars/bob.jpg"   },
-  { email: "charlie@example.com", password: "charlie1234", username: "charlie", avatarUrl: "/avatars/default.png"                 },
-  { email: "diana@example.com",   password: "diana1234",   username: "diana",   avatarUrl: "/avatars/default.png"                 },
-  { email: "eve@example.com",     password: "eve1234",     username: "eve",     avatarUrl: "/avatars/eve.jpg"   },
-  { email: "frank@example.com",   password: "frank1234",   username: "frank",   avatarUrl: "/avatars/frank.jpg" },
-  { email: "grace@example.com",   password: "grace1234",   username: "grace",   avatarUrl: "/avatars/default.png"                 },
+  { email: "alice@example.com",   password: "Alice12345",   username: "alice",   avatarUrl: "/avatars/alice.png" },
+  { email: "bob@example.com",     password: "Bob12345",     username: "bob",     avatarUrl: "/avatars/bob.jpg"   },
+  { email: "charlie@example.com", password: "Charlie12345", username: "charlie", avatarUrl: "/avatars/default.png"                 },
+  { email: "diana@example.com",   password: "Diana12345",   username: "diana",   avatarUrl: "/avatars/default.png"                 },
+  { email: "eve@example.com",     password: "Eve12345",     username: "eve",     avatarUrl: "/avatars/eve.jpg"   },
+  { email: "frank@example.com",   password: "Frank12345",   username: "frank",   avatarUrl: "/avatars/frank.jpg" },
+  { email: "grace@example.com",   password: "Grace12345",   username: "grace",   avatarUrl: "/avatars/default.png"                 },
   // extra players for badge testing
-  { email: "henry@example.com",   password: "henry1234",   username: "henry",   avatarUrl: "/avatars/default.png" },  // Intermediate → 18 games, 12 wins
-  { email: "ivy@example.com",     password: "ivy1234",     username: "ivy",     avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
-  { email: "jack@example.com",    password: "jack1234",    username: "jack",    avatarUrl: "/avatars/default.png" },  // Beginner → 3 games, 1 win
-  { email: "leo@example.com",     password: "leo1234",     username: "leo",     avatarUrl: "/avatars/default.png" },  // Master → 320 games, 240 wins
-  { email: "mia@example.com",     password: "mia1234",     username: "mia",     avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
-  { email: "noah@example.com",    password: "noah1234",    username: "noah",    avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
+  { email: "henry@example.com",   password: "Henry12345",   username: "henry",   avatarUrl: "/avatars/default.png" },  // Intermediate → 18 games, 12 wins
+  { email: "ivy@example.com",     password: "Ivy12345",     username: "ivy",     avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
+  { email: "jack@example.com",    password: "Jack12345",    username: "jack",    avatarUrl: "/avatars/default.png" },  // Beginner → 3 games, 1 win
+  { email: "leo@example.com",     password: "Leo12345",     username: "leo",     avatarUrl: "/avatars/default.png" },  // Master → 320 games, 240 wins
+  { email: "mia@example.com",     password: "Mia12345",     username: "mia",     avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
+  { email: "noah@example.com",    password: "Noah12345",    username: "noah",    avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
 ];
 
 // Each game: host, date, and players with their final placement (1 = winner)
