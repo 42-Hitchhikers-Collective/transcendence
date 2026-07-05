@@ -2,9 +2,23 @@ import { CARDS, SCREEN } from "./Layouts.ts";
 import { passTurn } from "../../network/gameNetwork";
 
 export class Announcement {
-  constructor(private scene: Phaser.Scene) {}
+  // Phaser scene reference — class field instead of constructor param
+  // because 'private' in constructor is not allowed with erasableSyntaxOnly
+  private scene: Phaser.Scene;
+
+  constructor(scene: Phaser.Scene) {
+    this.scene = scene;
+  }
+
+  // Race condition guard: when navigating away from the game, Phaser destroys
+  // the scene, but socket events like 'uno' or 'error' may still fire.
+  // Without this guard, this.scene.add.* throws "Cannot read properties of null".
+  private isSceneAlive(): boolean {
+    return !!(this.scene && (this.scene as any).sys?.game);
+  }
 
   uno() {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     const sprite = this.scene.add.image(
       SCREEN.WIDTH / 2,
       SCREEN.HEIGHT / 2,
@@ -28,6 +42,7 @@ export class Announcement {
   }
 
   error(text: string) {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     if (text == "first_draw") {
       const txt = this.scene.add.text(
         500,

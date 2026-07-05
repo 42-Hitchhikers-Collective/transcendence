@@ -3,8 +3,11 @@ import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
 export class BoardManager {
   private pile!: Phaser.GameObjects.Zone;
   private boardContainer!: Phaser.GameObjects.Container;
+  private scene: Phaser.Scene; // JESS: Phaser scene reference — class field instead of constructor param because 'private' in constructor is not allowed with erasableSyntaxOnly
 
-  constructor(private scene: Phaser.Scene) {}
+  constructor(scene: Phaser.Scene) { // JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
+    this.scene = scene; // JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
+  }
 
   create(): {
     pile: Phaser.GameObjects.Zone;

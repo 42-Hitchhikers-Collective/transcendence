@@ -13,7 +13,7 @@ export class RenderManager {
   private pendingDrawText: Phaser.GameObjects.Text | null = null;
   private canDraw = false; // JESS: we need a flag to disable the draw pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
 
-  private scene: Phaser.Scene; //JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
+  private scene: Phaser.Scene; // JESS Phaser scene reference — class field instead of constructor param because 'private' in constructor is not allowed with erasableSyntaxOnly
 
   constructor(
     scene: Phaser.Scene, //JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
@@ -39,7 +39,10 @@ export class RenderManager {
     }
   }
 
+  // this.scene.add.* on a destroyed scene throws "can't access property 'add'".
   render(room: FrontendRoom) {
+    if (!this.scene || !(this.scene as any).sys?.game) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
+
     this.clearPlayers();
 
     const positions = this.getPlayerPositions(room.players.length);

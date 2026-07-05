@@ -6,12 +6,26 @@ interface ColorButton {
 }
 
 export class UIManager {
+  private scene: Phaser.Scene;   // JESS: Phaser scene reference — class field instead of constructor param because 'private' in constructor is not allowed with erasableSyntaxOnly
   private wildColorContainer: Phaser.GameObjects.Container | null = null;
   private passTurnContainer: Phaser.GameObjects.Container | null = null;
 
-  constructor(private scene: Phaser.Scene) {}
+  constructor(scene: Phaser.Scene) {
+    this.scene = scene;
+  }
+
+  // ______________________________________________________________________________
+  // JESS: Race condition guard: when navigating away from the game, Phaser destroys
+  // the scene (gameObject factory becomes null), but socket events like
+  // 'show_colors' or 'display_pass_button' may still fire. Without this guard,
+  // this.scene.add.* throws "Cannot read properties of null (reading 'add')".
+  private isSceneAlive(): boolean {
+    return !!(this.scene && (this.scene as any).sys?.game);
+  }
+  // ______________________________________________________________________________
 
   showWildColorButtons() {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     this.hideWildColorButtons();
 
     this.wildColorContainer = this.scene.add.container(500, 290); // JESS: I improved the position of the wild color buttons
@@ -59,6 +73,7 @@ export class UIManager {
   }
 
   showPassTurnButtons() {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     if (this.passTurnContainer) {
       return;
     }

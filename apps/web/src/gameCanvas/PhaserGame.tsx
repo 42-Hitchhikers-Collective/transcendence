@@ -28,8 +28,7 @@ export default function PhaserGame() {
 
     const game = new Phaser.Game(config);
 
-    game.canvas.style.borderRadius = "16px"; // JESS: add rounded corners to the game canvas to match the container's rounded corners
-    const h = container?.clientHeight ?? 0; // JESS: get the height of the container to set the game canvas height, ensuring it fills the container vertically
+    game.canvas.style.borderRadius = "16px";
     console.log(
       `[PhaserGame] Canvas: ${game.canvas.width}×${game.canvas.height}`,
     );

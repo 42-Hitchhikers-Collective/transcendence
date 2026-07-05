@@ -3,16 +3,27 @@ import { EventBus } from "../../events/EventBus";
 
 export class InputManager {
   private pile!: Phaser.GameObjects.Zone;
-  private canPlay = false; // JESS: WE NEED A FLAG THAT GUARDS OTHER PLAYERS TO INTERACT WITH THE GAME WHEN IT'S NOT THEIR TURN OE THE GAME WILL BEHAVE UNEXPECTEDLY
+  private canPlay = false; //JESS: we need a flag to disable the discard pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
+
+  // Phaser scene reference — class field because 'private' in constructor
+  // is not allowed with erasableSyntaxOnly
+  private scene: Phaser.Scene;
 
   constructor(
-    private scene: Phaser.Scene,
+    scene: Phaser.Scene, // JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
     pile: Phaser.GameObjects.Zone,
   ) {
+    this.scene = scene; // JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
     this.pile = pile;
   }
 
-  // JESS: ADDED THIS FUNCTION AS A GUARD THAT DISABLES OTHER PLAYERS TO SEND GAME EVENTS WHEN THEY INTERACT WITH THE GAME BUT IT'S NOT THEIR TURN
+  // Race condition guard: Phaser input events (drag/drop) keep firing during
+  // scene teardown. Without this, this.scene.tweens.add() throws
+  // "Cannot read properties of null" because the tween manager is destroyed.
+  private isSceneAlive(): boolean {
+    return !!(this.scene && (this.scene as any).sys?.game);
+  }
+
   setCanPlay(flag: boolean) {
     this.canPlay = flag;
   }
@@ -29,6 +40,7 @@ export class InputManager {
     x: number,
     y: number,
   ) {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     obj.x = x;
     obj.y = y;
   }
@@ -38,6 +50,7 @@ export class InputManager {
     obj: Phaser.GameObjects.Image,
     zone: Phaser.GameObjects.Zone,
   ) {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     // JESS: ADDED A DISPLAY MESSAGE TO SHOW WHEN THE USER NOT IN TURN INTERACTS WITH THE GAME TO EXPLAIN WHY NOTHING HAPPENS
     if (!this.canPlay) {
       this.resetCard(obj);
@@ -59,6 +72,7 @@ export class InputManager {
     obj: Phaser.GameObjects.Image,
     dropped: boolean,
   ) {
+    if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
     if (!dropped) {
       this.resetCard(obj);
     }
