@@ -15,6 +15,9 @@ export default function PhaserGame() {
       type: Phaser.AUTO,
       parent: container, //JESS: attached Phaser to the div container
       scene: [Boot, Preloader, GameScene],
+      audio: {
+        noAudio: true, // disable audio to prevent AudioContext suspend/resume errors on navigation
+      },
       scale: {
         mode: Phaser.Scale.FIT, // JESS: use FIT mode to maintain aspect ratio and fit the game within the container
         autoCenter: Phaser.Scale.CENTER_BOTH, // JESS: center the game both horizontally and vertically within the container
@@ -32,8 +35,6 @@ export default function PhaserGame() {
     );
 
     return () => {
-      const sound = game.sound as any; // JESS: cast to any to access the private context property
-      sound?.context?.close?.();// JESS: close the audio context to prevent errors when navigating away from the game
       game.destroy(true);
     };
   }, []);
