@@ -31,6 +31,14 @@ certs: dirs
 		-subj "/CN=localhost"
 	@echo "✅  SSL certificate ready"
 
+# Prints the local and LAN URLs — reusable by any target that starts the app
+show-url:
+	@echo "✅  App running at https://localhost:8443"
+	@LAN_IP=$$({ ip -4 addr show 2>/dev/null || ifconfig 2>/dev/null; } | grep -oE 'inet (addr:)?[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | grep -v 127.0.0.1 | head -1); \
+	if [ -n "$$LAN_IP" ]; then \
+	  echo "🌐  Other devices: https://$$LAN_IP:8443"; \
+	fi
+
 host-certs: dirs
 	$(eval LAN_IP := $(shell ip -4 addr show | grep -oP '(?<=inet )\d+\.\d+\.\d+\.\d+' | grep -v 127.0.0.1 | head -1))
 	@echo "Generating cert for localhost + $(LAN_IP)"
@@ -56,7 +64,7 @@ deploy: host-certs
 up: dirs
 	@echo "🔨  Building and starting all containers..."
 	$(COMPOSE) up -d --build
-	@echo "✅  App running at https://localhost:8443"
+	$(MAKE) show-url
 
 down:
 	@echo "🛑  Stopping all containers..."
@@ -86,12 +94,12 @@ prune:
 
 rebuild: clean up
 
-# ── Fresh starts (wipes everything) ──────────────────────────
+# ── Start project (sets up project from scratch and/or wipes everything) ──────────────────────────
 
 fresh: clean prune
 	@echo "🧼  Fresh start: rebuilding containers..."
 	$(MAKE) up
-	@echo "✅  Fresh start complete: app at https://localhost:8443"
+	@echo "✅  Fresh start complete"
 
 setup: certs clean prune
 	@echo "🚀  Full setup: rebuilding from scratch..."
@@ -101,7 +109,8 @@ setup: certs clean prune
 	sleep 2
 	$(MAKE) db-seed
 	@echo ""
-	@echo "✅  Setup complete: app running at https://localhost:8443"
+	@echo "✅  Setup complete"
+	$(MAKE) show-url
 	@echo ""
 
 # ── Database ─────────────────────────────────────────────────
@@ -149,6 +158,6 @@ reinstall:
 # ── Phony targets ────────────────────────────────────────────
 
 .PHONY: all up down re ps logs clean prune rebuild fresh setup \
-        dirs certs host-certs deploy \
+        dirs certs host-certs deploy show-url \
         db db-seed db-migrate db-reset prisma-studio \
         api reinstall
