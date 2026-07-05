@@ -1,37 +1,35 @@
-# Header
+# ============================================================
+#  Transcendence: Makefile recipes for building, running, and managing the application.
+# 
+#  1. Run "MAKE" to build the whole project from scratch all in one command. This is the default recipe as it's the first command to run on a new computer.
+#  2. Use Docker lifecycle section to start/stop/restart the app while keeping your database data intact.
+#  3. When you are done developing, you can use the Cleanup section to remove containers and volumes or prune unused Docker resources.
+#  4. Use the Fresh starts section to wipe everything and start from scratch, without seeding the database.
+#  5. Use Infrastructure section to create directories and generate SSL certs separately when needed for deployment.
+#  6. Use Database section recipes for tasks that are directly related to the database, such as seeding, migrating, resetting, and opening Prisma Studio.
+#  7. Use Dev tools section recipes for tasks that are not part of the main application lifecycle, such as running the API only, reinstalling dependencies, or other utilities.
+# 
+# ============================================================
+
 COMPOSE = docker compose -f docker-compose.yml
 
-# Basics
-all: up
+# ── Default ──────────────────────────────────────────────────
 
-up: dirs
-	$(COMPOSE) up -d --build
+all: setup
 
-down:
-	$(COMPOSE) down
+# ── Infrastructure (directories, certs) ──────────────────────
 
-ps:
-	$(COMPOSE) ps
-
-logs:
-	$(COMPOSE) logs -f
-
-clean:
-	$(COMPOSE) down -v --remove-orphans
-
-re: down up
-
-rebuild: clean up
-
-# Setup
 dirs:
+	@echo "📁  Creating required directories..."
 	mkdir -p data/postgres data/avatars nginx/certs
-	
+
 certs: dirs
+	@echo "🔐  Generating self-signed SSL certificate..."
 	openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 -nodes \
 		-keyout nginx/certs/dev.key \
 		-out nginx/certs/dev.crt \
 		-subj "/CN=localhost"
+	@echo "✅  SSL certificate ready"
 
 host-certs: dirs
 	$(eval LAN_IP := $(shell ip -4 addr show | grep -oP '(?<=inet )\d+\.\d+\.\d+\.\d+' | grep -v 127.0.0.1 | head -1))
@@ -52,62 +50,105 @@ deploy: host-certs
 	@echo "  Connect from other computers: https://$(shell cat nginx/certs/host-ip.txt):8443"
 	@echo ""
 
-# Database
+# ── Docker lifecycle ─────────────────────────────────────────
+#  Start / stop / restart: keeps your database data intact.
+
+up: dirs
+	@echo "🔨  Building and starting all containers..."
+	$(COMPOSE) up -d --build
+	@echo "✅  App running at https://localhost:8443"
+
+down:
+	@echo "🛑  Stopping all containers..."
+	$(COMPOSE) down
+	@echo "✅  All containers stopped"
+
+re: down up
+	@echo "✅  Restarted: data preserved"
+
+ps:
+	$(COMPOSE) ps
+
+logs:
+	$(COMPOSE) logs -f
+
+# ── Cleanup ──────────────────────────────────────────────────
+
+clean:
+	@echo "🧹  Stopping containers and removing volumes..."
+	$(COMPOSE) down -v --remove-orphans
+	@echo "✅  Cleaned up"
+
+prune:
+	@echo "🧹  Pruning unused Docker resources..."
+	docker system prune -a --volumes -f
+	@echo "✅  Docker pruned"
+
+rebuild: clean up
+
+# ── Fresh starts (wipes everything) ──────────────────────────
+
+fresh: clean prune
+	@echo "🧼  Fresh start: rebuilding containers..."
+	$(MAKE) up
+	@echo "✅  Fresh start complete: app at https://localhost:8443"
+
+setup: certs clean prune
+	@echo "🚀  Full setup: rebuilding from scratch..."
+	$(MAKE) up
+	@echo "  ⏳  Waiting for database and seeding..."
+	@until docker compose -f docker-compose.yml exec -T db pg_isready -U app 2>/dev/null; do sleep 1; done
+	sleep 2
+	$(MAKE) db-seed
+	@echo ""
+	@echo "✅  Setup complete: app running at https://localhost:8443"
+	@echo ""
+
+# ── Database ─────────────────────────────────────────────────
+
 db:
+	@echo "🗄️   Starting database only..."
 	$(COMPOSE) up -d db
+	@echo "✅  Database running on port 5434"
 
 db-seed:
+	@echo "🌱  Seeding database with test data..."
 	$(COMPOSE) exec api npm run db:seed
+	@echo "✅  Database seeded"
 
 db-migrate:
+	@echo "🔄  Running Prisma migration (you'll be prompted for a name)..."
 	$(COMPOSE) exec -it api npx prisma migrate dev
+	@echo "✅  Migration complete"
 
 db-reset:
+	@echo "🗑️   Wiping database and recreating from scratch..."
 	$(COMPOSE) down -v
 	rm -rf data/postgres/*
 	$(COMPOSE) up -d
+	@echo "✅  Database reset: fresh schema applied"
 
-# Prisma
 prisma-studio:
+	@echo "🔍  Opening Prisma Studio..."
 	$(COMPOSE) exec api npx prisma studio --hostname 0.0.0.0 --port 5555
-	
-# API / Backend
-api:
-	$(COMPOSE) up -d --build api
-	
-migration:
-	$(COMPOSE) exec -it api npx prisma migrate dev --name init
 
-prune:
-	docker system prune -a --volumes -f
+# ── Dev tools ────────────────────────────────────────────────
+
+api:
+	@echo "🔧  Building and starting API only..."
+	$(COMPOSE) up -d --build api
+	@echo "✅  API running on port 3000"
 
 reinstall:
+	@echo "📦  Reinstalling all dependencies..."
 	rm -rf apps/api/node_modules apps/web/node_modules
 	npm install --prefix apps/api
 	npm install --prefix apps/web
+	@echo "✅  Dependencies reinstalled"
 
-# Fresh start: removes all data and rebuilds everything so that is ready to run
-fresh:
-	docker compose down -v
-	docker system prune -a --volumes -f
-	rm -rf data/postgres/*
-	mkdir -p data/postgres data/avatars nginx/certs
-	$(COMPOSE) up -d --build
+# ── Phony targets ────────────────────────────────────────────
 
-# Run this on the school pc, make sure to follow the points in this file first /home/jslusark/sgoinfre/transcendence/docs/how_to_start_on_42.md
-setup: certs
-	$(COMPOSE) down -v 2>/dev/null; true
-	docker system prune -a --volumes -f
-	rm -rf data/postgres/*
-	mkdir -p data/postgres data/avatars
-	$(COMPOSE) up -d --build
-	@echo "Waiting for database to be healthy..."
-	@until docker compose -f docker-compose.yml exec -T db pg_isready -U transcendence 2>/dev/null; do sleep 1; done
-	sleep 2
-	$(COMPOSE) exec -T api npm run db:seed
-	@echo ""
-	@echo "  Setup complete — app running at https://localhost:8443"
-	@echo ""
-
-# Phony
-.PHONY: all up down logs clean re rebuild certs host-certs deploy dirs db db-seed db-migrate db-reset api migration prune ps reinstall fresh setup
+.PHONY: all up down re ps logs clean prune rebuild fresh setup \
+        dirs certs host-certs deploy \
+        db db-seed db-migrate db-reset prisma-studio \
+        api reinstall
