@@ -81,7 +81,10 @@ export async function userRoutes(app: any) {
       where: { userId: { in: ranked.map((r) => r.userId) } },
       select: { userId: true, username: true, avatarUrl: true },
     });
-    const profileMap = new Map(profiles.map((p: any) => [p.userId, p]));
+    
+    // Create a map for quick lookup of profile data by userId
+    const profileMap: Map<string, { userId: string; username: string; avatarUrl: string | null }> =
+      new Map(profiles.map((p: { userId: string; username: string; avatarUrl: string | null }) => [p.userId, p]));
 
     const data = ranked.map((r) => ({
       rank: r.rank,

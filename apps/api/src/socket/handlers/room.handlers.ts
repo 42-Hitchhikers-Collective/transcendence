@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+import { Socket } from "socket.io";
 import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from ".";
@@ -24,7 +25,7 @@ export function registerRoomHandlers(
 ) {
 
   // Create a new room
-  socket.on("create_room", ({ roomName }) => {
+  socket.on("create_room", ({ roomName }: { roomName: string }) => {
     const { playerId, userName } = getIdentity(socket);
     const res = gameManager.createRoom(roomName, playerId);
     if (!res.success) {
@@ -48,7 +49,7 @@ export function registerRoomHandlers(
   });
 
   // Join an existing room
-  socket.on("join_room", ({ roomName }) => {
+  socket.on("join_room", ({ roomName }: { roomName: string }) => {
     const { playerId, userName } = getIdentity(socket);
     const res = gameManager.joinRoom(roomName, playerId);
     if (!res.success) {
@@ -112,7 +113,7 @@ export function registerRoomHandlers(
     broadcastGamePage(res.roomId);
     console.log("[room:leave_room] success", {
       playerId,
-      username: socket.name,
+      username: userName,
       roomId: res.roomId,
     });
     checkLonelyPlayer(res.roomId); // check if only 1 player left in the room after a player left
@@ -173,13 +174,13 @@ export function registerRoomHandlers(
   }
   
   // Check if the room with the given name exists, returns room name and exists boolean true or false
-  socket.on("is_room_exists", ({ roomName }) => {
+  socket.on("is_room_exists", ({ roomName }: { roomName: string }) => {
     const exists = gameManager.getRoomsByNameMap().has(roomName);
     socket.emit("room_exists_response", { roomName, exists });
   });
 
   // Check if player is part of the room with the given name, returns room name and isPart boolean true or false
-  socket.on("is_part_of_room", ({ roomName }) => {
+  socket.on("is_part_of_room", ({ roomName }: { roomName: string }) => {
     const { playerId } = getIdentity(socket);
     const potentialRoom = gameManager.getRoomByName(roomName);
     if (!potentialRoom) {
@@ -190,14 +191,5 @@ export function registerRoomHandlers(
     socket.emit("part_of_room_response", { roomName, isPart });
   });
   
-  // EVENT IS NOT NEEDED, BACKEND SHOULD SHOOT BY DEFAULT A SYSTEM MESSAGE WHEN A PLAYER DROPS OR REJOINS WITH NEW SOCKET ID
-  // // Listens to when a player rejoins a room after dropping, notifys with a chat msg
-  // socket.on("dropped_player_back", () => {
-  //   const { playerId } = getIdentity(socket);
-  //   const roomId = gameManager.getPlayerRoomId(playerId);
-  //   if (roomId) {
-  //     systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK);
-  //   }
-  // });
 }
   
