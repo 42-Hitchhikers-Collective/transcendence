@@ -4,6 +4,9 @@ export async function authRoutes(app: any) {
   app.post(
     "/register",
     {
+      config: {
+        rateLimit: { max: 10, timeWindow: "5 minutes" }, 
+      },
       schema: {
         body: {
           type: "object",
@@ -43,7 +46,7 @@ export async function authRoutes(app: any) {
     "/login",
     {
       config: {
-        rateLimit: { max: 10, timeWindow: "1 minute" },
+        rateLimit: { max: 10, timeWindow: "5 minutes" },
       },
       schema: {
         body: {
