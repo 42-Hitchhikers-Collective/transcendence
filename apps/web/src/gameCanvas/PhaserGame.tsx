@@ -12,7 +12,7 @@ export default function PhaserGame() {
     if (!container) return; // Safety check, should never happen
 
     const config = {
-      type: Phaser.AUTO,
+      type: Phaser.CANVAS, // JESS: Canvas renderer — avoids WebGL warnings in browser console
       parent: container, //JESS: attached Phaser to the div container
       scene: [Boot, Preloader, GameScene],
       audio: {

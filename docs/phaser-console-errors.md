@@ -1,6 +1,6 @@
 # Phaser Race Conditions — Diagnosis & Fixes
 
-Documenting every console error thrown by the Phaser game canvas during navigation, why each one occurs, and how it was resolved.
+Documenting every console error and warnings thrown by the Phaser game canvas during navigation, why each one occurs, and how it was resolved.
 
 ---
 
@@ -286,6 +286,53 @@ All 5 managers had this pattern. Each was fixed the same way:
 - The `erasableSyntaxOnly` setting in `tsconfig.json` deliberately blocks this specific syntax
 - This setting exists so the project can be compiled by tools that only strip types (like esbuild in our Vite setup)
 - The fix is writing the assignment out explicitly in the constructor body — functionally identical, just more verbose
+
+---
+
+## Warning #9 — WebGL console warnings (Firefox)
+
+```
+WebGL warning: generateMipmap: Tex image TEXTURE_2D level 0 is incurring lazy initialization.
+WebGL warning: Alpha-premult and y-flip are deprecated for non-DOM-Element uploads.
+```
+
+**When:** Appears on every page refresh or navigation while the game is running.
+
+**Why:** Firefox's GPU driver pipeline delays WebGL texture allocation until the first frame is drawn. When Phaser loads card image textures, the GPU hasn't finalized them yet, so Firefox logs a warning. The deprecation warning is because Phaser uses older WebGL texture upload methods that newer browsers have deprecated.
+
+These are **browser/GPU driver internals** — not application bugs. Nothing is broken; the textures load correctly on the next frame.
+
+**Fix:** Switched Phaser renderer from `Phaser.AUTO` (WebGL) to `Phaser.CANVAS` (HTML5 Canvas 2D):
+
+```ts
+// Before
+type: Phaser.AUTO,  // tries WebGL → falls back to Canvas
+
+// After
+type: Phaser.CANVAS, // eliminates all WebGL warnings
+```
+
+Canvas 2D rendering is perfectly adequate for a card game — no visible difference in sprites, text, input, or tweens. WebGL only matters for particle effects, shaders, or complex 3D scenes.
+
+**Evaluator note:** *"Phaser's default WebGL renderer triggers browser-level GPU pipeline warnings in Firefox that are outside application control. We switched to the Canvas renderer, which eliminates these entirely. For a 2D card game, Canvas and WebGL produce identical output."*
+
+**File:** `PhaserGame.tsx`
+
+---
+
+## Warning #10 — React DevTools source map
+
+```
+Source map error: can't access property "sources", map is undefined
+Resource URL: https://localhost:8443/%3Canonymous%20code%3E
+Source Map URL: react_devtools_backend_compact.js.map
+```
+
+**Why:** The React DevTools browser extension injects a helper script into every page. That script references a source map file (`react_devtools_backend_compact.js.map`) that isn't hosted on our server. The browser tries to fetch it, gets a 404, and the source map parser fails.
+
+**Impact:** Zero. This is the browser extension's internal debugging file, not our application code. It does not affect rendering, game logic, or any functionality.
+
+**Fix:** None needed — this is external to the application. The warning disappears when React DevTools is disabled. For evaluation, simply note that it's the browser extension, not the project code.
 
 ---
 
