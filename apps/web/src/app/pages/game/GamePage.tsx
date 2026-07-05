@@ -44,13 +44,13 @@ function GamePageContent({ roomName }: { roomName: string }) {
       }}
     >
       <div className="grid flex-1 min-h-0 w-full max-w-7xl 2xl:max-w-[90vw] mx-auto grid-cols-1 grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[30%_1fr] 2xl:grid-cols-[26%_1fr] gap-[clamp(0.75rem,1.5vw,1.5rem)]">
-        {/* ── Sidebar column (always visible) ──
+        {/*  Sidebar column (always visible) 
              Placed first in DOM so natural flow = desktop (col 1).
              order-2 pushes it below canvas on mobile. */}
         <div className="flex flex-col gap-[clamp(0.75rem,1.5vw,1rem)] order-2 lg:order-0 px-[clamp(0.5rem,2vw,2.5rem)] lg:px-0 min-w-0 min-h-0 overflow-hidden self-start lg:self-stretch">
           <RoomCode gameStarted={gameStarted} roomName={roomName} />
 
-          {/* ── Chat button (mobile only, above player list) ── */}
+          {/*  Chat button (mobile only, above player list)  */}
           <button
             type="button"
             onClick={() => setChatOpen(true)}
@@ -71,13 +71,13 @@ function GamePageContent({ roomName }: { roomName: string }) {
             />
           </div>
 
-          {/* ── Inline chat (desktop only) ── */}
+          {/*  Inline chat (desktop only)  */}
           <div className="hidden lg:flex flex-1 min-h-0 min-w-0">
             <Chat playerList={playerList} />
           </div>
         </div>
 
-        {/* ── Game canvas (top on mobile via order-1, right column on desktop via natural flow) ── */}
+        {/*  Game canvas (top on mobile via order-1, right column on desktop via natural flow)  */}
 
         <div className="flex flex-col order-1 lg:order-0 h-full w-full min-h-0 min-w-0">
           {gameOver?.reason === "finished" ? (
@@ -89,15 +89,15 @@ function GamePageContent({ roomName }: { roomName: string }) {
           )}
         </div>
       </div>
-      {/* ── Chat popup overlay (mobile only) ── */}
+      {/*  Chat popup overlay (mobile only)  */}
       {chatOpen && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm p-[clamp(1rem,3vw,2rem)]">
-          <div className="w-full max-w-md max-h-[85vh] relative">
-            {/* ── Red X close button, outside the box, top-right ── */}
+        <div className="absolute inset-0 z-40 flex bg-white">
+          <div className="w-full h-full flex flex-col min-h-0 relative">
+            {/*  Red X close button, top-left corner  */}
             <button
               type="button"
               onClick={() => setChatOpen(false)}
-              className="absolute -top-[clamp(1.5rem,3vw,2.5rem)] -right-[clamp(0.25rem,0.5vw,0.5rem)] z-10 rounded-full bg-red-500 p-[clamp(0.35rem,0.6vw,0.5rem)] text-white shadow-lg hover:bg-red-400 transition"
+              className="absolute top-[clamp(0.5rem,1.5vw,0.75rem)] right-[clamp(0.5rem,1.5vw,0.75rem)] z-10 rounded-full bg-red-500 p-[clamp(0.35rem,0.6vw,0.5rem)] text-white shadow-lg hover:bg-red-400 transition"
               aria-label="Close chat"
             >
               <XMarkIcon className="size-[clamp(1.25rem,2vw,1.5rem)]" />
