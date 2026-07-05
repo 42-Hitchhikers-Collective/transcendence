@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket";
 
 type Props = {
-  isWinner: boolean;
+  isWinner?: boolean; // undefined = unknown (page refresh during finished game)
 };
 
 export default function GameOver({ isWinner }: Props) {
@@ -13,16 +13,24 @@ export default function GameOver({ isWinner }: Props) {
     navigate("/", { replace: true });
   };
 
+  const isWinnerKnown = isWinner !== undefined;
+
   return (
     <div className="h-full w-full flex items-center justify-center bg-black/60 rounded-2xl">
-      <div className="rounded-2xl border border-slate-200/20 bg-neutral-900 p-[clamp(1.5rem,4vw,3rem)] text-center shadow-2xl max-w-sm mx-[clamp(0.75rem,2vw,1rem)]">
+      <div className="h-full w-full flex flex-col items-center justify-center rounded-2xl border border-slate-200/20 bg-neutral-900 p-[clamp(1.5rem,4vw,3rem)] text-center shadow-2xl px-[clamp(1rem,3vw,2rem)]">
         <p className="text-[clamp(1.25rem,3vw,2rem)] font-semibold text-white">
-          {isWinner ? "You Won! 🎉" : "You lost!😞"}
+          {isWinnerKnown
+            ? isWinner
+              ? "You Won! 🎉"
+              : "You lost!😞"
+            : "Game Over"}
         </p>
         <p className="mt-[clamp(0.5rem,1vw,0.75rem)] text-[clamp(0.7rem,1vw,0.875rem)] text-slate-400">
-          {isWinner
-            ? "Congratulations! Your victory has been saved to your history."
-            : "Better luck next time! Game results saved to your history."}
+          {isWinnerKnown
+            ? isWinner
+              ? "Congratulations! Your victory has been saved to your history."
+              : "Better luck next time! Game results saved to your history."
+            : "This game has ended. Results are saved to your history."}
         </p>
         <button
           onClick={handleBack}

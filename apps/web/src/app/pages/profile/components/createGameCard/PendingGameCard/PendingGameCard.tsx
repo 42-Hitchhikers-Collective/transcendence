@@ -28,15 +28,17 @@ export default function PendingGameCard({
           <h3 className="text-[clamp(1.5rem,5vw,3rem)] min-[450px]:text-[clamp(2rem,6vw,4rem)] lg:text-[clamp(1.5rem,5vw,3rem)] font-extrabold tracking-tight text-slate-900">
             Aren't you forgetting something?
           </h3>
-          <p className="text-[clamp(1rem,1.5vw,1.5rem)] min-[450px]:text-[clamp(1.5rem,2.5vw,2.5rem)] lg:text-[clamp(1rem,1.5vw,1.5rem)] font-bold text-rose-500 tabular-nums">
-            {timeLeft / 1000}s
-          </p>
+
           <p className="mx-auto max-w-xl text-[clamp(0.85rem,1.2vw,1.125rem)] min-[450px]:text-[clamp(1rem,1.5vw,1.3rem)] lg:text-[clamp(0.85rem,1.2vw,1.125rem)] text-slate-600">
             Your friends are waiting for you in room "
             <span className="text-rose-500">{activeRoomName}</span>" ! <br />
             You won&apos;t be able to join or create a new room until you
-            leave this one for good, decide wisely...
+            leave this one for good, decide quickly or you will be kicked out by default after 30 seconds of inactivity!
           </p>
+          {/* <p className="text-[clamp(1rem,1.5vw,1.5rem)] font-bold text-rose-500 tabular-nums">
+            {Math.ceil(timeLeft / 1000)}s
+          </p> */}
+          <div className="mx-auto size-[clamp(2rem,4vw,3rem)] animate-spin rounded-full border-[3px] border-rose-200 border-t-rose-500" />
         </div>
 
         <div className="flex flex-row items-center justify-center gap-[clamp(0.5rem,1vw,1rem)] min-[450px]:gap-[clamp(0.75rem,1.5vw,1.5rem)] lg:gap-[clamp(0.5rem,1vw,1rem)] py-[clamp(1rem,2vw,2rem)] min-[450px]:py-[clamp(1.5rem,3vw,3rem)] lg:py-[clamp(1rem,2vw,2rem)]">

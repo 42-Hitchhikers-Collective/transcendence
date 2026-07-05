@@ -81,7 +81,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
         <div className="flex flex-col order-1 lg:order-0 h-full w-full min-h-0 min-w-0">
           {gameOver?.reason === "finished" ? (
-            <GameOver isWinner={playerInfo?.playerId === gameOver.winnerId} />
+            <GameOver isWinner={gameOver.winnerId ? playerInfo?.playerId === gameOver.winnerId : undefined} />
           ) : gameOver?.reason === "lonely" && roomId ? (
             <LonelyPlayerOverlay roomId={roomId} />
           ) : (

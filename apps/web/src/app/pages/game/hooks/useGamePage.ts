@@ -46,7 +46,10 @@ export function useGamePage(roomName: string) {
   const [gameStarted, setGameStarted] = useState(false);
   const [canvasError, setCanvasError] = useState<string | null>(null);
   const [roomError, setRoomError] = useState<string | null>(null);
-  const [gameOver, setGameOver] = useState<{ reason: "finished" | "lonely"; winnerId?: string } | null>(null);
+  const [gameOver, setGameOver] = useState<{
+    reason: "finished" | "lonely";
+    winnerId?: string;
+  } | null>(null);
   // const [socketReady, setSocketReady] = useState(socket.connected);
 
   // Keeps refs to avoid stale closures in socket callbacks ──
@@ -107,7 +110,9 @@ export function useGamePage(roomName: string) {
     socket.on("game_start_error", handleGameStartFailed);
 
     // Game-over events
-    socket.on("game_finished", ({ winnerId }: { winnerId?: string }) => setGameOver({ reason: "finished", winnerId }));
+    socket.on("game_finished", ({ winnerId }: { winnerId?: string }) =>
+      setGameOver({ reason: "finished", winnerId }),
+    );
     socket.on("lonely_player", () => {
       setGameOver({ reason: "lonely" });
     });
@@ -221,9 +226,13 @@ export function useGamePage(roomName: string) {
     if (roomData) {
       const playersData = roomData.players.map((p) => ({
         ...p,
-        isPlayerTurn: p.userName === roomData.playerTurnUserName, // ← compute this
+        isPlayerTurn: p.userName === roomData.playerTurnUserName, // computes this
       }));
-      setPlayerList(playersData); // ← use the new list
+      setPlayerList(playersData); // uses the new list
+    }
+    // If the game is already finished when reconnecting, shows GameOver
+    if (roomData.roomState === "finished") {
+      setGameOver({ reason: "finished" });
     }
   };
 

@@ -8,6 +8,13 @@ export const socket = io({
   withCredentials: true, // we need this to send the cookie with the socket connection so that the server can authenticate the user
 });
 
+// Handles Back-Forward Cache: reconnect socket when page is restored from bfcache
+// (bfcache freezes the WebSocket — this reconnects cleanly instead of logging an error)
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted && socket.disconnected) {
+    socket.connect();
+  }
+});
 
 socket.on("connect_error", (err) => {
   console.log(`[socket] connect_error \n Error Message ${err.message}`);
