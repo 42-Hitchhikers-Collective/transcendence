@@ -32,6 +32,13 @@ export function registerGameHandlers(
   // Play a card
   socket.on("play_card", async ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
+
+    // JESS: added validation for cardIndex to prevent errors when a player tries to play a card that doesn't exist
+    if (typeof cardIndex !== "number" || cardIndex < 0 || !Number.isInteger(cardIndex)) {
+      socket.emit("error", { message: "Invalid card index" });
+      return;
+    }
+
     const res = gameManager.playCard(playerId, cardIndex);
     if (!res.success) socket.emit("error", { message: res.error });
     // this was encapsulated in an else statement
@@ -73,6 +80,13 @@ export function registerGameHandlers(
   // Select color for wild card. When a player selects a color
   socket.on("select_wild_color", ({ color }) => {
     const { playerId } = getIdentity(socket);
+
+    const validColors = ["red", "blue", "green", "yellow"];
+    if (!validColors.includes(color)) {
+      socket.emit("error", { message: "Invalid color" });
+      return;
+    }
+
     const res = gameManager.selectWildColor(playerId, color);
     if (!res.success) socket.emit("error", { message: res.error });
 

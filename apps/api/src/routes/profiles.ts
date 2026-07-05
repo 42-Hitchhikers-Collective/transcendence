@@ -1,6 +1,7 @@
 import { writeFile, unlink } from "fs/promises";
 import { mkdirSync } from "fs";
 import path from "path";
+import sharp from "sharp";
 
 const AVATAR_DIR = process.env.AVATAR_DIR || "/app/data/avatars";
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
@@ -60,6 +61,15 @@ export async function profileRoutes(app: any) {
         return reply
           .code(400)
           .send({ error: "avatar image must be under 2 MB" });
+
+      // Validates that the file is actually a valid image and not just a renamed file with a valid extension
+      try {
+        const metadata = await sharp(buffer).metadata();
+        if (!metadata.width || !metadata.height || !metadata.format)
+          return reply.code(400).send({ error: "invalid image file" });
+      } catch {
+        return reply.code(400).send({ error: "invalid image file" });
+      }
 
       // Clean up old avatar before saving the new one
       const existing = await app.prisma.profile.findUnique({

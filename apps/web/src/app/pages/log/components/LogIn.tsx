@@ -9,10 +9,9 @@ export function Login({
   onRequestMode,
   onLogin,
   error,
-  isLoading,
 }: LoginProps) {
   const formFields: FormFields[] = [
-    { id: "email", label: "Email", type: "text" },
+    { id: "email", label: "Email", type: "email" },
     { id: "password", label: "Password", type: "password" },
   ];
 

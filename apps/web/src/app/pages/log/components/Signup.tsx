@@ -7,12 +7,12 @@ export function Signup({
   onRequestMode,
   onSignup,
   error,
-  isLoading,
 }: SignupProps) {
   const formFields: FormFields[] = [
-    { id: "email", label: "Email", type: "text" },
+    { id: "email", label: "Email", type: "email" },
     { id: "username", label: "Username", type: "text" },
     { id: "password", label: "Password", type: "password" },
+    // { id: "confirm-password", label: "Confirm Password", type: "password" },
   ];
 
   const handleSubmit = async (values: Record<string, string>) => {

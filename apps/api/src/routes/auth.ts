@@ -16,7 +16,7 @@ export async function authRoutes(app: any) {
               pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
             },
             password: { type: "string", minLength: 8, pattern: "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).+$" },
-            username: { type: "string", minLength: 1 },
+            username: { type: "string", minLength: 1, maxLength: 20, pattern: "^[a-zA-Z0-9_\\-.]+$" }, // only allow alphanumeric, underscore, hyphen, and dot characters in usernames to prevent XSS attacks
           },
         },
       },
