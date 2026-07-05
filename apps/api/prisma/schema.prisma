@@ -44,7 +44,6 @@ enum ConversationType {
 }
 
 enum NotificationType {
-  FRIEND_REQUEST
   INVITE
   GAME_RESULT
   SYSTEM
@@ -73,10 +72,6 @@ model User {
   gamePlayers   GamePlayer[]
 
   // ADVANCED: Social
-  friendRequestsSent     FriendRequest[] @relation("FriendRequestsSent")
-  friendRequestsReceived FriendRequest[] @relation("FriendRequestsReceived")
-  friendshipsA           Friendship[]    @relation("FriendshipA")
-  friendshipsB           Friendship[]    @relation("FriendshipB")
   blocksMade             Block[]         @relation("BlocksMade")
   blocksReceived         Block[]         @relation("BlocksReceived")
 
@@ -98,7 +93,6 @@ model Profile {
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   username  String  @unique
   avatarUrl String?
-  bio       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,32 +171,6 @@ model GamePlayer {
 // ============================================================
 
 // --- Social ---
-
-model FriendRequest {
-  id         String   @id @default(uuid())
-  fromUserId String
-  toUserId   String
-  createdAt  DateTime @default(now())
-
-  fromUser User @relation("FriendRequestsSent", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUser   User @relation("FriendRequestsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
-
-  @@unique([fromUserId, toUserId])
-  @@index([fromUserId])
-  @@index([toUserId])
-}
-
-model Friendship {
-  userAId   String
-  userBId   String
-  createdAt DateTime @default(now())
-
-  userA User @relation("FriendshipA", fields: [userAId], references: [id], onDelete: Cascade)
-  userB User @relation("FriendshipB", fields: [userBId], references: [id], onDelete: Cascade)
-
-  @@id([userAId, userBId])
-  @@index([userBId])
-}
 
 model Block {
   blockerId String

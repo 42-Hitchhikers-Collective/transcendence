@@ -53,21 +53,8 @@ All endpoints are prefixed with `/api`.
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| PATCH | `/me` | JWT | Update username, avatarUrl, bio |
-| POST | `/me/avatar` | JWT | Upload avatar image (jpeg/png/webp/gif, max 5MB), returns URL |
-
-### Friends — `/api/friends`
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/` | JWT | Get friends list (id, username, avatarUrl, since) |
-| GET | `/requests` | JWT | Get incoming pending friend requests |
-| POST | `/requests` | JWT | Send a friend request `{ targetId }` |
-| PATCH | `/requests/:id/accept` | JWT | Accept a friend request → creates Friendship |
-| PATCH | `/requests/:id/decline` | JWT | Decline a friend request |
-| DELETE | `/:friendId` | JWT | Remove a friend |
-
-> Online status (`isOnline`) will be added to `GET /` once the socket presence module is wired up.
+| POST | `/me/avatar` | JWT | Upload avatar image (jpeg/png/webp, max 2MB), returns URL |
+| DELETE | `/me/avatar` | JWT | Delete avatar, reset to default |
 
 ### Other
 

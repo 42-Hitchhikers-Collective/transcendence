@@ -11,7 +11,6 @@ type AuthUser = {
   profile?: {
     username?: string;
     avatarUrl?: string | null;
-    bio?: string | null;
   } | null;
 } | null;
 

@@ -53,16 +53,14 @@ say "1.4) /users/me with token should be 200"
 status="$(http_status -i "${API}/users/me" -H "Authorization: Bearer $TOKEN")"
 assert_status "200" "$status" "/users/me works with Bearer token"
 
-say "1.5) /profiles/me without token should be 401"
-status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
-  -d '{"username":"HACKED"}')"
-assert_status "401" "$status" "/profiles/me is protected"
+say "1.5) /profiles/me/avatar without token should be 401"
+status="$(http_status_json -i -X POST "${API}/profiles/me/avatar")"
+assert_status "401" "$status" "/profiles/me/avatar is protected"
 
-say "1.6) /profiles/me with token should be 200"
-status="$(http_status_json -i -X PATCH "${API}/profiles/me" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"username":"Bubu","bio":"hello"}')"
-assert_status "200" "$status" "profile update works with Bearer token"
+say "1.6) /profiles/me/avatar with token (no file) should be 400"
+status="$(http_status_json -i -X POST "${API}/profiles/me/avatar" \
+  -H "Authorization: Bearer $TOKEN")"
+assert_status "400" "$status" "avatar upload requires a file"
 
 say "1.7) Register admin user (may be 201 or 409)"
 status="$(http_status_json -i -X POST "${API}/auth/register" \

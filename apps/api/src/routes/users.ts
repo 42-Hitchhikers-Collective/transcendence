@@ -104,7 +104,7 @@ export async function userRoutes(app: any) {
         id: true,
         email: true,
         createdAt: true,
-        profile: { select: { username: true, avatarUrl: true, bio: true } },
+        profile: { select: { username: true, avatarUrl: true } },
       },
     });
 
@@ -171,7 +171,7 @@ export async function userRoutes(app: any) {
       select: {
         id: true,
         createdAt: true,
-        profile: { select: { username: true, avatarUrl: true, bio: true } },
+        profile: { select: { username: true, avatarUrl: true } },
       },
     });
 

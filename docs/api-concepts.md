@@ -224,7 +224,7 @@ app.post("/path", { preHandler: [app.auth] }, async (request, reply) => {
 });
 ```
 
-- `app.post / app.get / app.patch / app.delete` — registers a route for that HTTP method
+- `app.post / app.get / app.delete` — registers a route for that HTTP method
 - First argument — the URL path (relative to the prefix registered in `server.ts`)
 - Second argument — options object (schema validation, preHandlers, etc.)
 - Third argument — the async handler function
@@ -295,7 +295,7 @@ await app.prisma.user.update({ where: { id: "..." }, data: { ... } });
 // Create or update (upsert)
 await app.prisma.profile.upsert({
   where: { userId: "..." },
-  update: { bio: "..." },
+  update: { avatarUrl: "/avatars/new.png" },
   create: { userId: "...", username: "..." },
 });
 

@@ -1,8 +1,6 @@
-import { randomUUID } from "crypto";
 import { writeFile, unlink } from "fs/promises";
 import { mkdirSync } from "fs";
 import path from "path";
-import sharp from "sharp";
 
 const AVATAR_DIR = process.env.AVATAR_DIR || "/app/data/avatars";
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
@@ -23,48 +21,6 @@ async function deleteLocalAvatar(avatarUrl: string | null) {
 }
 
 export async function profileRoutes(app: any) {
-  app.patch(
-    "/me",
-    {
-      preHandler: [app.auth],
-      schema: {
-        body: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            username: { type: "string", minLength: 1 },
-            avatarUrl: { type: "string", minLength: 1 },
-            bio: { type: "string" },
-          },
-        },
-      },
-    },
-    async (request: any, reply: any) => {
-      const payload = request.user as { sub?: string };
-      if (!payload.sub) return reply.code(401).send({ error: "unauthorized" });
-
-      const body = request.body as {
-        username?: string;
-        avatarUrl?: string;
-        bio?: string;
-      };
-
-      const profile = await app.prisma.profile.upsert({
-        where: { userId: payload.sub },
-        update: body,
-        create: {
-          userId: payload.sub,
-          username: body.username || "User",
-          avatarUrl: body.avatarUrl ?? "/avatars/default.png",
-          bio: body.bio,
-        },
-        select: { username: true, avatarUrl: true, bio: true },
-      });
-
-      return reply.send({ profile });
-    },
-  );
-
   app.post(
     "/me/avatar",
     {

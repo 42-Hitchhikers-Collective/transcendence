@@ -32,17 +32,24 @@ TOKEN=$(curl -k -s https://localhost/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test1234"}' | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 curl -k -i https://localhost/api/users/me -H "Authorization: Bearer $TOKEN"
+
 ## Login+
 TOKEN=$(curl -k -s https://localhost/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"test1234"}' | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 
-curl -k -i https://localhost/api/profiles/me \
-  -X PATCH \
-  -H "Content-Type: application/json" \
+## Avatar test
+# Create a dummy PNG to upload
+printf '\x89PNG\r\n\x1a\n' > /tmp/test-avatar.png
+# Upload avatar
+curl -k -i https://localhost/api/profiles/me/avatar \
   -H "Authorization: Bearer $TOKEN" \
-  -d '{"displayName":"Bubu","bio":"hello"}'
-  
+  -F "file=@/tmp/test-avatar.png"
+# Delete avatar (reset to default)
+curl -k -i -X DELETE https://localhost/api/profiles/me/avatar \
+  -H "Authorization: Bearer $TOKEN"
+rm /tmp/test-avatar.png
+
 # Prisma Studio (Open Port on 5555) [Web UI for DB Tables]
 http://localhost:5555
 
@@ -61,12 +68,6 @@ echo "TOKEN_LEN=${#TOKEN}"
 curl -sk -i https://localhost/api/users/me \
   -H "Authorization: Bearer $TOKEN"
 
-curl -sk -i https://localhost/api/profiles/me \
-  -X PATCH \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $TOKEN" \
-  -d '{"displayName":"Bubu","bio":"hello"}'
-  
 # Cookies
 ## login: saves refresh cookie + prints access token
 curl -sk -c cookies.txt https://localhost/api/auth/login \
