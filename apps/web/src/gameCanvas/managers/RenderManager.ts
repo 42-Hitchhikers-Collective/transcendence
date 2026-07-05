@@ -1,8 +1,7 @@
 import type { FrontendRoom, FrontendPlayer } from "../types/roomTypes";
-import { CARDS, PLAYER, SCREEN } from "./Layouts.ts";
+import { CARDS, SCREEN } from "./Layouts.ts";
 import { drawCard } from "../../network/gameNetwork";
 import { EventBus } from "../../events/EventBus";
-import { AlignCenter } from "lucide-react";
 
 type Position = { x: number; y: number; p: "v" | "h" };
 
@@ -14,12 +13,14 @@ export class RenderManager {
   private pendingDrawText: Phaser.GameObjects.Text | null = null;
   private canDraw = false; // JESS: we need a flag to disable the draw pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
 
+  private scene: Phaser.Scene; //JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
+
   constructor(
-    private scene: Phaser.Scene,
+    scene: Phaser.Scene, //JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
     boardContainer: Phaser.GameObjects.Container,
   ) {
+    this.scene = scene; //JESS: we need a reference to the Phaser scene to be able to add sprites and text to it
     this.boardContainer = boardContainer;
-    this.scene = scene;
   }
 
   setMyPlayerId(id: string) {
@@ -97,8 +98,9 @@ export class RenderManager {
     );
   }
 
-  private renderText(numberOfCards: number) {
+  private renderText(numberOfCards: number | undefined) { // JESS: undefined was added to the type because when the game starts, the number of cards to draw is undefined, and we need to handle that case
     this.pendingDrawText?.destroy();
+    if (!numberOfCards) return; // JESS: if numberOfCards is undefined or 0, we don't need to render the text
 
     this.pendingDrawText = this.scene.add.text(
       SCREEN.WIDTH / 2,
@@ -113,6 +115,8 @@ export class RenderManager {
   }
 
   private renderDiscardPile(room: FrontendRoom) {
+    if (!room.game?.discardTopCard) return; // JESS: if discardTopCard is undefined, we don't need to render the discard pile
+
     const sprite = this.scene.add.image(
       SCREEN.WIDTH / 2 - 50, // x
       SCREEN.HEIGHT / 2, // y

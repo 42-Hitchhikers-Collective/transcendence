@@ -32,6 +32,8 @@ export default function PhaserGame() {
     );
 
     return () => {
+      const sound = game.sound as any; // JESS: cast to any to access the private context property
+      sound?.context?.close?.();// JESS: close the audio context to prevent errors when navigating away from the game
       game.destroy(true);
     };
   }, []);
