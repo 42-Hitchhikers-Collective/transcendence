@@ -60,7 +60,9 @@ export function registerRoomHandlers(
         error: res.error,
       });
       if (res.error === "Player already in room (Dropped)") {
-        broadcastGamePage(res.roomId);
+        const roomId = res.roomId;
+        systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK); // JESS: added system message when player rejoins with new coket
+        broadcastGamePage(roomId);
       }
       socket.emit("error", { message: res.error });
       return;
@@ -188,13 +190,14 @@ export function registerRoomHandlers(
     socket.emit("part_of_room_response", { roomName, isPart });
   });
   
-  // Listens to when a player rejoins a room after dropping, notifys with a chat msg
-  socket.on("dropped_player_back", () => {
-    const { playerId } = getIdentity(socket);
-    const roomId = gameManager.getPlayerRoomId(playerId);
-    if (roomId) {
-      systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK);
-    }
-  });
+  // EVENT IS NOT NEEDED, BACKEND SHOULD SHOOT BY DEFAULT A SYSTEM MESSAGE WHEN A PLAYER DROPS OR REJOINS WITH NEW SOCKET ID
+  // // Listens to when a player rejoins a room after dropping, notifys with a chat msg
+  // socket.on("dropped_player_back", () => {
+  //   const { playerId } = getIdentity(socket);
+  //   const roomId = gameManager.getPlayerRoomId(playerId);
+  //   if (roomId) {
+  //     systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK);
+  //   }
+  // });
 }
   

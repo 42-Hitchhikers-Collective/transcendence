@@ -40,9 +40,6 @@ export function registerConnectionHandlers(
         console.log(`[Socket] ${userName} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId); // join back the room with the new socket to be able to receive room updates
         console.log(`Player ${userName} automatically rejoin room ${roomId}`);
-        systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK); // JESS: added system message when player rejoins
-        
-        // gameManager.cancelDropTimer(playerId); // Cancel the timer that would drop them from the room page - doe sit happen somewhere else?
         broadcastRoomState(roomId);
     }
     

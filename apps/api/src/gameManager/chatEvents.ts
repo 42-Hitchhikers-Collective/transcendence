@@ -36,7 +36,7 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
   [ChatMsgType.LEFT_ROOM]: "left. \n If the game already started, they won't be able to rejoin.",
   [ChatMsgType.STARTED_GAME]: "started the game.",
   [ChatMsgType.WON_GAME]: "won!",
-  [ChatMsgType.DROP_ROOM]: "dropped! They have 30 seconds to rejoin or will be removed from the game.",
+  [ChatMsgType.DROP_ROOM]: "dropped! They will be kicked out in 30 seconds if not back",
   [ChatMsgType.DROP_ROOM_BACK]: "is back!",
   [ChatMsgType.UNO]: "called UNO! 🚨", // JESS: add uno call
 };
