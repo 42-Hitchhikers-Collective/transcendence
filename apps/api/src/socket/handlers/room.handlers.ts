@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   room.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/02 15:02:10 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/06 13:45:13 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,14 +68,12 @@ export function registerRoomHandlers(
     }
     const roomId = res.room.id;
     socket.join(roomId);
-    // Cancel room-page drop timer if player rejoined in time
-    gameManager.cancelDropTimer(playerId);
+    gameManager.cancelDropTimer(playerId); // Cancel room-page drop timer if player rejoined in time
     socket.emit("room_joined", { roomName });
     systemChatMsg(playerId, roomId, socket, ChatMsgType.JOIN_ROOM);
     socket.emit("chatHistory", res.room.chatHistory); // Send chat history to player when they join the room
     broadcastGameCanvas(roomId);
     broadcastGamePage(roomId);
-
     console.log("[room:join_room] success", {
       playerId,
       username: userName,
@@ -98,15 +96,11 @@ export function registerRoomHandlers(
       socket.emit("error", { message: res.error });
       return;
     }
-    // Clear any pending drop timer since they're intentionally leaving
-    gameManager.cancelDropTimer(playerId);
+    gameManager.cancelDropTimer(playerId); // Clear any pending drop timer since they're intentionally leaving
     console.log("[room:user_dropped] timer cancelled for", playerId);
     systemChatMsg(playerId, res.roomId, socket, ChatMsgType.LEFT_ROOM);
-
     socket.leave(res.roomId);
-    
     const action_pend = gameManager.playerLeft(res.roomId, playerId);
-
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId);
     if (action_pend.success) {
@@ -151,8 +145,7 @@ export function registerRoomHandlers(
         socketId: socket.id,
       });
     }
-    gameManager.startDropTimer(playerId, ({ roomId }) => {
-      // paranthasis will run only after drop timer expires
+    gameManager.startDropTimer(playerId, ({ roomId }) => { // will run only after drop timer expires:
       const currentPlayer = gameManager.getOnlinePlayer(playerId);
       if (currentPlayer?.socketId) {
         socket.nsp.to(currentPlayer.socketId).emit("leave_room");
@@ -179,12 +172,7 @@ export function registerRoomHandlers(
       console.log(
         `[room:check_lonely_player] Room ${roomId} has only 1 player left.`,
       );
-      socket.nsp.to(roomId).emit("lonely_player"); // emit to "everyone" is safer
-
-      // ---- this function may also trigger the "abortGame" function
-      // but otherwise frontend will trigger it by emitting "abort_game" to the backend. ----
-
-      // abortGameAndCleanup(roomId, "Only 1 player left");
+      socket.nsp.to(roomId).emit("lonely_player");
     }
   }
 
