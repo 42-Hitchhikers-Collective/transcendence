@@ -158,10 +158,12 @@ export function useGamePage(roomName: string) {
       setGameOver({ reason: "lonely" });
     }
 
-    setTimeout(() => {
-      socket.emit("canvas_ready");
-      console.warn(`🎨 Refreshing canvas: ${gameStarted}`);
-    }, 100);
+    // setTimeout(() => {
+    //   socket.emit("canvas_ready");
+    //     console.warn(`Game started? ${RoomDataRef.current?.roomState}`)
+    //   console.warn(`🎨 Refreshing canvas: ${gameStarted}`);
+    //   console.warn(`🎨 Refreshing canvas: ${gameStarted}`);
+    //   }, 100);
   }, [playerList, RoomDataRef.current?.roomState]); // ⬅️ runs whenever players or room state changes to keep the game canvas in sync with the latest room state (e.g. new player joins, game starts, etc)
 
   useEffect(() => {

@@ -12,6 +12,7 @@ export default function StartGameButton({
 }: StartGameButtonProps) {
   const startGame = useCallback(() => {
     socket.emit("start_game");
+    socket.emit("canvas_ready");
     console.log(`[GamePage] start_game emitted`);
   }, []);
 

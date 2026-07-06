@@ -6,7 +6,7 @@
 /*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 15:51:45 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/06 19:36:38 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 export function registerConnectionHandlers(
   app: FastifyInstance,
   socket: Socket,
-  broadcastRoomState: (roomId: string) => void
+  broadcastGameCanvas: (roomId: string) => void
 ) {
     const { playerId, userName } = getIdentity(socket);
     
@@ -36,7 +36,7 @@ export function registerConnectionHandlers(
         console.log(`[Socket] ${userName} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId); // join back the room with the new socket to be able to receive room updates
         console.log(`Player ${userName} automatically rejoin room ${roomId}`);
-        broadcastRoomState(roomId);
+        // broadcastGameCanvas(roomId); // This refreshes canvas for everyone and bug 
     }
     
     // Disconnect and leave room if in any

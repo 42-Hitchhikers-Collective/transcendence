@@ -6,7 +6,7 @@
 /*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 17:31:02 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/06 19:30:26 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from "./index";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
+import { getGameCanvasRoom } from "../../gameManager/dataToFrontend"
 import "../../plugins/prisma"; // Load Prisma module augmentation
 
 // type Event = { color: boolean; uno: boolean; finish: boolean };
@@ -25,7 +26,7 @@ import "../../plugins/prisma"; // Load Prisma module augmentation
 // --- Game Events ---
 
 export function registerGameHandlers(
-  app: FastifyInstance, 
+  app: FastifyInstance,
   socket: Socket,
   broadcastGameCanvas: (roomId: string) => void,
   broadcastGamePage: (roomId: string) => void,
@@ -40,8 +41,7 @@ export function registerGameHandlers(
     }
 
     const res = gameManager.playCard(playerId, cardIndex);
-    if (!res.success)
-    {
+    if (!res.success) {
       console.log(`Are we here? ${res.error}`);
       socket.emit("error_front", res.error);
     }
@@ -116,31 +116,40 @@ export function registerGameHandlers(
       socket.emit("error", { message: "Player is not in a room" });
       return;
     }
-    const room = getRoomById(roomId);
-    broadcastGameCanvas(roomId);
-    if (room?.game?.table.color)
-      socket.emit("show_colors", { roomId: roomId });
   });
-  
+
+
+  // When a player refreshes the page, broadcast excusively to them
+  socket.on("canvas_refresh", () => {
+    const { playerId } = getIdentity(socket);
+    const roomId = gameManager.getPlayerRoomId(playerId);
+    if (!roomId) return;
+    const room = gameManager.getRoomById(roomId);
+    if (room) {
+      const gameCanvasRoom = getGameCanvasRoom(room, playerId);
+      socket.emit("room_state", gameCanvasRoom);
+    }
+  });
+
 
   // --- Major Game Events ---
 
   // Start the game by pressing a button. Create DB record and store the ID
   socket.on("start_game", async () => {
-      const { playerId } = getIdentity(socket);
-      const res = gameManager.startGameButton(playerId);
-      if (!res.success) {
-          socket.emit("error", { message: res.error });
-          socket.emit("game_start_error", { message: res.error });
-          return;
-      }
-      console.log(`Game started in room ${res.room.id}`);
-      const gameDbId = await createGameRecord(app.prisma, res.room.name); //DB recored creation
-      res.room.gameDbId = gameDbId;
-      socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
-      systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
-      broadcastGameCanvas(res.room.id);
-      broadcastGamePage(res.room.id);
+    const { playerId } = getIdentity(socket);
+    const res = gameManager.startGameButton(playerId);
+    if (!res.success) {
+      socket.emit("error", { message: res.error });
+      socket.emit("game_start_error", { message: res.error });
+      return;
+    }
+    console.log(`Game started in room ${res.room.id}`);
+    const gameDbId = await createGameRecord(app.prisma, res.room.name); //DB recored creation
+    res.room.gameDbId = gameDbId;
+    socket.nsp.to(res.room.id).emit("game_start_success", { roomId: res.room.id });
+    systemChatMsg(playerId, res.room.id, socket, ChatMsgType.STARTED_GAME);
+    broadcastGameCanvas(res.room.id);
+    broadcastGamePage(res.room.id);
   });
 
   // Send finished game data to the Database and announce the finished game

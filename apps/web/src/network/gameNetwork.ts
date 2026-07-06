@@ -22,7 +22,7 @@ export function passTurn() {
   socket.emit("on_press_pass_button");
 }
 
-export function canvasReady() {
-  LOG(`📤 emit canvas_ready`);
-  socket.emit("canvas_ready");
+export function canvasRefresh() {
+  LOG(`📤 emit canvas_refresh`);
+  socket.emit("canvas_refresh");
 }

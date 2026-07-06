@@ -6,7 +6,7 @@ import { InputManager } from "../managers/InputManager";
 import { RenderManager } from "../managers/RenderManager";
 import { UIManager } from "../managers/UIManager";
 import { Announcement } from "../managers/Announcemente";
-import { canvasReady } from "../../network/gameNetwork";
+import { canvasReady, canvasRefresh } from "../../network/gameNetwork";
 
 const LOG = (msg: string) => console.log(`🕹️ PHASER: ${msg}`);
 
@@ -74,7 +74,7 @@ export class GameScene extends Scene {
     });
 
     LOG("GameScene ready"); // JESS: keep this log to help with debugging tha game scene
-    canvasReady();
+    canvasRefresh();
   }
 
   private onRoomState(room: FrontendRoom) {
