@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/02 15:01:53 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/06 13:51:10 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ import {
   MAX_PLAYERS_PER_ROOM,
   MIN_PLAYERS_TO_START,
   msgLeftRoom,
+  msgResult,
 } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
@@ -48,8 +49,8 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
   // Call the game's playCard with the Card object
   const res = room.game.playCard(playerId, card);
 
-  if (!res)
-    return { success: false, roomId: roomId, error: "Card play failed" };
+  if (!res.success)
+    return { success: false, roomId: roomId, error: res.error };
   return { success: true, roomId: roomId };
 }
 

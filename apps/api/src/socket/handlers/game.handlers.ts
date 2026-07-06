@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 16:48:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:45:13 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,11 @@ export function registerGameHandlers(
   socket.on("play_card", async ({ cardIndex }) => {
     const { playerId } = getIdentity(socket);
     const res = gameManager.playCard(playerId, cardIndex);
-    if (!res.success) socket.emit("error", { message: res.error });
+    if (!res.success)
+    {
+      console.log(`Are we here? ${res.error}`);
+      socket.emit("error_front", res.error);
+    }
     // this was encapsulated in an else statement
     broadcastGameCanvas(res.roomId);
     const events = gameManager.checkGameEvent(res.roomId);

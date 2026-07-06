@@ -15,6 +15,7 @@ export class GameMaster {
 
     let res = this.validateMove(table, playerId, card);
     if (!res.success) {
+      console.log(`Error: ${res.error}`)
       return res;
     }
 
@@ -97,11 +98,14 @@ export class GameMaster {
 
   private validateMove(table: Table, playerId: string, card: Card): msgResult {
     if (!this.isPlayerTurn(table, playerId))
+    {
+      console.log("validateMove: false, not your turn");
       return { success: false, error: "Is not your turn" };
-    if (!this.isCardPlayable(table, card))
-      return { success: false, error: "Card not playable" };
+    }
     if (!this.pendingCards(table, card))
       return { success: false, error: "Draw cards first" };
+    if (!this.isCardPlayable(table, card))
+      return { success: false, error: "Card not playable" };
 
     return { success: true, msg: "" };
   }
@@ -139,11 +143,9 @@ export class GameMaster {
   advanceTurn(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
 
-    console.log(`Player: ${player?.username}, Draw: ${table.draw}`);
 
     if (!player || table.draw != 0) return false;
 
-    console.log(`Color flag: ${table.color}`);
 
     if (table.color == true) return false;
 

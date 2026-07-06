@@ -27,12 +27,11 @@ export class Announcement {
     passTurn();
   }
 
-  error(text: string) {
-    if (text == "first_draw") {
+  announceError(text: string) {
       const txt = this.scene.add.text(
         500,
         400,
-        "Draw card first or play same type",
+        `${text}`,
         {
           fontSize: "36px",
           color: "#ff4444",
@@ -50,6 +49,6 @@ export class Announcement {
         duration: 2000,
         onComplete: () => txt.destroy(),
       });
-    }
+    
   }
 }

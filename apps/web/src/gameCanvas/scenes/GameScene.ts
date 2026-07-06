@@ -57,7 +57,7 @@ export class GameScene extends Scene {
     EventBus.on("show_colors", this.selectColor, this);
     EventBus.on("display_pass_button", this.passTurn, this);
     EventBus.on("uno", this.uno_announcemente, this);
-    //EventBus.on("error", this.error_announcemente, this);
+    EventBus.on("error_front", this.onError, this);
     EventBus.on("not_turn", this.showNotTurn, this); // JESS: WE NEED AN EVENT BUS ALSO 
     LOG("  EventBus listeners registered");
 
@@ -67,6 +67,7 @@ export class GameScene extends Scene {
       EventBus.off("display_pass_button", this.passTurn, this);
       EventBus.off("uno", this.uno_announcemente, this);
       EventBus.off("not_turn", this.showNotTurn, this);
+      EventBus.off("error_front", this.onError, this);
       this.uiManager.hideAll();
       LOG("💀 GameScene shutdown — all listeners removed"); // JESS: keep this log to help with debugging tha game scene
     });
@@ -122,10 +123,6 @@ export class GameScene extends Scene {
     this.uiManager.showPassTurnButtons();
   }
 
-  private onSocketError(err: { message: string }) {
-    console.error(`Socket error: ${err.message}`);
-  }
-
   // JESS: THIS FUNCTION SHOW A MESSAGE WHEN THE USER INTERACTS WITH THE GAME BUT IT'S NOT THEIR TURN TO EXPLAIN WHY NOTHING HAPPENS, THIS IS IMPORTANT TO IMPROVE THE USER EXPERIENCE AND AVOID CONFUSION FOR NEW PLAYERS
   private showNotTurn() {
     const txt = this.add.text(500, 400, "It's not your turn yet", {
@@ -147,7 +144,12 @@ export class GameScene extends Scene {
   }
 
   private uno_announcemente() {
-    LOG("UNO! called"); // JESS: keep this log to help with debugging tha game scene
     this.announcement.uno();
+  }
+
+  private onError(text: string)
+  {
+    console.log("######################## On Error Signal")
+    this.announcement.announceError(text)
   }
 }
