@@ -6,12 +6,20 @@
 #  3. When you are done developing, you can use the Cleanup section to remove containers and volumes or prune unused Docker resources.
 #  4. Use the Fresh starts section to wipe everything and start from scratch, without seeding the database.
 #  5. Use Infrastructure section to create directories and generate SSL certs separately when needed for deployment.
-#  6. Use Database section recipes for tasks that are directly related to the database, such as seeding, migrating, resetting, and opening Prisma Studio.
-#  7. Use Dev tools section recipes for tasks that are not part of the main application lifecycle, such as running the API only, reinstalling dependencies, or other utilities.
+#  6. Use Goinfre section on school computers to relocate Docker + npm off the tiny /home tmpfs onto /sgoinfre.
+#  7. Use Database section recipes for tasks that are directly related to the database, such as seeding, migrating, resetting, and opening Prisma Studio.
+#  8. Use Dev tools section recipes for tasks that are not part of the main application lifecycle, such as running the API only, reinstalling dependencies, or other utilities.
 # 
 # ============================================================
 
 COMPOSE = docker compose -f docker-compose.yml
+
+# ── Goinfre (school) paths ───────────────────────────────────
+#  /home is a tiny tmpfs; Docker + npm must live on /sgoinfre
+GOINFRE_BASE  := /goinfre/goinfre/Perso/$(shell whoami)
+GOINFRE_DOCKER := $(GOINFRE_BASE)/docker
+GOINFRE_NPM    := $(GOINFRE_BASE)/.npm
+is_sgoinfre    := $(shell test -d /sgoinfre && echo 1 || echo 0)
 
 # ── Default ──────────────────────────────────────────────────
 
@@ -58,6 +66,44 @@ deploy: host-certs
 	@echo "  Connect from other computers: https://$(shell cat nginx/certs/host-ip.txt):8443"
 	@echo ""
 
+# ── Goinfre (school machine) setup ───────────────────────────
+#  Moves Docker data-root + npm cache off the tiny /home tmpfs
+#  onto /sgoinfre.  Safe to run repeatedly.
+
+goinfre-docker:
+	@echo "🐳  Configuring Docker to use goinfre..."
+	@mkdir -p $(GOINFRE_DOCKER)
+	@mkdir -p ~/.config/docker
+	@echo '{"data-root": "$(GOINFRE_DOCKER)"}' > ~/.config/docker/daemon.json
+	@systemctl --user stop docker 2>/dev/null; sleep 1
+	@systemctl --user start docker; sleep 3
+	@echo "   Docker root: $$(docker info --format '{{.DockerRootDir}}' 2>/dev/null || echo 'UNKNOWN')"
+	@echo "✅  Docker → goinfre"
+
+goinfre-npm:
+	@echo "📦  Configuring npm to use goinfre..."
+	@mkdir -p $(GOINFRE_NPM)
+	@npm config set cache $(GOINFRE_NPM)/_cacache
+	@npm config set prefix $(GOINFRE_NPM)/_global
+	@echo "   npm cache : $$(npm config get cache)"
+	@echo "   npm prefix: $$(npm config get prefix)"
+	@echo "✅  npm → goinfre"
+
+goinfre-check:
+	@echo "=== Docker ==="
+	@echo "Root dir: $$(docker info --format '{{.DockerRootDir}}' 2>/dev/null || echo 'NOT RUNNING')"
+	@echo "daemon.json: $$(cat ~/.config/docker/daemon.json 2>/dev/null || echo 'MISSING')"
+	@echo ""
+	@echo "=== npm ==="
+	@echo "cache : $$(npm config get cache)"
+	@echo "prefix: $$(npm config get prefix)"
+	@echo ""
+	@echo "=== Disk ==="
+	@df -h /home /sgoinfre 2>/dev/null || true
+
+goinfre: goinfre-docker goinfre-npm goinfre-check
+	@echo "✅  Goinfre setup complete"
+
 # ── Docker lifecycle ─────────────────────────────────────────
 #  Start / stop / restart: keeps your database data intact.
 
@@ -102,6 +148,10 @@ fresh: clean prune
 	@echo "✅  Fresh start complete"
 
 setup: certs clean prune
+	@if [ "$(is_sgoinfre)" = "1" ]; then \
+	  echo "🏫  School machine detected — configuring goinfre..."; \
+	  $(MAKE) goinfre; \
+	fi
 	@echo "🚀  Full setup: rebuilding from scratch..."
 	$(MAKE) up
 	@echo "  ⏳  Waiting for database and seeding..."
@@ -159,5 +209,6 @@ reinstall:
 
 .PHONY: all up down re ps logs clean prune rebuild fresh setup \
         dirs certs host-certs deploy show-url \
+        goinfre-docker goinfre-npm goinfre-check goinfre \
         db db-seed db-migrate db-reset prisma-studio \
         api reinstall
