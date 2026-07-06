@@ -30,6 +30,7 @@ all: setup
 dirs:
 	@echo "📁  Creating required directories..."
 	mkdir -p data/postgres data/avatars nginx/certs
+# 	mkdir -p data/avatars nginx/certs
 
 certs: dirs
 	@echo "🔐  Generating self-signed SSL certificate..."
@@ -183,7 +184,6 @@ db-migrate:
 db-reset:
 	@echo "🗑️   Wiping database and recreating from scratch..."
 	$(COMPOSE) down -v
-	rm -rf data/postgres/*
 	$(COMPOSE) up -d
 	@echo "✅  Database reset: fresh schema applied"
 
