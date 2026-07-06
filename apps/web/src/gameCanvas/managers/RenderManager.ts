@@ -179,12 +179,18 @@ export class RenderManager {
 
     if (pos.p === "v") title.setAngle(pos.x < 500 ? 90 : -90);
 
-    // Reduce spacing when there are more than 20 cards
-    const cardCount = player.cards?.length ?? player.cardCount;
-
-    const spacing = cardCount > 20 ? Math.max(15, 40 - (cardCount - 5)) : 40;
-
     const isMe = player.id === this.myPlayerId;
+    
+    const cardCount = player.cards?.length ?? player.cardCount;
+    let spacing = cardCount > 8 ? Math.max(15, 40 - (cardCount - 2)) : 40;
+
+    if (isMe)
+      spacing = cardCount > 8 ? Math.max(15, 40 - (cardCount - 10)) : 40;
+
+    // Reduce spacing when there are more than 20 cards
+
+
+   
 
     if (isMe && player.cards) {
       let offsetX = -((player.cards.length - 1) * spacing) / 2;
@@ -211,15 +217,22 @@ export class RenderManager {
       let offsetX = 0;
       let offsetY = 0;
 
+      let cards = player.cardCount;
+
+      if (cards > 12 && pos.p === "v")
+          cards = 12;
+      if (cards > 25 && pos.p === "h") 
+        cards = 25
+
       if (pos.p === "h") {
-        offsetX = -((player.cardCount - 1) * spacing) / 2;
+        offsetX = -((cards - 1) * spacing) / 2;
       }
 
       if (pos.p === "v") {
-        offsetY = -((player.cardCount - 1) * spacing) / 2;
+        offsetY = -((cards - 1) * spacing) / 2;
       }
 
-      for (let i = 0; i < player.cardCount; i++) {
+      for (let i = 0; i < cards; i++) {
         const sprite = this.scene.add.image(
           pos.x + offsetX,
           pos.y + offsetY,

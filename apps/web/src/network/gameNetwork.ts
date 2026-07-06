@@ -12,7 +12,6 @@ export function drawCard() {
   socket.emit("draw_card");
 }
 
-
 export function selectWildColor(color: "red" | "blue" | "green" | "yellow") {
   LOG(`📤 emit select_wild_color | color: ${color}`);
   socket.emit("select_wild_color", { color });
@@ -21,4 +20,9 @@ export function selectWildColor(color: "red" | "blue" | "green" | "yellow") {
 export function passTurn() {
   LOG(`📤 emit on_press_pass_button`);
   socket.emit("on_press_pass_button");
+}
+
+export function canvasReady() {
+  LOG(`📤 emit canvas_ready`);
+  socket.emit("canvas_ready");
 }

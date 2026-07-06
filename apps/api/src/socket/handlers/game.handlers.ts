@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 16:02:24 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 17:31:02 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,12 @@ export function registerGameHandlers(
     }
 
     const res = gameManager.playCard(playerId, cardIndex);
+    if (!res.success)
+    {
+      console.log(`Are we here? ${res.error}`);
+      socket.emit("error_front", res.error);
+    }
+    // this was encapsulated in an else statement
     if (!res.success) socket.emit("error", { message: res.error });
     broadcastGameCanvas(res.roomId);
     const events = gameManager.checkGameEvent(res.roomId);
@@ -110,7 +116,10 @@ export function registerGameHandlers(
       socket.emit("error", { message: "Player is not in a room" });
       return;
     }
+    const room = getRoomById(roomId);
     broadcastGameCanvas(roomId);
+    if (room?.game?.table.color)
+      socket.emit("show_colors", { roomId: roomId });
   });
   
 

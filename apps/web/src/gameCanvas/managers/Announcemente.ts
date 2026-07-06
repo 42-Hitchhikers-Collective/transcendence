@@ -41,13 +41,12 @@ export class Announcement {
     passTurn();
   }
 
-  error(text: string) {
+  announceError(text: string) {
     if (!this.isSceneAlive()) return; // JESS: added guard to prevent console errors when navigating away from the game scene (scene is destroyed but the render function is still called by the socket event, which causes errors in the console)
-    if (text == "first_draw") {
       const txt = this.scene.add.text(
         500,
         400,
-        "Draw card first or play same type",
+        `${text}`,
         {
           fontSize: "36px",
           color: "#ff4444",
@@ -65,6 +64,6 @@ export class Announcement {
         duration: 2000,
         onComplete: () => txt.destroy(),
       });
-    }
+    
   }
 }

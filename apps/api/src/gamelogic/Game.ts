@@ -2,6 +2,7 @@ import { Player } from "./Player";
 import { Table } from "./Table";
 import { GameMaster } from "./GameMaster";
 import { Card } from "./Card";
+import { msgResult } from "../gameManager/types";
 
 type Event = { color: boolean; uno: boolean; finish: boolean };
 
@@ -68,9 +69,9 @@ export class Game {
     this.timestampEnd = Date.now();
   }
 
-  public playCard(playerId: string, card: Card): boolean {
-    if (!this.gameMaster.playCard(this.table, playerId, card)) return false;
-    return true;
+  public playCard(playerId: string, card: Card): msgResult {
+    let res = this.gameMaster.playCard(this.table, playerId, card);
+    return res
   }
 
   public drawCard(playerId: string): boolean {
@@ -98,10 +99,6 @@ export class Game {
       uno: this.table.uno,
       finish: this.table.finish,
     };
-  }
-
-  public first_play() {
-    this.gameMaster.applyEffect(this.table, this.table.discardPile[0]);
   }
 
   public playerLeft(playerID: string) : boolean {

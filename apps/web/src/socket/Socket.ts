@@ -34,7 +34,7 @@ socket.io.engine?.on("upgradeError", (err) => {
 });
 
 socket.on("room_state", (frontendRoom: FrontendRoom) => {
-  console.log(`[EventBus] room_state: \n ${JSON.stringify(frontendRoom)}`);
+  console.log(`[ EventBus ] room_state: \n ${JSON.stringify(frontendRoom)}`);
   EventBus.emit("room_state", frontendRoom);
 });
 
@@ -53,8 +53,8 @@ socket.on("show_colors", (frontendRoom: FrontendRoom) => {
   EventBus.emit("show_colors", frontendRoom);
 });
 
-socket.on("error", (err) => {
-  console.log(`[EventBus] SOCKET_ERROR \n Error Message: ${err.message}`);
-  EventBus.emit("error", err);
+socket.on("error_front", (error: string) => {
+  console.log("###################### Signal recived ERROR_FRONT")
+  EventBus.emit("error_front", error);
 });
 

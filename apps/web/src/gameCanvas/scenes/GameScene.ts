@@ -6,6 +6,7 @@ import { InputManager } from "../managers/InputManager";
 import { RenderManager } from "../managers/RenderManager";
 import { UIManager } from "../managers/UIManager";
 import { Announcement } from "../managers/Announcemente";
+import { canvasReady } from "../../network/gameNetwork";
 
 const LOG = (msg: string) => console.log(`🕹️ PHASER: ${msg}`);
 
@@ -57,7 +58,7 @@ export class GameScene extends Scene {
     EventBus.on("show_colors", this.selectColor, this);
     EventBus.on("display_pass_button", this.passTurn, this);
     EventBus.on("uno", this.uno_announcemente, this);
-    //EventBus.on("error", this.error_announcemente, this);
+    EventBus.on("error_front", this.onError, this);
     EventBus.on("not_turn", this.showNotTurn, this); // JESS: WE NEED AN EVENT BUS ALSO 
     LOG("  EventBus listeners registered");
 
@@ -67,11 +68,13 @@ export class GameScene extends Scene {
       EventBus.off("display_pass_button", this.passTurn, this);
       EventBus.off("uno", this.uno_announcemente, this);
       EventBus.off("not_turn", this.showNotTurn, this);
+      EventBus.off("error_front", this.onError, this);
       this.uiManager.hideAll();
       LOG("💀 GameScene shutdown — all listeners removed"); // JESS: keep this log to help with debugging tha game scene
     });
 
     LOG("GameScene ready"); // JESS: keep this log to help with debugging tha game scene
+    canvasReady();
   }
 
   private onRoomState(room: FrontendRoom) {
@@ -80,6 +83,9 @@ export class GameScene extends Scene {
     this.uiManager.hidePassTurnButtons(); 
 
     this.room = room;
+
+    if (room.state !== "playing")
+      return;
 
     if (!this.myPlayerId) {
       const observer = room.players.find((p) => p.isTheObserver);
@@ -143,7 +149,12 @@ export class GameScene extends Scene {
   }
 
   private uno_announcemente() {
-    LOG("UNO! called"); // JESS: keep this log to help with debugging tha game scene
     this.announcement.uno();
+  }
+
+  private onError(text: string)
+  {
+    console.log("######################## On Error Signal")
+    this.announcement.announceError(text)
   }
 }

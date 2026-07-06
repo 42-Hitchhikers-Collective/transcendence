@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 16:00:30 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 17:28:46 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ import {
   RoomIdResult,
   MIN_PLAYERS_TO_START,
   msgLeftRoom,
+  msgResult,
 } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
@@ -45,8 +46,8 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
 
   const res = room.game.playCard(playerId, card);
 
-  if (!res)
-    return { success: false, roomId: roomId, error: "Card play failed" };
+  if (!res.success)
+    return { success: false, roomId: roomId, error: res.error };
   return { success: true, roomId: roomId };
 }
 
