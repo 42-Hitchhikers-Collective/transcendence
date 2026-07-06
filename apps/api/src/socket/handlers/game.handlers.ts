@@ -6,7 +6,7 @@
 /*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 13:45:13 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/06 14:44:49 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ import { systemChatMsg } from "./index";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
 import "../../plugins/prisma"; // Load Prisma module augmentation
+import { getRoomById } from "../../gameManager/gameManager";
 
 type Event = { color: boolean; uno: boolean; finish: boolean };
 // --- Game Events ---
@@ -101,7 +102,10 @@ export function registerGameHandlers(
       socket.emit("error", { message: "Player is not in a room" });
       return;
     }
+    const room = getRoomById(roomId);
     broadcastGameCanvas(roomId);
+    if (room?.game?.table.color)
+      socket.emit("show_colors", { roomId: roomId });
   });
 
   // --- Major Game Events ---
