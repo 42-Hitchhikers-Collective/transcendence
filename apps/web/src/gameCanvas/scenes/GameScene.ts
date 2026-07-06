@@ -84,6 +84,9 @@ export class GameScene extends Scene {
 
     this.room = room;
 
+    if (room.state !== "playing")
+      return;
+
     if (!this.myPlayerId) {
       const observer = room.players.find((p) => p.isTheObserver);
       if (observer) {
