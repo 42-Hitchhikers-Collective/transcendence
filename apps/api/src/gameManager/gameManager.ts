@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 13:25:13 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 16:00:41 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ export function getRoomById(roomId: string): Room | null  {
 
 export function getRoomByName(roomName: string): Room | null {
   const room = roomsByName.get(roomName);
-  // console.log(`Looking up room by name: ${roomName} - Found: ${!!room}`);
   return room ?? null;
 }
 

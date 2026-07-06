@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 15:57:47 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 16:02:24 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ import { ChatMsgType } from "../../gameManager/chatEvents";
 import { createGameRecord, finalizeGame, abortGame } from "../../services/game.service";
 import "../../plugins/prisma"; // Load Prisma module augmentation
 
-type Event = { color: boolean; uno: boolean; finish: boolean };
+// type Event = { color: boolean; uno: boolean; finish: boolean };
 
 
 // --- Game Events ---
