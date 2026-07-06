@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/18 20:41:41 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 13:23:29 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:26:50 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ export type Room = {
   players: Player[];
   state: GameState;
   chatHistory: Array<{ username: string; msg: string; avatarUrl: string }>;
-  gameDbId?: string; // id of the game in the database
+  gameDbId?: string;
   game?: Game;
 };
 
@@ -45,7 +45,7 @@ export type Room = {
 export type GameCanvasPlayer = {
   id: string;
   userName: string;
-  isTheObserver: boolean; // true if this is the player themselves, false for other players
+  isTheObserver: boolean;
   cardCount: number;
   cards?: { color: string; value: string | number }[];
 };

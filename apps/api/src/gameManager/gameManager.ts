@@ -6,12 +6,10 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:08 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/04 17:53:57 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:25:13 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-//will manage all active rooms -creating rooms, players joining/leaving
 
 import { Player, Room} from "./types";
 import { MAX_PLAYERS_PER_ROOM} from "./types";
@@ -23,14 +21,6 @@ const onlinePlayers: Map<string, Player> = new Map();   // playerId → Player
 const roomsByName: Map<string, Room> = new Map();       // roomName → Room (to allow join by name)
 const timeouts: Map<string, NodeJS.Timeout> = new Map(); // playerId → timeout for handling disconnection grace period
 const dropTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
-
-// --- Friends ---
-// async getFriendsWithStatus(userId: string) {
-  // Call friends.service.getFriendsList(userId)
-  // Then check onlinePlayers map
-  // Return combined result
-// }
-
 
 
 // --- Socket Timeout ---
@@ -48,7 +38,8 @@ export function clearPlayerTimeout(playerId: string) {
   }
 }
 
-// --- HELPERS ---
+
+// --- Helpers ---
 
 
 // Get Username from PlayerId
@@ -154,15 +145,11 @@ export function getDropTimeouts(): Map<string, ReturnType<typeof setTimeout>> {
 }
 
 
-// --- DEBUG ---
+// --- Debug ---
+
   export function debugState() {
     console.log("---- PLAYER STATE ----");
 
-    // for (const [roomId, room] of roomsById) {
-    //   const name = room.name ? `${room.name}` : "";
-    //   console.log(`Room: ${roomId} - Name: ${name} - State: ${room.state} - Players: ${room.players.length}`);
-    //   console.log("Players:", room.players.map(p => `${p.userName}`).join(", \n"));
-    // }
     console.log("Online players:");
     if (onlinePlayers.size === 0) {
       console.log("No online players");
