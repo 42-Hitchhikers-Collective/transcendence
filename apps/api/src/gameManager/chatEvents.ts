@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 17:36:17 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 17:13:05 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:08:04 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
   [ChatMsgType.WON_GAME]: "won!",
   [ChatMsgType.DROP_ROOM]: "dropped! They will be kicked out in 30 seconds if not back",
   [ChatMsgType.DROP_ROOM_BACK]: "is back!",
-  [ChatMsgType.UNO]: "called UNO! 🚨", // JESS: add uno call
+  [ChatMsgType.UNO]: "called UNO! 🚨"
 };
 
 // Validate a chat msg and add it to room's chat history
@@ -51,16 +51,10 @@ export function prepareChatMsg(playerId: string, msg: string): RoomIdResult {
         return {success: false, roomId: "undefined", error: "Room not found"};
     if (msg.length === 0 || msg.length > MAX_MSG_LENGTH)
         return {success: false, roomId: roomId, error: `Message must be between 1 and ${MAX_MSG_LENGTH} characters`};
-   // JESS: removed regex validation as the chat cannot be used for sql injection or any other attacks since it's not using
-   // a database. With socjet io we have only risk of DOS attacks, but MAX_MSG_LENGTH = 200 prevents that already.
-   // So let's not restrict the chat to only certain characters, as it would be annoying for users and it's nice if they can use emojis for example
-    // const regex = /^[a-zA-Z0-9 \-_!?.]+$/;
-    // if (!regex.test(msg))
-    //   return { success: false, roomId: "undefined", error: "Message contains invalid characters"};
     const username = getUsername(playerId) || "Unknown";
     const onlinePlayer = getOnlinePlayer(playerId);
     const avatarUrl = onlinePlayer?.avatarUrl ?? "/avatars/default.png";
-    addMsgToChatHistory(room, username, msg, avatarUrl); // JESS: added avatarUrl to chat history so the frontend can display it
+    addMsgToChatHistory(room, username, msg, avatarUrl);
     return {success: true, roomId: roomId};
 }
 
@@ -81,7 +75,7 @@ export function prepareStrChatMsg(playerId: string, roomId: string, msgType: Cha
 
 // Helper to add message to room's chat history and trim history if exceeds max
 function addMsgToChatHistory(room: Room, username: string, msg: string, avatarUrl?: string) {
-    room.chatHistory.push({ username, msg, avatarUrl: avatarUrl ?? "" }); // JESS: added avatarUrl to chat history so the frontend can display it
+    room.chatHistory.push({ username, msg, avatarUrl: avatarUrl ?? "" });
     if (room.chatHistory.length > MAX_MSG_HISTORY) {
         room.chatHistory.shift();
     }

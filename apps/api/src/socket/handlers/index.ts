@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/05 13:14:30 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 15:41:31 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:38:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ import { getIdentity } from "../socket.utils";
 import { registerRoomHandlers } from "./room.handlers";
 import { registerGameHandlers } from "./game.handlers";
 import { registerConnectionHandlers } from "./connection.handlers";
-// import registerFriendHandlers from "./friend.handlers";
 import { ChatMsgType } from "../../gameManager/chatEvents";
 import { SYSTEM_SENDER_NAME } from "../../gameManager/types";
 
@@ -33,7 +32,7 @@ export function registerSocketHandlers(
     const room = gameManager.getRoomById(roomId);
     if (!room) return;
     room.players.forEach((player) => {
-      if (!player.socketId) return; // skip players without an active socket
+      if (!player.socketId) return;
       const gameCanvasRoom = utils.getGameCanvasRoom(room, player.playerId);
       socket.nsp.to(player.socketId).emit("room_state", gameCanvasRoom);
     });
@@ -45,16 +44,13 @@ export function registerSocketHandlers(
     const roomInfo = utils.getFrontedRoomInfo(roomId);
     if (roomInfo) {
       socket.nsp.to(roomId).emit("room_info_response", roomInfo);
-      // console.log(`<-------------  📋 ROOM INFO ${roomId} 📋 -------------> \n`, roomInfo);
-      // console.log(`<--------------------------------------------->`);
     }
   }
 
   // Register related event handlers
-  registerConnectionHandlers(app, socket, broadcastGameCanvas /* broadcastGamePage */);
+  registerConnectionHandlers(app, socket, broadcastGameCanvas);
   registerRoomHandlers(socket, broadcastGameCanvas, broadcastGamePage);
-  registerGameHandlers(app, socket, broadcastGameCanvas, broadcastGamePage); // JESS: I need to pass broadcastGamePage to update the gamepage on who is playing
-  // registerFriendHandlers(app, socket);
+  registerGameHandlers(app, socket, broadcastGameCanvas, broadcastGamePage);
 
 
   // Emits an object of the current player state (or null) on request
@@ -76,8 +72,7 @@ export function registerSocketHandlers(
     socket.emit("room_info_response", frontedRoomInfo);
   });
 
-  
-  // JESS: I NEEDED THESE EVENT TO REQUEST THE CHAT HSTORY WHEN THE GAME PAGE MOUNTS
+  // Emits chat history on request
   socket.on("chat_history_request", () => {
     const { playerId } = getIdentity(socket);
     const roomId = gameManager.getPlayerRoomId(playerId);
@@ -102,10 +97,9 @@ export function registerSocketHandlers(
       return;
     }
     console.log("[send_msg] Broadcasting message to room:", res.roomId);
-    // JESS: I added avatarUrl to the chat message so the frontend can display it
     const onlinePlayer = gameManager.getOnlinePlayer(playerId);
     const avatarUrl = onlinePlayer?.avatarUrl ?? "/avatars/default.png";
-    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName, avatarUrl }); // JESS: added avatarUrl to chat message so the frontend can display it
+    socket.nsp.to(res.roomId).emit("chat_message", { msg, senderId: userName, avatarUrl });
   });
 
 

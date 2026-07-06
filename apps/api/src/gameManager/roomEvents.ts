@@ -6,14 +6,13 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 17:25:50 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/16 16:47:36 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:26:29 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import * as gm from "./gameManager";
 import { Room, RoomResult, RoomIdResult, MAX_ROOM_NAME_LENGTH, DROP_TIMER_DURATION } from "./types";
 import { MAX_PLAYERS_PER_ROOM } from "./types";
-// import { ChatMsgType, prepareStrChatMsg } from "./chatEvents";
 
 // --- Room Events ---
 
@@ -46,13 +45,11 @@ export function joinRoom(name: string, playerId: string): RoomResult {
   
   const currentRoomId = gm.getPlayerRoomId(playerId);
   const roomId = room.id;
-  if (currentRoomId) { // player is already in a room - is it the same room or a different one?
-    
+  if (currentRoomId) {
     if (gm.getPlayerRoomId(playerId) === roomId) { // player is already in the same room he requests to join
       cancelDropTimer(playerId); // Cancel drop timer if rejoining the same room
       return { success: false, roomId: roomId, error: "Player already in room (Dropped)" };
     }
-    
     return { success: false, roomId: currentRoomId, error: "Player already in a different room" };
   } 
   if (room.players.length >= MAX_PLAYERS_PER_ROOM)
@@ -113,7 +110,6 @@ export function startDropTimer(playerId: string, onExpired?: DropTimerExpiredCal
 export function cancelDropTimer(playerId: string) {
   const timer = gm.getDropTimeouts().get(playerId);
   const username = gm.getOnlinePlayer(playerId)?.userName || "Unknown";
-  // console.log("[drop-timer] check if to cancel for", username);
   if (timer) {
     clearTimeout(timer);
     gm.getDropTimeouts().delete(playerId);
@@ -165,16 +161,3 @@ function validateRoomName(name: string): RoomResult {
     return { success: false, roomId: "undefined", error: "Room name contains invalid characters"};
   return { success: true, room: null as any };
 }
-
-// socket reassigning is being made in the connection handler
-// When a player joins a room they are already in, reassign the socket id to avoid losing connection
-// function rejoinRoom(playerId: string, room: Room): RoomResult {
-//   const onlinePlayer = gm.getOnlinePlayer(playerId); 
-//   if (onlinePlayer) {
-//     const existing = room.players.find(p => p.playerId === playerId); 
-//     if (existing)
-//       existing.socketId = onlinePlayer.socketId;
-//     return { success: true, room: room };
-//   }
-//   return { success: false, error: "Player is in room but not in online players" };
-// }

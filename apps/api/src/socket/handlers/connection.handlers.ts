@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   connection.handlers.ts                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/15 14:05:12 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 15:51:45 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,8 @@ import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from ".";
 import { ChatMsgType } from "../../gameManager/chatEvents";
-// import { notifyFriendsPresence } from "./friend.handlers";
-import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
+// import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
-
-// Pausing the game if a player disconnects ?
 
 // --- Connection Events ---
 
@@ -30,9 +27,8 @@ export function registerConnectionHandlers(
   broadcastRoomState: (roomId: string) => void
 ) {
     const { playerId, userName } = getIdentity(socket);
-    // console.log(`socket connected: ${userName}`);
     
-    cancelDisconnectTimer(playerId);
+    // cancelDisconnectTimer(playerId);
     
     // Auto-rejoin player to their room if they were in one (handles reconnections)
     const roomId = gameManager.getPlayerRoomId(playerId);
@@ -46,19 +42,21 @@ export function registerConnectionHandlers(
     // Disconnect and leave room if in any
     socket.on("disconnect", () => {
         console.log(`[Socket] ${userName} disconnected`);
-        
         // Prevent older stale sockets (like a closed previous tab) from triggering the grace period
         const currentPlayer = gameManager.getOnlinePlayer(playerId);
         if (currentPlayer && currentPlayer.socketId !== socket.id) {
             console.log(`[Socket] ${userName} Stale socket disconnected, ignoring.`);
             return; 
         }
-        // console.log(`[Grace period] ${userName}: grace period starts now`);
-        // startGracePeriod(app, socket, playerId, broadcastRoomState);
     });
 }
 
+
+
+/// --- Older Grace period implementation ---
+
 // Start grace period before removing player from their room
+/*
 function startGracePeriod(
   app: FastifyInstance,
   socket: Socket,
@@ -69,11 +67,7 @@ function startGracePeriod(
     console.log(`[Grace period] starting for: ${userName} `);
     const timeoutId = setTimeout(async () => {
         const res = gameManager.leaveRoom(playerId);
-        
-        // Notify friends that player went offline
-        // await notifyFriendsPresence(app, socket, playerId, "offline");
-        
-        gameManager.removePlayerFromOnlinePlayers(playerId);
+         gameManager.removePlayerFromOnlinePlayers(playerId);
         console.log(`[Grace period] ended for player ${userName}, removed from online players and left room if in any.`);
         if (res.success) {
             broadcastRoomState(res.roomId);
@@ -91,6 +85,5 @@ function cancelDisconnectTimer(playerId: string) {
     const playerName = player ? player.userName : playerId;
     // console.log("[Grace period] check if to cancel for:", playerName);
     gameManager.clearPlayerTimeout(playerId);
-    // If the user comes back (new socket), also cancel the room-page drop timer ??
-    // gameManager.cancelDropTimer(playerId); 
 }
+*/

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/22 17:54:51 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/06 13:34:06 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,11 @@ import {
   RoomIdResult,
   MAX_PLAYERS_PER_ROOM,
   MIN_PLAYERS_TO_START,
+  msgLeftRoom,
 } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
+import { Player as GamePlayer } from "../gamelogic/Player";
 import { abortGame } from "../services/game.service";
 
 type Event = { color: boolean; uno: boolean; finish: boolean };
@@ -108,6 +110,8 @@ export function selectWildColor(
   return { success: true, roomId: roomId };
 }
 
+
+// Check for game events after a card is played
 export function checkGameEvent(roomId: string): Event | null {
   const room = gm.getRoomById(roomId);
   if (room) {
@@ -153,15 +157,9 @@ export function endGame(roomId: string) {
     return { success: false, roomId: roomId, error: "Game DB ID is undefined" };
   }
   room.state = "finished";
-  // ----- JESS : Find the winner (player with empty hand) from the game's player list and set it -----
-  const winner = room.game.players.find((p) => {
-    const hand = room.game?.table.getHand(p.id);
-    return hand && hand.length === 0;
-  });
-  if (winner) {
+  const winner = findWinner(room);
+  if (winner)
     room.game.finishGame(winner);
-  }
-  // ----- JESS : If no winner found (shouldn't happen in normal flow) set the game as interrupted -----
   if (!room.game.winner) {
     return { success: false, roomId: roomId, error: "Winner not found" };
   }
@@ -178,6 +176,17 @@ export function endGame(roomId: string) {
 }
 
 // --- Helpers ---
+
+// Find the winner of the game by checking if any player has an empty hand
+function findWinner(room: Room): GamePlayer | null {
+  if (!room.game)
+    return null;
+  const winner = room.game.players.find((p) => {
+    const hand = room.game?.table.getHand(p.id);
+    return hand?.length === 0;
+  });
+  return winner ?? null;
+}
 
 function getCardFromIndex(playerId: string, cardIndex: number): Card | null {
   const roomId = gm.getPlayerRoomId(playerId);
@@ -227,7 +236,7 @@ export function passTurnButton(playerId: string): RoomIdResult {
   return { success: true, roomId: roomId };
 }
 
-// Returns true only if game is in waiting mode, at least 2 players in the room, and all players are ready
+// Returns true only if game is in waiting mode, at least 2 players in the room
 function startGameCondition(room: Room): boolean {
   if (!room) return false;
   if (room.state !== "waiting") return false;
@@ -236,16 +245,19 @@ function startGameCondition(room: Room): boolean {
 }
 
 
-// Does the function need to return something?
-export function playerLeft(roomId: string, playerId: string) {
+// removes player from table and returns his cards. and if color platte is open - returns true
+export function playerLeft(roomId: string, playerId: string) : msgLeftRoom {
   
   const room = gm.getRoomById(roomId);
   if (!room || !room.game)
-    return { success: false, roomId: roomId, error: "Room or game not found" };
+    return { success: false};
   
   if (!room.game.playerLeft(playerId))
-    return false;
+    return { success: false };
 
-  return true
+  if (room.game.table.color)
+    return { success: true, roomId: roomId, currentPlayer: room.game.table.players[room.game.table.turnIndex].id};
+
+  return { success: false };
   
 }
