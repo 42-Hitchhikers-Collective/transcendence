@@ -21,11 +21,32 @@ GOINFRE_DOCKER := $(GOINFRE_BASE)/docker
 GOINFRE_NPM    := $(GOINFRE_BASE)/.npm
 is_sgoinfre    := $(shell test -d /sgoinfre && echo 1 || echo 0)
 
+# ── Environment variables file ───────────────────────────────────
+
+ENV_FILE := .env
+
 # ── Default ──────────────────────────────────────────────────
 
 all: setup
 
 # ── Infrastructure (directories, certs) ──────────────────────
+
+env:
+	@if [ -f "$(ENV_FILE)" ]; then \
+		echo "✅  .env already exists"; \
+	else \
+		echo "📝  Creating .env..."; \
+		POSTGRES_USER=$$(node -e "console.log(require('crypto').randomBytes(8).toString('hex'))"); \
+		POSTGRES_PASSWORD=$$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"); \
+		POSTGRES_DB=$$(node -e "console.log(require('crypto').randomBytes(8).toString('hex'))"); \
+		JWT_SECRET=$$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"); \
+		printf "POSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=%s\n\nDATABASE_URL=postgresql://%s:%s@db:5432/%s?schema=public\nJWT_SECRET=%s\n\nEXPOSE_DEV_TOKENS=true\n" \
+			"$$POSTGRES_USER" "$$POSTGRES_PASSWORD" "$$POSTGRES_DB" \
+			"$$POSTGRES_USER" "$$POSTGRES_PASSWORD" "$$POSTGRES_DB" \
+			"$$JWT_SECRET" > "$(ENV_FILE)"; \
+		echo "✅  .env created"; \
+	fi
+
 
 dirs:
 	@echo "📁  Creating required directories..."
@@ -148,7 +169,7 @@ fresh: clean prune
 	$(MAKE) up
 	@echo "✅  Fresh start complete"
 
-setup: certs clean prune
+setup: env certs clean prune
 	@if [ "$(is_sgoinfre)" = "1" ]; then \
 	  echo "🏫  School machine detected — configuring goinfre..."; \
 	  $(MAKE) goinfre; \
