@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/02 15:01:53 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/06 13:23:36 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ import {
 } from "./types";
 import { Game as GameInstance } from "../gamelogic/Game";
 import { Card } from "../gamelogic/Card";
+import { Player as GamePlayer } from "../gamelogic/Player";
 import { abortGame } from "../services/game.service";
 
 type Event = { color: boolean; uno: boolean; finish: boolean };
@@ -154,15 +155,9 @@ export function endGame(roomId: string) {
     return { success: false, roomId: roomId, error: "Game DB ID is undefined" };
   }
   room.state = "finished";
-  // ----- JESS : Find the winner (player with empty hand) from the game's player list and set it -----
-  const winner = room.game.players.find((p) => {
-    const hand = room.game?.table.getHand(p.id);
-    return hand && hand.length === 0;
-  });
-  if (winner) {
+  const winner = findWinner(room);
+  if (winner)
     room.game.finishGame(winner);
-  }
-  // ----- JESS : If no winner found (shouldn't happen in normal flow) set the game as interrupted -----
   if (!room.game.winner) {
     return { success: false, roomId: roomId, error: "Winner not found" };
   }
@@ -179,6 +174,17 @@ export function endGame(roomId: string) {
 }
 
 // --- Helpers ---
+
+// Find the winner of the game by checking if any player has an empty hand
+function findWinner(room: Room): GamePlayer | null {
+  if (!room.game)
+    return null;
+  const winner = room.game.players.find((p) => {
+    const hand = room.game?.table.getHand(p.id);
+    return hand?.length === 0;
+  });
+  return winner ?? null;
+}
 
 function getCardFromIndex(playerId: string, cardIndex: number): Card | null {
   const roomId = gm.getPlayerRoomId(playerId);
