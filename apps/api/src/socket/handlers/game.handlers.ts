@@ -6,7 +6,7 @@
 /*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 19:30:26 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/06 19:50:41 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,10 +125,14 @@ export function registerGameHandlers(
     const roomId = gameManager.getPlayerRoomId(playerId);
     if (!roomId) return;
     const room = gameManager.getRoomById(roomId);
-    if (room) {
-      const gameCanvasRoom = getGameCanvasRoom(room, playerId);
-      socket.emit("room_state", gameCanvasRoom);
+    if (!room) return;
+    if (room.game?.table.color) {
+      const currentPlayer = room.game.table.players[room.game.table.turnIndex].id;
+      if (currentPlayer === playerId)
+        socket.emit("show_colors", { roomId: roomId });
     }
+    const gameCanvasRoom = getGameCanvasRoom(room, playerId);
+    socket.emit("room_state", gameCanvasRoom);
   });
 
 
