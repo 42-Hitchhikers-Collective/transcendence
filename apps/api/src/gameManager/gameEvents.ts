@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 13:23:36 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:34:06 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,8 @@ export function selectWildColor(
   return { success: true, roomId: roomId };
 }
 
+
+// Check for game events after a card is played
 export function checkGameEvent(roomId: string): Event | null {
   const room = gm.getRoomById(roomId);
   if (room) {
