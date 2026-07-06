@@ -6,7 +6,7 @@
 /*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/22 13:28:26 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/08 16:43:22 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/06 13:46:31 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,11 @@ export function setupSocket(app: FastifyInstance) {
       existingPlayer.socketId = socket.id;
       existingPlayer.avatarUrl = avatarUrl; // update avatar in case it changed
       const roomId = gameManager.getPlayerRoomId(playerId);
-      // if (roomId)
-        // io.to(roomId).emit("playerUpdate", existingPlayer); // emiting that player is now online again to the room - neccessary?
     } else {
         console.log(`[online players] New player: ${userName}`);
         const newPlayer: Player = { playerId, socketId: socket.id, userName, avatarUrl };
         gameManager.addPlayerToOnlinePlayers(newPlayer);
-        // socket.emit("playerUpdate", newPlayer); // not neccessary ? is there a need to be updated when a new player is in town?
     }
-
-    // Game room handlers (create_room, join_room, leave_room, start_game, play_card, draw_card)
     registerSocketHandlers(app, socket);
   });
 

@@ -52,12 +52,11 @@ const start = async () => {
   await app.register(multipartPlugin);
 
   
-  //INBAR
   await app.register(fastifyStatic, {
     root: path.join(process.cwd(), "data/avatars"),
     prefix: "/avatars/",
   });
-  //INBAR
+
 
   await app.register(authRoutes, { prefix: "/api/auth" });
   await app.register(userRoutes, { prefix: "/api/users" });
