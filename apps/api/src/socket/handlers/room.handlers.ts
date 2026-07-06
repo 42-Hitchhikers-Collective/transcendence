@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   room.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 15:52:06 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/06 15:57:08 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ export function registerRoomHandlers(
       });
       if (res.error === "Player already in room (Dropped)") {
         const roomId = res.roomId;
-        systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK); // JESS: added system message when player rejoins with new coket
+        systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM_BACK);
         broadcastGamePage(roomId);
       }
       socket.emit("error", { message: res.error });
