@@ -23,6 +23,7 @@ const USERS = [
 // Each game: host, date, and players with their final placement (1 = winner)
 const GAMES = [
   {
+    roomName: "alice_3p_win",
     date: new Date("2026-03-11"),
     host: "alice",
     players: [
@@ -32,6 +33,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "grace_2p_win",
     date: new Date("2026-03-10"),
     host: "grace",
     players: [
@@ -40,6 +42,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "alice_3p_rematch",
     date: new Date("2026-03-09"),
     host: "alice",
     players: [
@@ -49,6 +52,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "alice_vs_eve",
     date: new Date("2026-03-08"),
     host: "alice",
     players: [
@@ -57,6 +61,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "frank_4p",
     date: new Date("2026-03-07"),
     host: "frank",
     players: [
@@ -68,6 +73,7 @@ const GAMES = [
   },
   // ── henry grinds Intermediate (18 games, 12 wins = 67%) ──
   ...Array.from({ length: 6 }, (_, i) => ({
+    roomName: `henry_vs_bob_${i + 1}`,
     date: new Date(`2026-02-${String(10 + i).padStart(2, "0")}`),
     host: "henry",
     players: [
@@ -76,6 +82,7 @@ const GAMES = [
     ],
   })),
   ...Array.from({ length: 6 }, (_, i) => ({
+    roomName: `henry_vs_eve_${i + 1}`,
     date: new Date(`2026-02-${String(16 + i).padStart(2, "0")}`),
     host: "henry",
     players: [
@@ -84,6 +91,7 @@ const GAMES = [
     ],
   })),
   ...Array.from({ length: 6 }, (_, i) => ({
+    roomName: `henry_loss_${i + 1}`,
     date: new Date(`2026-02-${String(22 + i).padStart(2, "0")}`),
     host: "henry",
     players: [
@@ -93,6 +101,7 @@ const GAMES = [
   })),
   // ── push henry to Expert (50+ games, 70%+ win rate) ──
   ...Array.from({ length: 16 }, (_, i) => ({
+    roomName: `henry_grind_${i + 1}`,
     date: new Date(`2026-01-${String(10 + i).padStart(2, "0")}`),
     host: "henry",
     players: [
@@ -101,6 +110,7 @@ const GAMES = [
     ],
   })),
   ...Array.from({ length: 16 }, (_, i) => ({
+    roomName: `henry_grind_${i + 17}`,
     date: new Date(`2026-02-${String(1 + i).padStart(2, "0")}`),
     host: "henry",
     players: [
@@ -110,6 +120,7 @@ const GAMES = [
   })),
   // ── alice gets a few more games ──
   {
+    roomName: "roomforus",
     date: new Date("2026-03-06"),
     host: "alice",
     players: [
@@ -118,6 +129,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "alice_vs_charlie",
     date: new Date("2026-03-05"),
     host: "alice",
     players: [
@@ -126,6 +138,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "losers_rematch",
     date: new Date("2026-03-04"),
     host: "bob",
     players: [
@@ -135,6 +148,7 @@ const GAMES = [
   },
   // ── leo grinds Master (320 games, 240 wins = 75%) ──
   ...Array.from({ length: 100 }, (_, i) => ({
+    roomName: `leo_vs_eve_${i + 1}`,
     date: new Date(`2025-11-${String(1 + (i % 30)).padStart(2, "0")}`),
     host: "leo",
     players: [
@@ -143,6 +157,7 @@ const GAMES = [
     ],
   })),
   ...Array.from({ length: 100 }, (_, i) => ({
+    roomName: `leo_vs_bob_${i + 1}`,
     date: new Date(`2025-12-${String(1 + (i % 30)).padStart(2, "0")}`),
     host: "leo",
     players: [
@@ -151,6 +166,7 @@ const GAMES = [
     ],
   })),
   ...Array.from({ length: 60 }, (_, i) => ({
+    roomName: `me-vs-me${i + 1}`,
     date: new Date(`2026-01-${String(1 + (i % 30)).padStart(2, "0")}`),
     host: "leo",
     players: [
@@ -159,6 +175,7 @@ const GAMES = [
     ],
   })),
   ...Array.from({ length: 60 }, (_, i) => ({
+    roomName: `leo_vs_charlie_${i + 1}`,
     date: new Date(`2026-01-${String(1 + (i % 30)).padStart(2, "0")}`),
     host: "leo",
     players: [
@@ -168,6 +185,7 @@ const GAMES = [
   })),
   // ── jack plays a few games ──
   {
+    roomName: "LateChat",
     date: new Date("2026-03-03"),
     host: "jack",
     players: [
@@ -176,6 +194,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "OurRoom 💕",
     date: new Date("2026-03-02"),
     host: "jack",
     players: [
@@ -184,6 +203,7 @@ const GAMES = [
     ],
   },
   {
+    roomName: "Yolo",
     date: new Date("2026-03-01"),
     host: "jack",
     players: [
@@ -223,25 +243,9 @@ async function main() {
 
   // --- Games ---
   for (const g of GAMES) {
-    const hostId = userIds[g.host];
-
-    const lobby = await prisma.lobby.create({
-      data: {
-        hostUserId: hostId,
-        status: "CLOSED",
-        maxPlayers: g.players.length,
-        members: {
-          create: g.players.map((p) => ({
-            userId: userIds[p.username],
-            ready: true,
-          })),
-        },
-      },
-    });
-
     await prisma.game.create({
       data: {
-        lobbyId: lobby.id,
+        roomName: g.roomName,
         status: "FINISHED",
         createdAt: g.date,
         endedAt: g.date,

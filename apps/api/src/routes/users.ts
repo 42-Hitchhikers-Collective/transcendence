@@ -129,7 +129,6 @@ export async function userRoutes(app: any) {
       orderBy: [{ endedAt: "desc" }, { createdAt: "desc" }],
       take: 20,
       include: {
-        lobby: { select: { id: true } },
         players: {
           include: {
             user: {
@@ -157,7 +156,7 @@ export async function userRoutes(app: any) {
       return {
         id: game.id,
         result,
-        roomName: game.roomName ?? (game.lobby ? `Lobby ${game.lobby.id.slice(0, 6)}` : "Match"), // JESS: We need the room name to show it in the game history as first priority, then we resort to id and fallback later
+        roomName: game.roomName ?? "Match",
         opponents,
         date: (game.endedAt ?? game.createdAt).toISOString(),
       };

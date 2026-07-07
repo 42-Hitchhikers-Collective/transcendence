@@ -1,11 +1,10 @@
 // Called when a game starts. Creates a RUNNING Game record and returns its id.
 // Store the returned id on room.gameDbId so it can be passed to finalizeGame/abortGame later.
-export async function createGameRecord(prisma: any, roomName?: string, lobbyId?: string): Promise<string> {
+export async function createGameRecord(prisma: any, roomName?: string): Promise<string> {
   const game = await prisma.game.create({
     data: {
       status: "RUNNING",
       roomName: roomName ?? null,
-      lobbyId: lobbyId ?? null,
     },
     select: { id: true },
   });
