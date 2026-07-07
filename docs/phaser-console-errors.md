@@ -336,6 +336,34 @@ Source Map URL: react_devtools_backend_compact.js.map
 
 ---
 
+## Warning #11 — Phaser source map (phaser.js.map)
+
+```
+Source map error: Error: NetworkError when attempting to fetch resource.
+Resource URL: https://localhost:8443/node_modules/.vite/deps/phaser.js?v=...
+Source Map URL: phaser.js.map
+```
+
+**Why:** Phaser's npm package does not ship a `.map` file, but Vite's dependency pre-bundler (esbuild) adds a `//# sourceMappingURL=phaser.js.map` comment to the bundled output by default. The browser sees this reference, tries to fetch the map file, and gets a 404 — logging a red error in the console.
+
+**Impact:** Zero functionally — the game loads and runs perfectly (as confirmed by the `🎮 ROOM DATA RECEIVED` and `🕹️ PHASER: GameScene ready` logs). But it shows a red error in the console, which is unacceptable for evaluation.
+
+**Fix:** Disabled source maps for pre-bundled dependencies in `vite.config.ts`:
+
+```ts
+optimizeDeps: {
+  esbuildOptions: {
+    sourcemap: false, // phaser ships no .map file; prevents browser from trying to fetch it
+  },
+},
+```
+
+This tells esbuild not to emit `sourceMappingURL` comments for any `node_modules` dependency. Since we never need to debug Phaser's internals, losing source maps for dependencies is a non-issue.
+
+**File:** `vite.config.ts`
+
+---
+
 ## Summary: The Guard Pattern
 
 Every method that can be called asynchronously (via socket events or Phaser input events) after navigation now starts with:

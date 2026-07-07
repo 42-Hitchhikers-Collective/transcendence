@@ -126,9 +126,9 @@ export class RenderManager {
       `${room.game?.discardTopCard.value}_${room.game?.discardTopCard.color}`,
     );
     sprite.setDepth(0);
-
     sprite.setScale(CARDS.SCALE);
     sprite.setInteractive();
+    this.boardContainer.add(sprite); // fixes the issue of the discard pile being rendered behind the draw pile and player cards, because the discard pile is added to the boardContainer after the draw pile and player cards are added to the boardContainer
   }
 
   private renderDrawPile() {
