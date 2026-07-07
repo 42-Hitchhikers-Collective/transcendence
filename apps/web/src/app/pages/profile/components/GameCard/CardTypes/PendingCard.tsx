@@ -1,16 +1,16 @@
 import PendingGameTimer from "./PendingGameTimer";
 
-type PendingGameCardProps = {
+type PendingCardProps = {
   activeRoomName: string;
   onRejoin: () => void;
   onLeave: () => void;
 };
 
-export default function PendingGameCard({
+export default function PendingCard({
   activeRoomName,
   onRejoin,
   onLeave,
-}: PendingGameCardProps) {
+}: PendingCardProps) {
   const { timeLeft, isRunning, start } = PendingGameTimer(30_000);
 
   return (

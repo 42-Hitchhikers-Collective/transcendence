@@ -1,40 +1,32 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { socket } from "@/socket/Socket";
 import { useRoomState } from "@/gameCanvas/hooks/useRoomState";
-import PendingGameCard from "./PendingGameCard/PendingGameCard";
-import CreateRoom from "./CreateRoom";
-import JoinRoom from "./JoinRoom";
+import PendingCard from "./CardTypes/PendingCard";
+import CreateCard from "./CardTypes/CreateCard";
+import JoinRoom from "./CardTypes/JoinCard";
 import { cn } from "@/shared/lib/utils";
 
-export function CreateGameCard() {
+export function GameCard() {
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
-  const [isCreating, setIsCreating] = useState(false);
   const [roomNameInput, setRoomNameInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [hasPendingRoom, setHasPendingRoom] = useState<string | null>(null);
   const navigate = useNavigate();
   useRoomState();
 
   // Join room state
   const [joinRoomName, setJoinRoomName] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
-  const [joinError, setJoinError] = useState<string | null>(null); // keep room state subscription for active-room updates
 
   useEffect(() => {
-    // TODO: leave rooms mostly may not riun because new socket of the player is not connected
     socket.on("leave_room", () => {
-      console.log("Leave_room event received on CreateGameCard");
+      console.log("Leave_room event received on GameCard");
       setHasPendingRoom(null);
     });
-    socket.on("error", handleError);
     socket.on("player_info_response", handlePlayerInfo);
-
     socket.emit("player_info_request");
 
     return () => {
       socket.off("leave_room");
-      socket.off("error", handleError);
       socket.off("player_info_response", handlePlayerInfo);
     };
   }, []);
@@ -67,78 +59,15 @@ export function CreateGameCard() {
     }
   };
 
-  // Used for handling room creation errors only
-  const handleError = (err: { message: string }) => {
-    console.log(`GAMECREATE SOCKET_ERROR: ${err.message}`);
-    setError(err.message);
-    setIsCreating(false);
-  };
-
-  // Navigates to game room after successful creation
-  const navigateToGameRoom = (data: { roomName: string }) => {
-    setIsCreating(false);
-    setError(null);
-    navigate(`/game?room=${encodeURIComponent(data.roomName)}`);
-  };
-
-  // Ref to store timeout ID for cleanup
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Clear timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  const handleCreateRoom = () => {
-    const name = roomNameInput.trim();
-    if (!/^[\w-]{1,20}$/.test(name) || !name) {
-      setError(
-        "Invalid room name. Only letters allowed with a max length of 20",
-      );
-      return;
-    }
-    socket.emit("create_room", { roomName: name });
-    setIsCreating(true);
-    // Delay used to ensure backend has time to process room creation to load
-    timeoutRef.current = setTimeout(() => {
-      navigateToGameRoom({ roomName: name });
-      timeoutRef.current = null;
-    }, 2000);
-  };
-
   const handleLeaveRoom = () => {
     socket.emit("leave_room");
     setHasPendingRoom(null);
   };
 
-  const handleJoinRoom = () => {
-    const name = joinRoomName.trim();
-    if (!/^[\w-]{1,20}$/.test(name) || !name) {
-      setJoinError(
-        "Invalid room name. Only letters allowed with a max length of 20",
-      );
-      return;
-    }
-    setIsJoining(true);
-    setJoinError(null);
-    // Check if room exists before navigating
-    socket.emit("is_room_exists", { roomName: name });
-    socket.once("room_exists_response", ({ roomName, exists }) => {
-      if (exists) {
-        navigate(`/game?room=${encodeURIComponent(roomName)}`);
-      } else {
-        setJoinError("Room not found. Check the name and try again.");
-        setIsJoining(false);
-      }
-    });
-  };
-
   return (
     <>
       {hasPendingRoom ? (
-        <PendingGameCard
+        <PendingCard
           activeRoomName={hasPendingRoom}
           onRejoin={() =>
             navigate(`/game?room=${encodeURIComponent(hasPendingRoom)}`)
@@ -182,20 +111,14 @@ export function CreateGameCard() {
 
           {/* Content */}
           {activeTab === "create" ? (
-            <CreateRoom
+            <CreateCard
               roomNameInput={roomNameInput}
               onRoomNameChange={setRoomNameInput}
-              isCreating={isCreating}
-              error={error}
-              onCreateRoom={handleCreateRoom}
             />
           ) : (
             <JoinRoom
               roomNameInput={joinRoomName}
               onRoomNameChange={setJoinRoomName}
-              isJoining={isJoining}
-              error={joinError}
-              onJoinRoom={handleJoinRoom}
             />
           )}
         </div>

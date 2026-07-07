@@ -220,7 +220,10 @@ export function useGamePage(roomName: string) {
     );
   };
 
-  const handleRoomDataResponse = (roomData: RoomData) => {
+  const handleRoomDataResponse = (roomData: RoomData | null) => {
+    if (!roomData) {
+      return;
+    }
     RoomDataRef.current = roomData; // current stores the latest full room state for replaying on EventBus
     console.log(
       `🎮 ROOM DATA RECEIVED FROM SOCKET\n` +

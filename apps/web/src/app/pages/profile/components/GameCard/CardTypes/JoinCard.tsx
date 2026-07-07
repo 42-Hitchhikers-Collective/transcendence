@@ -1,23 +1,61 @@
-import cardBack from "@/assets/icons/uno_card_back.png";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { socket } from "@/socket/Socket";
+import cardBack from "@/assets/icons/plus4.png";
 
-type CreateRoomProps = {
+type JoinCardProps = {
   roomNameInput: string;
   onRoomNameChange: (value: string) => void;
-  isCreating: boolean;
-  error: string | null;
-  onCreateRoom: () => void;
 };
 
-export default function CreateRoom({
+export default function JoinCard({
   roomNameInput,
   onRoomNameChange,
-  isCreating,
-  error,
-  onCreateRoom,
-}: CreateRoomProps) {
+}: JoinCardProps) {
+  const [isJoining, setIsJoining] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleJoinRoom = () => {
+    const name = roomNameInput.trim();
+    if (!/^[\w-]{1,20}$/.test(name) || !name) {
+      setErrorMessage(
+        "Invalid room name. Only letters allowed with a max length of 20",
+      );
+      return;
+    }
+
+    // One-shot: listen for error on this specific join attempt
+    socket.once("error", (err: { message: string }) => {
+      setErrorMessage(err.message);
+      setIsJoining(false);
+    });
+
+    // One-shot: listen for room existence response
+    socket.once("room_exists_response", ({ roomName, exists }) => {
+      if (exists) {
+        // setIsJoining(false);
+        // setErrorMessage(null);
+        // navigate(`/game?room=${encodeURIComponent(roomName)}`);
+        setTimeout(() => {
+          console.log(`Room joined successfully: ${roomName}`);
+          setIsJoining(false);
+          setErrorMessage(null);
+          navigate(`/game?room=${encodeURIComponent(roomName)}`);
+        }, 2000);
+      } else {
+        setErrorMessage("Room not found. Check the name and try again.");
+        setIsJoining(false);
+      }
+    });
+
+    setIsJoining(true);
+    setErrorMessage(null);
+    socket.emit("is_room_exists", { roomName: name });
+  };
+
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10 rounded-2xl border bg-linear-to-br from-emerald-50 via-white to-emerald-100">
-      {/* Card image */}
+    <div className="h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10 rounded-2xl border bg-linear-to-br from-sky-50 via-white to-emerald-50">
       <style>{cardAnimation}</style>
 
       <div
@@ -25,7 +63,7 @@ export default function CreateRoom({
         style={{ maxWidth: 320, height: 280 }}
       >
         <div
-          className={`fan-wrapper${isCreating ? " is-active" : ""}`}
+          className={`fan-wrapper${isJoining ? " is-active" : ""}`}
           style={{ "--card-back": `url(${cardBack})` } as React.CSSProperties}
           aria-hidden="true"
         >
@@ -38,10 +76,10 @@ export default function CreateRoom({
       {/* Title + description */}
       <div className="text-center mb-6">
         <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900">
-          Start playing now
+          Join a room
         </h3>
         <p className="text-sm md:text-base text-slate-600 max-w-xs mx-auto mt-1">
-          Pick a name for your room, once created you can share it with your friends to let them join!
+          Enter a room code to join your friends.
         </p>
       </div>
 
@@ -51,21 +89,21 @@ export default function CreateRoom({
           type="text"
           value={roomNameInput}
           onChange={(e) => onRoomNameChange(e.target.value)}
-          placeholder="Give a name to your room.."
-          disabled={isCreating}
+          placeholder="Paste room name here.."
+          disabled={isJoining}
           className="h-12 w-full text-slate-300 bg-white rounded-lg border border-slate-100 px-4 text-sm md:text-base outline-none mb-3 block"
         />
         <button
           type="button"
-          onClick={onCreateRoom}
-          disabled={isCreating || !roomNameInput.trim()}
-          className="h-12 w-full rounded-lg bg-emerald-500 font-semibold text-white shadow-sm hover:bg-emerald-600 disabled:opacity-60 text-sm md:text-base block"
+          onClick={handleJoinRoom}
+          disabled={isJoining || !roomNameInput.trim()}
+          className="h-12 w-full rounded-lg bg-sky-500 font-semibold text-white shadow-sm hover:bg-sky-600 disabled:opacity-60 text-sm md:text-base block"
         >
-          {isCreating ? "Loading..." : "Create"}
+          {isJoining ? "Joining..." : "Join"}
         </button>
-        {error && (
-          <p className="text-sm text-emerald-600 font-medium mt-2 text-center">
-            {error}
+        {errorMessage && (
+          <p className="text-sm text-rose-600 font-medium mt-2 text-center">
+            {errorMessage}
           </p>
         )}
       </div>

@@ -59,9 +59,9 @@ app/
 │   │       │   ├── ProgressBar.tsx
 │   │       │   ├── ProfileAvatar.tsx
 │   │       │   └── ExperienceBadge.tsx
-│   │       ├── createGameCard/
-│   │       │   ├── CreateGameCard.tsx
-│   │       │   ├── CreateRoom.tsx
+│   │       ├── GameCard/
+│   │       │   ├── GameCard.tsx
+│   │       │   ├── CreateCard.tsx
 │   │       │   ├── JoinRoom.tsx
 │   │       │   ├── GameOptions/
 │   │       │   │   ├── GameOptionsCard.tsx
@@ -142,7 +142,7 @@ Combined login/signup view. Uses `useLogHandlers` hook for form state and submis
 ### `profile/ProfilePage.tsx`
 The main dashboard after login. Composed of three sections:
 - **ProfileSection** — avatar upload, username, stats, progress bar, experience badge
-- **CreateGameCard** — create room, join room, game options (invite friends, join random), pending game status
+- **GameCard** — create room, join room, game options (invite friends, join random), pending game status
 - **GameHistorySection** — match history with opponent lists and result cards
 
 ### `game/GamePage.tsx`
@@ -365,7 +365,7 @@ src/
 │   │   │   ├── ProfilePage.tsx        # Dashboard: profile + game creation + history
 │   │   │   └── components/
 │   │   │       ├── profileSection/    # Avatar, stats, progress bar
-│   │   │       ├── createGameCard/    # Create/join room, game options, pending game
+│   │   │       ├── GameCard/    # Create/join room, game options, pending game
 │   │   │       └── GameHistorySection/# Match history list
 │   │   └── game/
 │   │       ├── GamePage.tsx           # Game lobby + Phaser canvas host

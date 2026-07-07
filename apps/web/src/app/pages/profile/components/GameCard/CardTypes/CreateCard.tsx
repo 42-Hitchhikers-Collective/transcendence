@@ -1,27 +1,59 @@
-import cardBack from "@/assets/icons/plus4.png";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { socket } from "@/socket/Socket";
+import cardBack from "@/assets/icons/uno_card_back.png";
 
-type JoinRoomProps = {
+type CreateCardProps = {
   roomNameInput: string;
   onRoomNameChange: (value: string) => void;
-  isJoining: boolean;
-  error: string | null;
-  onJoinRoom: () => void;
 };
 
-export default function JoinRoom({
+export default function CreateCard({
   roomNameInput,
   onRoomNameChange,
-  isJoining,
-  error,
-  onJoinRoom,
-}: JoinRoomProps) {
+}: CreateCardProps) {
+  const [isCreating, setIsCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleCreateCard = () => {
+    const name = roomNameInput.trim();
+    if (!/^[\w-]{1,20}$/.test(name) || !name) {
+      setErrorMessage(
+        "Invalid room name. Only letters allowed with a max length of 20",
+      );
+      return;
+    }
+    socket.once("error", (err: { message: string }) => {
+      setErrorMessage(err.message);
+      setIsCreating(false);
+    });
+
+    socket.once("room_created", ({ roomName }: { roomName: string }) => {
+      console.log(`1 Room created successfully: ${roomName}`);
+      setTimeout(() => {
+        console.log(`Room created successfully: ${roomName}`);
+        setIsCreating(false);
+        setErrorMessage(null);
+        navigate(`/game?room=${encodeURIComponent(roomName)}`);
+      }, 2000);
+    });
+
+    socket.emit("create_room", { roomName: name });
+    setIsCreating(true);
+  };
+
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10 rounded-2xl border bg-linear-to-br from-sky-50 via-white to-emerald-50">
+    <div className="h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10 rounded-2xl border bg-linear-to-br from-emerald-50 via-white to-emerald-100">
+      {/* Card image */}
       <style>{cardAnimation}</style>
 
-      <div className="mx-auto mb-6 w-full" style={{ maxWidth: 320, height: 280 }}>
+      <div
+        className="mx-auto mb-6 w-full"
+        style={{ maxWidth: 320, height: 280 }}
+      >
         <div
-          className={`fan-wrapper${isJoining ? " is-active" : ""}`}
+          className={`fan-wrapper${isCreating ? " is-active" : ""}`}
           style={{ "--card-back": `url(${cardBack})` } as React.CSSProperties}
           aria-hidden="true"
         >
@@ -34,10 +66,11 @@ export default function JoinRoom({
       {/* Title + description */}
       <div className="text-center mb-6">
         <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900">
-          Join a room
+          Start playing now
         </h3>
         <p className="text-sm md:text-base text-slate-600 max-w-xs mx-auto mt-1">
-          Enter a room code to join your friends.
+          Pick a name for your room, once created you can share it with your
+          friends to let them join!
         </p>
       </div>
 
@@ -47,19 +80,23 @@ export default function JoinRoom({
           type="text"
           value={roomNameInput}
           onChange={(e) => onRoomNameChange(e.target.value)}
-          placeholder="Paste room name here.."
-          disabled={isJoining}
+          placeholder="Give a name to your room.."
+          disabled={isCreating}
           className="h-12 w-full text-slate-300 bg-white rounded-lg border border-slate-100 px-4 text-sm md:text-base outline-none mb-3 block"
         />
         <button
           type="button"
-          onClick={onJoinRoom}
-          disabled={isJoining || !roomNameInput.trim()}
-          className="h-12 w-full rounded-lg bg-sky-500 font-semibold text-white shadow-sm hover:bg-sky-600 disabled:opacity-60 text-sm md:text-base block"
+          onClick={handleCreateCard}
+          disabled={isCreating || !roomNameInput.trim()}
+          className="h-12 w-full rounded-lg bg-emerald-500 font-semibold text-white shadow-sm hover:bg-emerald-600 disabled:opacity-60 text-sm md:text-base block"
         >
-          {isJoining ? "Joining..." : "Join"}
+          {isCreating ? "Loading..." : "Create"}
         </button>
-        {error && <p className="text-sm text-rose-600 font-medium mt-2 text-center">{error}</p>}
+        {errorMessage && (
+          <p className="text-sm text-emerald-600 font-medium mt-2 text-center">
+            {errorMessage}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -109,4 +146,3 @@ const cardAnimation = `
   100% { transform: rotate(0deg) translateY(0); }
 }
 `;
-

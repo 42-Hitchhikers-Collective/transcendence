@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProfileSection } from "./components/profileSection/ProfileSection";
 import { GamesHistorySection } from "./components/GameHistorySection/GameHistorySection";
 import type { GameHistory } from "@/app/auth/mockProfiles";
-import { CreateGameCard} from "./components/createGameCard/CreateGameCard";
+import { GameCard} from "./components/GameCard/GameCard";
 
 import { Footer } from "@/shared/components/footer";
 import background from "@/assets/backgrounds/unocards_gemini.png";
@@ -70,7 +70,7 @@ export default function ProfilePage() {
           <GamesHistorySection games={historyLoading ? [] : history} />
         </div>
         <div className="order-1 lg:order-2 flex flex-col" style={{ minHeight: "clamp(400px, 60vh, 700px)" }}>
-          <CreateGameCard />
+          <GameCard />
         </div>
       </div>
       <div className="mt-[clamp(1rem,2vw,2rem)] flex justify-end">
