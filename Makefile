@@ -150,11 +150,13 @@ logs:
 
 # ── Cleanup ──────────────────────────────────────────────────
 
+# full resets the docker environment for this project, including volumes and orphaned images/networks
 clean:
 	@echo "🧹  Stopping containers and removing volumes..."
 	$(COMPOSE) down -v --remove-orphans
 	@echo "✅  Cleaned up"
 
+# removes all docker resource on the machine, not only this project
 prune:
 	@echo "🧹  Pruning unused Docker resources..."
 	docker system prune -a --volumes -f
