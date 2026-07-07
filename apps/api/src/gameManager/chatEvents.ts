@@ -38,7 +38,7 @@ const CHAT_MESSAGE_TEXT: Record<ChatMsgType, string> = {
   [ChatMsgType.WON_GAME]: "won!",
   [ChatMsgType.DROP_ROOM]: "dropped! They will be kicked out in 30 seconds if not back",
   [ChatMsgType.DROP_ROOM_BACK]: "is back!",
-  [ChatMsgType.UNO]: "called UNO! 🚨"
+  [ChatMsgType.UNO]: "called UNO!"
 };
 
 // Validate a chat msg and add it to room's chat history

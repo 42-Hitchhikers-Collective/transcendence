@@ -14,8 +14,14 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
   const cacheBuster = useRef(Date.now()); //used to force reload the image when the src changes
   const initial = name.charAt(0).toUpperCase();
   const colors = [
-    "bg-rose-400", "bg-emerald-400", "bg-amber-400", "bg-sky-400",
-    "bg-violet-400", "bg-pink-400", "bg-teal-400", "bg-orange-400",
+    "bg-rose-400",
+    "bg-emerald-400",
+    "bg-amber-400",
+    "bg-sky-400",
+    "bg-violet-400",
+    "bg-pink-400",
+    "bg-teal-400",
+    "bg-orange-400",
   ];
   const color = colors[name.length % colors.length];
 
@@ -48,7 +54,11 @@ export default function Chat() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleChatMessage = (data: { msg: string; senderId?: string; avatarUrl?: string }) => {
+    const handleChatMessage = (data: {
+      msg: string;
+      senderId?: string;
+      avatarUrl?: string;
+    }) => {
       setMessages((prev) => [
         ...prev,
         {
@@ -68,12 +78,16 @@ export default function Chat() {
 
   // Request chat history on mount
   useEffect(() => {
-    const handleHistory = (history: { username: string; msg: string; avatarUrl?: string }[]) => {
-      setMessages(history.map((h) => ({
-        senderId: h.username,
-        msg: h.msg,
-        avatarUrl: h.avatarUrl,
-      })));
+    const handleHistory = (
+      history: { username: string; msg: string; avatarUrl?: string }[],
+    ) => {
+      setMessages(
+        history.map((h) => ({
+          senderId: h.username,
+          msg: h.msg,
+          avatarUrl: h.avatarUrl,
+        })),
+      );
     };
     socket.on("chat_history_response", handleHistory);
     socket.emit("chat_history_request");
@@ -97,11 +111,12 @@ export default function Chat() {
   };
 
   const systemIcon = (text: string) => {
-    if (text.includes("dropped") && text.includes("30 seconds")) return "⚠️";
-    if (text.includes("is back")) return "🔄";
-    if (text.includes("joined the room") || text.includes("created the room")) return "👋";
-    if (text.includes("left the room")) return "🚪";
-    if (text.includes("won the game")) return "🏆";
+    if (text.includes("dropped") && text.includes("30 seconds")) return "⏰";
+    if (text.includes("is back")) return "⚡️";
+    if (text.includes("joined the room") || text.includes("created the room"))
+      return "👋";
+    if (text.includes("left the room")) return "❌";
+    if (text.includes("won")) return "🏆";
     if (text.includes("started the game")) return "🎬";
     if (text.includes("UNO")) return "🚨";
     return "📢";
@@ -112,7 +127,12 @@ export default function Chat() {
     if (space === -1) return <span>{msg}</span>;
     const name = msg.slice(0, space);
     const rest = msg.slice(space);
-    return <><span className="text-emerald-500 font-semibold">{name}</span><span className="text-slate-500">{rest}</span></>;
+    return (
+      <>
+        <span className="text-emerald-500 font-semibold">{name}</span>
+        <span className="text-slate-500">{rest}</span>
+      </>
+    );
   };
 
   const isSystem = (senderId: string) =>
@@ -122,28 +142,31 @@ export default function Chat() {
     <div className="flex flex-1 flex-col min-h-0 min-w-0">
       {/* Messages area */}
       <div className="rounded-2xl border border-rose-200/60 bg-white flex flex-col flex-1 min-h-0 min-w-0 relative">
-        <div
-          ref={scrollRef}
-          className="flex-1 space-y-2 overflow-y-auto p-2"
-        >
+        <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto p-2">
           {messages.map((msg, i) =>
             isSystem(msg.senderId) ? (
-                <p key={i} 
-                className="text-light text-start px-8 py-0.5 wrap-break-word overflow-hidden"> {systemIcon(msg.msg)}  
+              <p
+                key={i}
+                className="text-light text-start px-8 py-0.5 wrap-break-word overflow-hidden"
+              >
+                {" "}
+                {systemIcon(msg.msg)}
                 {renderSystemMsg(msg.msg)}
-                </p>
+              </p>
             ) : (
-              <div className="flex gap-[clamp(0.5rem,0.8vw,0.75rem)] 2xl:gap-[clamp(0.75rem,1vw,1.25rem)] bg-green-100 pl-[clamp(0.75rem,1.5vw,1rem)] 2xl:pl-[clamp(1rem,1.3vw,1.5rem)] py-[clamp(0.75rem,1vw,1rem)] 2xl:py-[clamp(1rem,1.5vw,1.5rem)] m-[clamp(0.75rem,1.5vw,1.5rem)] rounded-2xl " key={i}>
-                <MessageAvatar
-                  name={msg.senderId}
-                  src={msg.avatarUrl}
-                />
+              <div
+                className="flex gap-[clamp(0.5rem,0.8vw,0.75rem)] 2xl:gap-[clamp(0.75rem,1vw,1.25rem)] bg-green-100 pl-[clamp(0.75rem,1.5vw,1rem)] 2xl:pl-[clamp(1rem,1.3vw,1.5rem)] py-[clamp(0.75rem,1vw,1rem)] 2xl:py-[clamp(1rem,1.5vw,1.5rem)] m-[clamp(0.75rem,1.5vw,1.5rem)] rounded-2xl "
+                key={i}
+              >
+                <MessageAvatar name={msg.senderId} src={msg.avatarUrl} />
                 <div className="flex-1 min-w-0 ">
                   <div className="flex items-baseline gap-2">
                     <span className="text-[clamp(0.75rem,1.1vw,0.875rem)] 2xl:text-[clamp(1.2rem,1.5vw,1.6rem)] font-semibold text-slate-800 truncate">
                       {msg.senderId}
                     </span>
-                    <span className="text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1rem,1.2vw,1.3rem)] text-slate-400">{msg.time}</span>
+                    <span className="text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1rem,1.2vw,1.3rem)] text-slate-400">
+                      {msg.time}
+                    </span>
                   </div>
                   <p className="text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1.3vw,1.5rem)] text-slate-600 wrap-break-word text-start overflow-hidden">
                     {msg.msg}
@@ -157,7 +180,6 @@ export default function Chat() {
               No messages yet.
             </p>
           )}
-       
         </div>
 
         {/* Input area */}

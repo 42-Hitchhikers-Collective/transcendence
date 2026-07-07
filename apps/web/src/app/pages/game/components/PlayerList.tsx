@@ -24,12 +24,11 @@ function PlayerStatus({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-0.5 min-h-[clamp(1.1rem,2.8vw,1.4rem)] lg:min-h-[clamp(1.2rem,2vw,1.5rem)] 2xl:min-h-[clamp(1.6rem,1.5vw,2rem)]">
-      {gameOver?.reason === "finished" &&
-        gameOver.winnerId === playerId && (
-          <span className="text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-emerald-600">
-            Winner{" "}
-          </span>
-        )}
+      {gameOver?.reason === "finished" && gameOver.winnerId === playerId && (
+        <span className="text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-yellow-600">
+          Won!
+        </span>
+      )}
       {dropped && (
         <>
           <span className="flex items-center justify-center gap-[clamp(0.15rem,0.3vw,0.25rem)] text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-slate-500">
@@ -38,12 +37,12 @@ function PlayerStatus({
           </span>
         </>
       )}
-      {!dropped && isPlayerTurn && (
+      {!dropped && isPlayerTurn && !gameOver && (
         <span className="text-[clamp(0.4rem,1vw,0.5rem)] lg:text-[clamp(0.45rem,0.7vw,0.55rem)] 2xl:text-[clamp(0.6rem,0.6vw,0.8rem)] font-medium text-emerald-600 animate-pulse">
           Is playing
         </span>
       )}
-      {dropped && isPlayerTurn && (
+      {dropped && isPlayerTurn && !gameOver && (
         <span className="text-[clamp(0.4rem,1vw,0.5rem)] lg:text-[clamp(0.45rem,0.7vw,0.55rem)] 2xl:text-[clamp(0.6rem,0.6vw,0.8rem)] font-medium text-emerald-600 animate-pulse">
           Dropped while playing
         </span>
@@ -88,22 +87,19 @@ function PlayerItem({
     <div
       className={`flex w-[clamp(3.5rem,10vw,4.5rem)] lg:w-[clamp(4.5rem,7vw,5.5rem)] 2xl:w-[clamp(5.5rem,5vw,7rem)] min-w-0 flex-col items-center justify-center gap-[clamp(0.15rem,0.4vw,0.3rem)] rounded-xl border-2 p-[clamp(0.3rem,0.7vw,0.5rem)] shadow-md ${
         player.dropped
-          ? "border-slate-200"
-          : player.isPlayerTurn
-            ? "border-emerald-300 animate-bounce bg-emerald-200 shadow-emerald-200 text-emerald-900" // ← turn highlight
-            : ""
+          ? "border-slate-300 bg-slate-200 text-slate-400"
+          : gameOver && player.playerId === gameOver.winnerId
+            ? "border-yellow-400 bg-yellow-100 animate-pulse"
+            : player.isPlayerTurn
+              ? "border-emerald-300 animate-bounce bg-emerald-200 shadow-emerald-200 text-emerald-900" // ← turn highlight
+              : ""
       }`}
     >
       {/* username */}
       <p
-        className={`text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight truncate w-full ${
-          player.dropped
-            ? "text-slate-300"
-            : player.isPlayerTurn
-              ? " text-emerald-800" // ← turn name color
-              : "text-slate-600"
-        }`}
+        className="text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight truncate w-full"
       >
+        {player.playerId === gameOver?.winnerId ? "🎉 " : ""}
         {isYou ? `You` : player.userName}
       </p>
       {/* avatar */}

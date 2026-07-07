@@ -15,6 +15,7 @@ type PlayerData = {
 };
 
 export type PlayerListItem = {
+  playerId: string;
   userName: string;
   avatarUrl?: string;
   dropped: boolean;
@@ -25,6 +26,7 @@ type RoomData = {
   roomId: string;
   roomName: string;
   roomState: string;
+  winnerId?: string | null;
   players: PlayerListItem[];
   playerTurnId: string;
   playerTurnUserName: string;
@@ -144,6 +146,7 @@ export function useGamePage(roomName: string) {
         `👤👤👤👤 PLAYER LIST UPDATED: ${playerList.map((p) => p.userName)}`,
       );
       console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
+      console.log(`Winner ID: ${RoomDataRef.current?.playerTurnId}`);
     }
     if (RoomDataRef.current?.roomState === "playing") {
       // socket.emit("canvas_ready"); // trigger game canvas to refresh with the latest room state when game starts (e.g. in case player refreshes page during game or joins late)
@@ -234,7 +237,7 @@ export function useGamePage(roomName: string) {
     }
     // If the game is already finished when reconnecting, shows GameOver
     if (roomData.roomState === "finished") {
-      setGameOver({ reason: "finished" });
+      setGameOver({ reason: "finished", winnerId: roomData.winnerId ?? undefined });
     }
   };
 

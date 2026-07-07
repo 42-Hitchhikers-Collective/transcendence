@@ -72,11 +72,13 @@ export function getFrontedRoomInfo(roomid: string) {
     roomId: room.id,
     roomName: room.name,
     roomState: room.state, // "waiting", "playing", or "finished"
+    winnerId: room.game?.winner?.id ?? null,
     playerTurnId: room.game?.table.players[room.game.table.turnIndex]?.id || "",
     playerTurnUserName:
       room.game?.table.players[room.game.table.turnIndex]?.username || "",
     players:
       room.players.map((p) => ({
+        playerId: p.playerId,
         userName: p.userName,
         avatarUrl: p.avatarUrl ?? "/avatars/default.png",
         dropped: getDropTimeouts().has(p.playerId),
