@@ -4,11 +4,16 @@ import { socket } from "@/socket/Socket";
 type StartGameButtonProps = {
   gameStarted: boolean;
   canvasError?: string | null;
+  gameOver?: {
+    reason: "finished" | "lonely";
+    winnerId?: string;
+  } | null;
 };
 
 export default function StartGameButton({
   gameStarted,
   canvasError,
+  gameOver,
 }: StartGameButtonProps) {
   const startGame = useCallback(() => {
     socket.emit("start_game");
@@ -16,7 +21,7 @@ export default function StartGameButton({
     console.log(`[GamePage] start_game emitted`);
   }, []);
 
-  if (!gameStarted) 
+  if (!gameStarted && gameOver == null) 
   return (
     <>
       <button

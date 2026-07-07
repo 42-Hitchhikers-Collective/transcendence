@@ -62,7 +62,7 @@ export function CreateGameCard() {
     );
 
     // Only show rejoin card if player is in an active (not finished) room
-    if (data.activeRoom && data.activeRoom.roomState !== "finished") {
+    if (data.activeRoom && data.activeRoom !== null) {
       setHasPendingRoom(data.activeRoom.roomName);
     }
   };

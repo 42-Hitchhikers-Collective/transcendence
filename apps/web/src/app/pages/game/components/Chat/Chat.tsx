@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "@/socket/Socket";
-import type { PlayerListItem } from "../hooks/useGamePage";
+import type { PlayerListItem } from "../../hooks/useGamePage";
 
 type ChatMessage = {
   senderId: string;
@@ -21,7 +21,7 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
 
   return (
     <div
-      className={`flex h-[clamp(1.5rem,2vw,2rem)] 2xl:h-[clamp(3rem,2vw,3.5rem)] w-[clamp(1.5rem,2vw,2rem)] 2xl:w-[clamp(3rem,2vw,3.5rem)] shrink-0 items-center justify-center overflow-hidden rounded-full text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1.1rem,0.9vw,1.5rem)] font-bold text-white ${!src ? color : ""}`}
+      className={`flex h-[clamp(1.5rem,2vw,2rem)] 2xl:h-[clamp(3rem,3.3vw,3.5rem)] w-[clamp(1.5rem,2vw,2rem)] 2xl:w-[clamp(3rem,3.3vw,3.5rem)] shrink-0 items-center justify-center overflow-hidden rounded-full text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1.1rem,1.3vw,1.5rem)] font-bold text-white ${!src ? color : ""}`}
     >
       {src ? (
         <img
@@ -42,10 +42,9 @@ function MessageAvatar({ name, src }: { name: string; src?: string }) {
   );
 }
 
-export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[] }) {
+export default function Chat() {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [open, setOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -129,24 +128,24 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
         >
           {messages.map((msg, i) =>
             isSystem(msg.senderId) ? (
-              <div key={i} className="text-[clamp(0.6rem,0.9vw,0.7rem)] 2xl:text-[clamp(1.1rem,1vw,1.5rem)] text-start px-[clamp(0.5rem,2vw,2.5rem)] py-0.5 wrap-break-word overflow-hidden">
-                <span>{systemIcon(msg.msg)} </span>
+                <p key={i} 
+                className="text-light text-start px-8 py-0.5 wrap-break-word overflow-hidden"> {systemIcon(msg.msg)}  
                 {renderSystemMsg(msg.msg)}
-              </div>
+                </p>
             ) : (
-              <div className="flex gap-[clamp(0.5rem,0.8vw,0.75rem)] 2xl:gap-[clamp(0.75rem,1vw,1.25rem)] bg-green-100 pl-[clamp(0.75rem,1.5vw,1rem)] 2xl:pl-[clamp(1rem,2vw,1.5rem)] py-[clamp(0.75rem,1vw,1rem)] 2xl:py-[clamp(1rem,1.5vw,1.5rem)] m-[clamp(0.75rem,2vw,1.5rem)] rounded-2xl " key={i}>
+              <div className="flex gap-[clamp(0.5rem,0.8vw,0.75rem)] 2xl:gap-[clamp(0.75rem,1vw,1.25rem)] bg-green-100 pl-[clamp(0.75rem,1.5vw,1rem)] 2xl:pl-[clamp(1rem,1.3vw,1.5rem)] py-[clamp(0.75rem,1vw,1rem)] 2xl:py-[clamp(1rem,1.5vw,1.5rem)] m-[clamp(0.75rem,1.5vw,1.5rem)] rounded-2xl " key={i}>
                 <MessageAvatar
                   name={msg.senderId}
                   src={msg.avatarUrl}
                 />
                 <div className="flex-1 min-w-0 ">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[clamp(0.75rem,1.1vw,0.875rem)] 2xl:text-[clamp(1.2rem,1vw,1.6rem)] font-semibold text-slate-800 truncate">
+                    <span className="text-[clamp(0.75rem,1.1vw,0.875rem)] 2xl:text-[clamp(1.2rem,1.5vw,1.6rem)] font-semibold text-slate-800 truncate">
                       {msg.senderId}
                     </span>
-                    <span className="text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1rem,0.8vw,1.3rem)] text-slate-400">{msg.time}</span>
+                    <span className="text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1rem,1.2vw,1.3rem)] text-slate-400">{msg.time}</span>
                   </div>
-                  <p className="text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1vw,1.5rem)] text-slate-600 wrap-break-word text-start overflow-hidden">
+                  <p className="text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1.3vw,1.5rem)] text-slate-600 wrap-break-word text-start overflow-hidden">
                     {msg.msg}
                   </p>
                 </div>
@@ -154,7 +153,7 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
             ),
           )}
           {messages.length === 0 && (
-            <p className="text-center text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1vw,1.5rem)] text-slate-400 truncate">
+            <p className="text-center text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1.3vw,1.5rem)] text-slate-400 truncate">
               No messages yet.
             </p>
           )}
@@ -168,12 +167,12 @@ export default function Chat({ playerList = [] }: { playerList?: PlayerListItem[
             onChange={(event) => setChatInput(event.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Write something..."
-            className="flex-1 min-w-0 rounded-lg bg-slate-200 px-[clamp(0.5rem,1vw,0.75rem)] 2xl:px-[clamp(1rem,1.5vw,1.5rem)] py-[clamp(0.35rem,0.6vw,0.5rem)] 2xl:py-[clamp(0.6rem,0.8vw,1rem)] text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1vw,1.5rem)] text-slate-800 placeholder:text-slate-400 outline-none"
+            className="flex-1 min-w-0 rounded-lg bg-slate-200 px-[clamp(0.5rem,1vw,0.75rem)] 2xl:px-[clamp(1rem,1.5vw,1.5rem)] py-[clamp(0.35rem,0.6vw,0.5rem)] 2xl:py-[clamp(0.6rem,0.8vw,1rem)] text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.1rem,1.3vw,1.5rem)] text-slate-800 placeholder:text-slate-400 outline-none"
           />
           <button
             type="button"
             onClick={sendMessage}
-            className="rounded-lg bg-emerald-500 px-[clamp(0.5rem,1vw,0.75rem)] 2xl:px-[clamp(1rem,1.5vw,1.5rem)] py-[clamp(0.35rem,0.6vw,0.5rem)] 2xl:py-[clamp(0.6rem,0.8vw,1rem)] text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1.1rem,0.9vw,1.4rem)] font-semibold uppercase tracking-wide text-white hover:bg-emerald-600 shrink-0"
+            className="rounded-lg bg-emerald-500 px-[clamp(0.5rem,1vw,0.75rem)] 2xl:px-[clamp(1rem,1.5vw,1.5rem)] py-[clamp(0.35rem,0.6vw,0.5rem)] 2xl:py-[clamp(0.6rem,0.8vw,1rem)] text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1.1rem,1.3vw,1.4rem)] font-semibold uppercase tracking-wide text-white hover:bg-emerald-600 shrink-0"
           >
             Send
           </button>

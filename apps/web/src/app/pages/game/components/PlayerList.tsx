@@ -5,17 +5,31 @@ import { Clock } from "lucide-react";
 type PlayerListProps = {
   playerList: PlayerListItem[];
   clientUsername?: string;
+  gameOver?: {
+    reason: "finished" | "lonely";
+    winnerId?: string;
+  };
 };
 
 function PlayerStatus({
   dropped,
   isPlayerTurn,
+  gameOver,
+  playerId,
 }: {
   dropped: boolean;
   isPlayerTurn: boolean;
+  gameOver?: { reason: "finished" | "lonely"; winnerId?: string };
+  playerId: string;
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-0.5 min-h-[clamp(1.1rem,2.8vw,1.4rem)] lg:min-h-[clamp(1.2rem,2vw,1.5rem)] 2xl:min-h-[clamp(1.6rem,1.5vw,2rem)]">
+      {gameOver?.reason === "finished" &&
+        gameOver.winnerId === playerId && (
+          <span className="text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-emerald-600">
+            Winner{" "}
+          </span>
+        )}
       {dropped && (
         <>
           <span className="flex items-center justify-center gap-[clamp(0.15rem,0.3vw,0.25rem)] text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-slate-500">
@@ -60,9 +74,11 @@ function PlayerStatus({
 function PlayerItem({
   player,
   clientUsername,
+  gameOver,
 }: {
   player: PlayerListItem;
   clientUsername?: string;
+  gameOver?: { reason: "finished" | "lonely"; winnerId?: string };
 }) {
   const cacheBuster = useRef(Date.now()); // cache buster to force reload the avatar image when the src changes
   const isYou = player.userName === clientUsername;
@@ -126,6 +142,8 @@ function PlayerItem({
       <PlayerStatus
         dropped={player.dropped}
         isPlayerTurn={player.isPlayerTurn}
+        gameOver={gameOver}
+        playerId={player.playerId}
       />
     </div>
   );
@@ -161,9 +179,10 @@ function LeavingPlayerItem({ player }: { player: PlayerListItem }) {
 export default function PlayerList({
   playerList,
   clientUsername,
+  gameOver,
 }: PlayerListProps) {
   const prevPlayersRef = useRef<PlayerListItem[]>([]); // Store previous player list to detect leaving players
-  const [leavingPlayers, setLeavingPlayers] = useState<PlayerListItem[]>([]);// Store players who are leaving to animate them out
+  const [leavingPlayers, setLeavingPlayers] = useState<PlayerListItem[]>([]); // Store players who are leaving to animate them out
 
   // Detects players who disappeared and animate them out
   useEffect(() => {
@@ -241,6 +260,7 @@ export default function PlayerList({
                 key={player.userName}
                 player={player}
                 clientUsername={clientUsername}
+                gameOver={gameOver}
               />
             );
           })}

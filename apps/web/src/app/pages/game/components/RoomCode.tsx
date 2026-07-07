@@ -3,9 +3,14 @@ import { useState } from "react";
 export default function RoomCode({
   roomName,
   gameStarted,
+  gameOver,
 }: {
   roomName: string;
   gameStarted: boolean;
+  gameOver?: {
+    reason: "finished" | "lonely";
+    winnerId?: string;
+  } | null;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -15,7 +20,7 @@ export default function RoomCode({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!gameStarted)
+  if (!gameStarted && gameOver == null) 
     return (
       <div className="rounded-xl bg-white px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.5rem,1vw,0.75rem)] text-center min-w-0 overflow-hidden">
         <p className="text-[clamp(0.6rem,0.9vw,0.75rem)] font-semibold uppercase tracking-[0.2em] truncate">

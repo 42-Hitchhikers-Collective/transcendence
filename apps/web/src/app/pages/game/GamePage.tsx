@@ -2,16 +2,16 @@ import { useState } from "react";
 import { Navigate, useSearchParams } from "react-router";
 import background from "@/assets/backgrounds/unocards_gemini.png";
 
-import Chat from "./components/Chat";
 import { useGamePage } from "./hooks/useGamePage";
 import PlayerList from "./components/PlayerList";
 import StartGameButton from "./components/StartGameButton";
 import PhaserGame from "@/gameCanvas/PhaserGame";
 import GamePageError from "./components/GamePageError";
 import RoomCode from "./components/RoomCode";
-import GameOver from "./components/GameOver";
-import LonelyPlayerOverlay from "./components/LonelyPlayerOverlay";
-import { ChatBubbleLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/solid";
+import GameInterrupted from "./components/GameInterrupted";
+
+import ChatContainer from "./components/Chat/ChatContainer";
 
 export default function GamePage() {
   const [searchParams] = useSearchParams();
@@ -23,8 +23,14 @@ export default function GamePage() {
 }
 
 function GamePageContent({ roomName }: { roomName: string }) {
-  const { playerInfo, playerList, gameStarted, gameOver, roomId, canvasError, roomError } =
-    useGamePage(roomName);
+  const {
+    playerInfo,
+    playerList,
+    gameStarted,
+    gameOver,
+    canvasError,
+    roomError,
+  } = useGamePage(roomName);
 
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -44,68 +50,56 @@ function GamePageContent({ roomName }: { roomName: string }) {
       }}
     >
       <div className="grid flex-1 min-h-0 w-full max-w-7xl 2xl:max-w-[90vw] mx-auto grid-cols-1 grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[30%_1fr] 2xl:grid-cols-[26%_1fr] gap-[clamp(0.75rem,1.5vw,1.5rem)]">
-        {/*  Sidebar column (always visible) 
-             Placed first in DOM so natural flow = desktop (col 1).
-             order-2 pushes it below canvas on mobile. */}
+        {/*  Sidebar column */}
         <div className="flex flex-col gap-[clamp(0.75rem,1.5vw,1rem)] order-2 lg:order-0 px-[clamp(0.5rem,2vw,2.5rem)] lg:px-0 min-w-0 min-h-0 overflow-hidden self-start lg:self-stretch">
-          <RoomCode gameStarted={gameStarted} roomName={roomName} />
-
-          {/*  Chat button (mobile only, above player list)  */}
-          <button
-            type="button"
-            onClick={() => setChatOpen(true)}
-            className="lg:hidden flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.5rem,1vw,0.75rem)] text-[clamp(0.75rem,1vw,0.875rem)] font-semibold text-white shadow-md hover:bg-rose-400 transition"
-          >
-            <ChatBubbleLeftIcon className="size-[clamp(1rem,1.5vw,1.25rem)]" />
-            Chat
-          </button>
+          <RoomCode
+            gameStarted={gameStarted}
+            gameOver={gameOver}
+            roomName={roomName}
+          />
 
           <div className="items-center gap-[clamp(0.5rem,1vw,1rem)] rounded-xl border bg-white shadow-sm p-[clamp(0.75rem,1.5vw,1.5rem)]">
             <PlayerList
               playerList={playerList}
               clientUsername={playerInfo?.userName}
+              gameOver={gameOver}
             />
             <StartGameButton
               gameStarted={gameStarted}
               canvasError={canvasError}
+              gameOver={gameOver}
             />
+            {/*  Chat button (mobile only, above player list)  */}
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="lg:hidden flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.5rem,1vw,0.75rem)] text-[clamp(0.75rem,1vw,0.875rem)] font-semibold text-white shadow-md hover:bg-rose-400 transition"
+            >
+              <ChatBubbleLeftIcon className="size-[clamp(1rem,1.5vw,1.25rem)]" />
+              Show Chat
+            </button>
           </div>
-
-          {/*  Inline chat (desktop only)  */}
-          <div className="hidden lg:flex flex-1 min-h-0 min-w-0">
-            <Chat playerList={playerList} />
-          </div>
+          <ChatContainer
+            chatOpen={chatOpen}
+            setChatOpen={setChatOpen}
+          />
         </div>
 
-        {/*  Game canvas (top on mobile via order-1, right column on desktop via natural flow)  */}
+        {/*  Right bar Game canvas (top on mobile via order-1, right column on desktop via natural flow)  */}
 
         <div className="flex flex-col order-1 lg:order-0 h-full w-full min-h-0 min-w-0">
-          {gameOver?.reason === "finished" ? (
-            <GameOver isWinner={gameOver.winnerId ? playerInfo?.playerId === gameOver.winnerId : undefined} />
-          ) : gameOver?.reason === "lonely" && roomId ? (
-            <LonelyPlayerOverlay roomId={roomId} />
-          ) : (
+          {gameOver === null ? (
             <PhaserGame />
+          ) : (
+            <GameInterrupted
+              reason={gameOver?.reason}
+              winnerId={gameOver?.winnerId}
+              playerId={playerInfo?.playerId}
+              roomName={roomName}
+            />
           )}
         </div>
       </div>
-      {/*  Chat popup overlay (mobile only)  */}
-      {chatOpen && (
-        <div className="absolute inset-0 z-40 flex bg-white">
-          <div className="w-full h-full flex flex-col min-h-0 relative">
-            {/*  Red X close button, top-left corner  */}
-            <button
-              type="button"
-              onClick={() => setChatOpen(false)}
-              className="absolute top-[clamp(0.5rem,1.5vw,0.75rem)] right-[clamp(0.5rem,1.5vw,0.75rem)] z-10 rounded-full bg-red-500 p-[clamp(0.35rem,0.6vw,0.5rem)] text-white shadow-lg hover:bg-red-400 transition"
-              aria-label="Close chat"
-            >
-              <XMarkIcon className="size-[clamp(1.25rem,2vw,1.5rem)]" />
-            </button>
-            <Chat playerList={playerList} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
