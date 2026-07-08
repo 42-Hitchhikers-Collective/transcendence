@@ -1,14 +1,64 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum GameStatus {
+  RUNNING
+  FINISHED
+  ABORTED
+}
+
+// ============================================================
+// CORE MODELS
+// ============================================================
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id           String  @id @default(uuid())
+  email        String  @unique
+  passwordHash String?
+
   createdAt DateTime @default(now())
+
+  profile     Profile?
+  gamePlayers GamePlayer[]
+}
+
+model Profile {
+  userId    String  @id
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username  String  @unique
+  avatarUrl String?
+
+  createdAt DateTime @default(now())
+}
+
+model Game {
+  id        String     @id @default(uuid())
+  roomName  String?
+  status    GameStatus @default(RUNNING)
+  createdAt DateTime   @default(now())
+  endedAt   DateTime?
+
+  players GamePlayer[]
+}
+
+model GamePlayer {
+  gameId    String
+  userId    String
+  placement Int? // finish order (1st, 2nd, ...)
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, userId])
+  @@index([userId])
 }
