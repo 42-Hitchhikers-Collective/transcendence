@@ -6,16 +6,16 @@ const prisma = new PrismaClient();
 const USERS = [
   { email: "alice@example.com",   password: "Alice12345",   username: "alice",   avatarUrl: "/avatars/alice.png" },
   { email: "bob@example.com",     password: "Bob12345",     username: "bob",     avatarUrl: "/avatars/bob.jpg"   },
-  { email: "charlie@example.com", password: "Charlie12345", username: "charlie", avatarUrl: "/avatars/default.png"                 },
-  { email: "diana@example.com",   password: "Diana12345",   username: "diana",   avatarUrl: "/avatars/default.png"                 },
+  { email: "charlie@example.com", password: "Charlie12345", username: "charlie", avatarUrl: "/avatars/default.png"},
+  { email: "diana@example.com",   password: "Diana12345",   username: "diana",   avatarUrl: "/avatars/default.png"},
   { email: "eve@example.com",     password: "Eve12345",     username: "eve",     avatarUrl: "/avatars/eve.jpg"   },
-  { email: "frank@example.com",   password: "Frank12345",   username: "frank",   avatarUrl: "/avatars/frank.jpg" },
-  { email: "grace@example.com",   password: "Grace12345",   username: "grace",   avatarUrl: "/avatars/default.png"                 },
+  { email: "inbar@example.com",   password: "Inbar12345",   username: "inbar",   avatarUrl: "/avatars/inbar.jpg" },
+  { email: "grace@example.com",   password: "Grace12345",   username: "grace",   avatarUrl: "/avatars/default.png"},
   // extra players for badge testing
-  { email: "henry@example.com",   password: "Henry12345",   username: "henry",   avatarUrl: "/avatars/default.png" },  // Intermediate → 18 games, 12 wins
-  { email: "ivy@example.com",     password: "Ivy12345",     username: "ivy",     avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
-  { email: "jack@example.com",    password: "Jack12345",    username: "jack",    avatarUrl: "/avatars/default.png" },  // Beginner → 3 games, 1 win
-  { email: "leo@example.com",     password: "Leo12345",     username: "leo",     avatarUrl: "/avatars/default.png" },  // Master → 320 games, 240 wins
+  { email: "henry@example.com",   password: "Henry12345",   username: "henry",   avatarUrl: "/avatars/henry.jpg" },  // Intermediate → 18 games, 12 wins
+  { email: "jess@example.com",    password: "Jess12345",    username: "jess",    avatarUrl: "/avatars/jess.jpg" },  // Newbie → 0 games
+  { email: "welf@example.com",    password: "Welf12345",    username: "welf",    avatarUrl: "/avatars/welf.jpg" },  // Beginner → 3 games, 1 win
+  { email: "gabriel@example.com", password: "Gabriel12345", username: "gabriel", avatarUrl: "/avatars/gabriel.png" },  // Master → 320 games, 240 wins
   { email: "mia@example.com",     password: "Mia12345",     username: "mia",     avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
   { email: "noah@example.com",    password: "Noah12345",    username: "noah",    avatarUrl: "/avatars/default.png" },  // Newbie → 0 games
 ];
@@ -61,11 +61,11 @@ const GAMES = [
     ],
   },
   {
-    roomName: "frank_4p",
+    roomName: "inbar_4p",
     date: new Date("2026-03-07"),
-    host: "frank",
+    host: "inbar",
     players: [
-      { username: "frank",   placement: 1 },
+      { username: "inbar",   placement: 1 },
       { username: "alice",   placement: 2 },
       { username: "grace",   placement: 3 },
       { username: "diana",   placement: 4 },
@@ -146,69 +146,69 @@ const GAMES = [
       { username: "alice",   placement: 2 },
     ],
   },
-  // ── leo grinds Master (320 games, 240 wins = 75%) ──
+  // ── gabriel grinds Master (320 games, 240 wins = 75%) ──
   ...Array.from({ length: 100 }, (_, i) => ({
-    roomName: `leo_vs_eve_${i + 1}`,
+    roomName: `gabriel_vs_eve_${i + 1}`,
     date: new Date(`2025-11-${String(1 + (i % 30)).padStart(2, "0")}`),
-    host: "leo",
+    host: "gabriel",
     players: [
-      { username: "leo", placement: 1 },
+      { username: "gabriel", placement: 1 },
       { username: "eve", placement: 2 },
     ],
   })),
   ...Array.from({ length: 100 }, (_, i) => ({
-    roomName: `leo_vs_bob_${i + 1}`,
+    roomName: `gabriel_vs_bob_${i + 1}`,
     date: new Date(`2025-12-${String(1 + (i % 30)).padStart(2, "0")}`),
-    host: "leo",
+    host: "gabriel",
     players: [
-      { username: "leo", placement: 1 },
+      { username: "gabriel", placement: 1 },
       { username: "bob", placement: 2 },
     ],
   })),
   ...Array.from({ length: 60 }, (_, i) => ({
     roomName: `me-vs-me${i + 1}`,
     date: new Date(`2026-01-${String(1 + (i % 30)).padStart(2, "0")}`),
-    host: "leo",
+    host: "gabriel",
     players: [
-      { username: "leo",    placement: 1 },
+      { username: "gabriel",    placement: 1 },
       { username: "diana",  placement: 2 },
     ],
   })),
   ...Array.from({ length: 60 }, (_, i) => ({
-    roomName: `leo_vs_charlie_${i + 1}`,
+    roomName: `gabriel_vs_charlie_${i + 1}`,
     date: new Date(`2026-01-${String(1 + (i % 30)).padStart(2, "0")}`),
-    host: "leo",
+    host: "gabriel",
     players: [
-      { username: "leo",     placement: 1 },
+      { username: "gabriel",     placement: 1 },
       { username: "charlie", placement: 2 },
     ],
   })),
-  // ── jack plays a few games ──
+  // ── welf plays a few games ──
   {
     roomName: "LateChat",
     date: new Date("2026-03-03"),
-    host: "jack",
+    host: "welf",
     players: [
-      { username: "jack",    placement: 1 },
+      { username: "welf",    placement: 1 },
       { username: "diana",   placement: 2 },
     ],
   },
   {
     roomName: "OurRoom 💕",
     date: new Date("2026-03-02"),
-    host: "jack",
+    host: "welf",
     players: [
-      { username: "frank",   placement: 1 },
-      { username: "jack",    placement: 2 },
+      { username: "inbar",   placement: 1 },
+      { username: "welf",    placement: 2 },
     ],
   },
   {
     roomName: "Yolo",
     date: new Date("2026-03-01"),
-    host: "jack",
+    host: "welf",
     players: [
       { username: "alice",   placement: 1 },
-      { username: "jack",    placement: 2 },
+      { username: "welf",    placement: 2 },
     ],
   },
 ];

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   room.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
+/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/08 13:03:13 by gabrielrial      ###   ########.fr       */
+/*   Updated: 2026/07/08 14:26:53 by ilazar           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,19 +139,23 @@ export function registerRoomHandlers(
     gameManager.startDropTimer(playerId, ({ roomId }) => { // will run only after drop timer expires:
       const currentPlayer = gameManager.getOnlinePlayer(playerId);
       if (currentPlayer?.socketId) {
+        console.log("emitign leave_room to currentPlayer.socketId", currentPlayer.socketId);
         socket.nsp.to(currentPlayer.socketId).emit("leave_room");
       }
       socket.leave(roomId);
+      gameManager.playerLeft(roomId, playerId);
       systemChatMsg(playerId, roomId, socket, ChatMsgType.LEFT_ROOM);
       console.log(
         "[room:user_dropped] timer expired, player removed from room",
         { userName, roomId },
       );
       broadcastGamePage(roomId); // update GamePage when player leaves the room after end of drop timer
+      broadcastGameCanvas(roomId); // update GameCanvas when player leaves the room after end of drop timer
       checkLonelyPlayer(roomId); // check if only 1 player left in the room after a player dropped
     });
     systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM);
     broadcastGamePage(roomId); //update GamePage when a player drops (and timer started)
+    broadcastGameCanvas(roomId);
   });
 
   // --- Helpers ---

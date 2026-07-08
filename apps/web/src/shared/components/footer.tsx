@@ -19,7 +19,7 @@ const LEGAL_LINKS = [
   },
   {
     id: "terms",
-    label: "Terms & Conditions",
+    label: "Terms of Service",
     content: <TermsContent />,
   },
 ] as const;

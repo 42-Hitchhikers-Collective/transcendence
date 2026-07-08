@@ -2,6 +2,8 @@ import { writeFile, unlink } from "fs/promises";
 import { mkdirSync } from "fs";
 import path from "path";
 import sharp from "sharp";
+import { gameManager } from "../gameManager";
+import { utils } from "../gameManager";
 
 const AVATAR_DIR = process.env.AVATAR_DIR || "/app/data/avatars";
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
@@ -19,6 +21,32 @@ async function deleteLocalAvatar(avatarUrl: string | null) {
   const filename = path.basename(avatarUrl);
   if (filename === "default.png") return;
   await unlink(path.join(AVATAR_DIR, filename)).catch(() => {});
+}
+
+function syncAvatarInMemory(app: any, playerId: string, avatarUrl: string | null) {
+  const nextAvatar = avatarUrl ? `${avatarUrl}?v=${Date.now()}` : "/avatars/default.png";
+
+  // modify avatar
+  const onlinePlayer = gameManager.getOnlinePlayer(playerId);
+  if (onlinePlayer) {
+    onlinePlayer.avatarUrl = nextAvatar;
+  }
+
+  const roomId = gameManager.getPlayerRoomId(playerId);
+  if (!roomId) return;
+  const room = gameManager.getRoomById(roomId);
+  if (!room) return;
+  const roomPlayer = room.players.find((player) => player.playerId === playerId);
+  if (roomPlayer)
+      roomPlayer.avatarUrl = nextAvatar;
+
+
+  const io = (app as any).io;
+  if (!io) return;
+
+  //send updates
+  io.to(room.id).emit("room_info_response", utils.getFrontedRoomInfo(room.id));
+
 }
 
 export async function profileRoutes(app: any) {
@@ -89,6 +117,8 @@ export async function profileRoutes(app: any) {
         create: { userId: payload.sub, username: "User", avatarUrl },
       });
 
+      syncAvatarInMemory(app, payload.sub, avatarUrl);
+
       return reply.send({ avatarUrl });
     },
   );
@@ -111,6 +141,8 @@ export async function profileRoutes(app: any) {
         where: { userId: payload.sub },
         data: { avatarUrl: null },
       });
+
+      syncAvatarInMemory(app, payload.sub, null);
 
       return reply.send({ avatarUrl: null });
     },
