@@ -111,15 +111,15 @@ export default function Chat() {
   };
 
   const systemIcon = (text: string) => {
-    if (text.includes("dropped") && text.includes("30 seconds")) return "⏰";
-    if (text.includes("is back")) return "⚡️";
+    if (text.includes("dropped") && text.includes("30 seconds")) return "⏰ ";
+    if (text.includes("is back")) return "⚡️ ";
     if (text.includes("joined the room") || text.includes("created the room"))
-      return "👋";
-    if (text.includes("left the room")) return "❌";
-    if (text.includes("won")) return "🏆";
-    if (text.includes("started the game")) return "🎬";
-    if (text.includes("UNO")) return "🚨";
-    return "📢";
+      return "👋 ";
+    if (text.includes("left the room")) return "❌ ";
+    if (text.includes("won")) return "🏆 ";
+    if (text.includes("started the game")) return "🎬 ";
+    if (text.includes("UNO")) return "🚨 ";
+    return "📢 ";
   };
 
   const renderSystemMsg = (msg: string) => {
