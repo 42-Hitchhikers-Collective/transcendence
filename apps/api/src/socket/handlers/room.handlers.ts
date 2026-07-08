@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   room.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 19:41:29 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/08 13:03:13 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,20 +101,10 @@ export function registerRoomHandlers(
     console.log("[room:user_dropped] timer cancelled for", playerId);
     systemChatMsg(playerId, res.roomId, socket, ChatMsgType.LEFT_ROOM);
     socket.leave(res.roomId);
-    const action_pend = gameManager.playerLeft(res.roomId, playerId);
+    gameManager.playerLeft(res.roomId, playerId);
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId);
-    if (action_pend.success) {
-      const room = getRoomById(res.roomId);
-      const currentPlayer = room?.players.findIndex(
-        (player) => player.playerId === action_pend.currentPlayer,
-      );
-      if (currentPlayer) {
-        let player = room?.players[currentPlayer];
-        if (player)
-          socket.nsp.to(player.socketId).emit("show_colors", { roomId: res.roomId });
-      }
-    }
+
     console.log("[room:leave_room] success", {
       playerId,
       username: userName,
