@@ -2,6 +2,7 @@ import { Card } from "./Card.ts";
 import { Table } from "./Table.ts";
 import { Player } from "./Player.ts";
 import { msgResult } from "../gameManager/types.ts";
+import { randomInt } from "node:crypto";
 
 export class GameMaster {
   playCard(table: Table, playerId: string, card: Card): msgResult {
@@ -15,7 +16,7 @@ export class GameMaster {
 
     let res = this.validateMove(table, playerId, card);
     if (!res.success) {
-      console.log(`Error: ${res.error}`)
+      console.log(`Error: ${res.error}`);
       return res;
     }
 
@@ -97,8 +98,7 @@ export class GameMaster {
   // ============================================================
 
   private validateMove(table: Table, playerId: string, card: Card): msgResult {
-    if (!this.isPlayerTurn(table, playerId))
-    {
+    if (!this.isPlayerTurn(table, playerId)) {
       console.log("validateMove: false, not your turn");
       return { success: false, error: "Is not your turn" };
     }
@@ -143,9 +143,7 @@ export class GameMaster {
   advanceTurn(table: Table, playerId: string): boolean {
     const player = table.players.find((p) => p.id === playerId);
 
-
     if (!player || table.draw != 0) return false;
-
 
     if (table.color == true) return false;
 
@@ -215,7 +213,10 @@ export class GameMaster {
     this.removePlayer(table.players, player, table);
 
     if (table.color) {
-      // send select_color to next player
+      const colors = ["red", "yellow", "blue", "green"] as const;
+
+      table.currentColor = colors[Math.floor(Math.random() * colors.length)];
+      table.color = false;
     }
 
     return true;
