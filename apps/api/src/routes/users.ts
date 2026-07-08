@@ -90,8 +90,8 @@ export async function userRoutes(app: any) {
       rank: r.rank,
       username: profileMap.get(r.userId)?.username ?? "Unknown",
       avatarUrl: profileMap.get(r.userId)?.avatarUrl ?? null,
-      wins: r.wins, // JESS - added to show win data on the leaderboard
-      losses: r.losses, // JESS - added to show win data on the leaderboard
+      wins: r.wins,
+      losses: r.losses,
     }));
 
     return { data };
