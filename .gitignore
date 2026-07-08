@@ -16,4 +16,4 @@ build/
 .vscode
 .idea
 .gabriel/
-data/avatars
+# data/avatars
