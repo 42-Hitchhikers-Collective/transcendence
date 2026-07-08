@@ -35,13 +35,15 @@ export default function ProfilePage() {
       .finally(() => setHistoryLoading(false));
   }, [isAuthenticated]);
 
-  // compute wins/losses from history; rank comes from the API (via /api/users/me stored in auth context)
+  // wins/losses/rank come from the server-side computeRankedUsers (all games, not capped)
+  // history is only used for the match history list display, not for stats
   const stats = useMemo(() => {
-    const wins = history.filter((game) => game.result === "win").length;
-    const losses = history.filter((game) => game.result === "loss").length;
-    const rank = user?.stats?.rank ?? null;
-    return { wins, losses, rank };
-  }, [history, user?.stats?.rank]);
+    return {
+      wins: user?.stats?.wins ?? 0,
+      losses: user?.stats?.losses ?? 0,
+      rank: user?.stats?.rank ?? null,
+    };
+  }, [user?.stats?.wins, user?.stats?.losses, user?.stats?.rank]);
 
   return (
     <div
