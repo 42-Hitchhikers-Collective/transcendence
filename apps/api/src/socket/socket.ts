@@ -22,6 +22,7 @@ export function setupSocket(app: FastifyInstance) {
     path: "/socket.io",
     cors: { origin: true },
   });
+  app.decorate("io", io);
 
   // --- Use JWT auth middleware ---
   io.use(createAuthMiddleware(app));
