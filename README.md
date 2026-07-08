@@ -2,7 +2,7 @@ _This project has been created as part of the 42 curriculum by grial, ilazar, js
 
 # transcendence
 
-A real-time multiplayer UNO card game — the final project of the 42 Common Core. Play UNO with friends in custom rooms, chat in real time, track your stats on a leaderboard, and more.
+A real-time multiplayer UNO card game as our final project for the 42 Common Core. Play UNO with friends, chat in real time, track your stats on a leaderboard and more!
 
 ---
 
@@ -10,7 +10,13 @@ A real-time multiplayer UNO card game — the final project of the 42 Common Cor
 
 **Project name:** Transcendence (UNO)
 
-**Our Goal:** Build a single-page web application where users can play the UNO card game against each other in real time. All communication between frontend and backend is encrypted via HTTPS. The project demonstrates mastery of full-stack web development, real-time networking, game logic, and DevOps practices.
+**Our Goal:** Our main goal for this project was mainly to learn full stack web development principles. Most of our previous projects were based on low level programming languages and old programming libraries, this has been our first project where we could finally use a modern development stack and we wanted to use this as an opportunioty to mostly learn and practice. So we decided to build a simple single-page web application of a game that everyone knows and likes, UNO!
+
+The project is a website hosting a real-time multiplayer UNO. The game is a classic card game where players take turns matching a card in their hand with the current card shown on top of the deck either by color or number. The goal is to be the first player to get rid of all their cards. The game includes special action cards that can change the flow of the game, such as Skip, Reverse, Draw Two, Wild, and Wild Draw Four cards.
+
+multiplayer game where users can play against each other in real time, chat with each other and track their stats on a leaderboard. The project is built with a modern web development stack and we wanted to use this project as an opportunity to learn and practice full stack web development principles.
+
+Build a single-page web application where users can play the UNO card game against each other in real time. All communication between frontend and backend is encrypted via HTTPS. The project demonstrates mastery of full-stack web development, real-time networking, game logic, and DevOps practices.
 
 **Key Features:**
 
@@ -157,7 +163,7 @@ All AI-generated code was reviewed and tested, thoroughly, human verification wa
 
 ## Team Information
 
-- grial: Game developer across backend (UNO engine) and frontend (Phaser canvas). Designed and built the core game mechanics — card logic, rule enforcement, turn management — and integrated the game engine with the real-time socket layer.
+- grial: Game developer across backend (UNO engine) and frontend (Phaser canvas). Designed and built the core game mechanics (card logic, rule enforcement, turn management) and integrated the game engine with the real-time socket layer.
 
 - ilazar: Backend developer focused on real-time communication and room management. Built the Socket.IO layer, room lifecycle (create/join/leave), drop timer and reconnection system.
 
@@ -296,10 +302,7 @@ Schema file: [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma)
 ---
 
 ## Modules
-
-
-
-> [TO FILL: Verify module points and assign correct team members.]
+A detailed list of modules that we have chosen to implement for this project can be found in [docs/readme_files/modules.md](docs/readme_files/modules.md).
 
 ---
 
