@@ -212,13 +212,6 @@ export class GameMaster {
 
     this.removePlayer(table.players, player, table);
 
-    if (table.color) {
-      const colors = ["red", "yellow", "blue", "green"] as const;
-
-      table.currentColor = colors[Math.floor(Math.random() * colors.length)];
-      table.color = false;
-    }
-
     return true;
   }
 
@@ -232,6 +225,11 @@ export class GameMaster {
 
     if (CurrentTurn == player) {
       this.forcePassTurn(table);
+      if (table.color) {
+        const colors = ["red", "yellow", "blue", "green"] as const;
+        table.currentColor = colors[Math.floor(Math.random() * colors.length)];
+      }
+      this.newTurnStats(table);
     } else {
       table.turnIndex = players.indexOf(CurrentTurn);
     }
