@@ -49,6 +49,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, username: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -164,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // login, signup, and logout functions to its children
     // we do this so that we can access the auth context from any component in the app
     <AuthContext.Provider
-      value={{ user, isAuthenticated, login, signup, logout }}
+      value={{ user, isAuthenticated, login, signup, logout, refreshUser: fetchUser }}
     >
       {children}
     </AuthContext.Provider>

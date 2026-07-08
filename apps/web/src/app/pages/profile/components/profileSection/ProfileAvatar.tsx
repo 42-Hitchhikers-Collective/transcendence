@@ -3,6 +3,7 @@
 import { Camera, Trash2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
+import { useAuthContext } from "@/app/auth/AuthContext";
 import {
   Avatar,
   AvatarImage,
@@ -35,6 +36,7 @@ function UploadError({ message }: { message: string | null }) {
 export const ProfileAvatar = ({
   avatarUrl,
 }: ProfileAvatarProps) => {
+  const { refreshUser } = useAuthContext();
   const [files, setFiles] = useState<File[]>([]);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -132,9 +134,7 @@ export const ProfileAvatar = ({
       // ── Refresh the auth context's cached /api/users/me response so that
       //     other components (navbar, friends list, etc.) pick up the new URL
       //     and stop referencing the old (now‑deleted) avatar ──
-      fetch("/api/users/me", { credentials: "include" })
-        .then((r) => r.json())
-        .catch(() => {});
+      refreshUser();
     } catch (err) {
       // fetch only enters catch when the request itself fails (network error),
       // so this covers cases where no response was delivered at all
@@ -187,9 +187,7 @@ export const ProfileAvatar = ({
       setFiles([]);
 
       // ── Refresh auth context so other components pick up the null avatarUrl ──
-      fetch("/api/users/me", { credentials: "include" })
-        .then((r) => r.json())
-        .catch(() => {});
+      refreshUser();
     } catch (err) {
       console.error("DELETE: Avatar delete error:", err);
 
