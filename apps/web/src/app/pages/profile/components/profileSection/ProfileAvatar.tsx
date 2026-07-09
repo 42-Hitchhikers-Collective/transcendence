@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Trash2 } from "lucide-react";
+import { CameraIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { useState, useEffect, useRef } from "react";
 
 import { useAuthContext } from "@/app/auth/AuthContext";
@@ -240,7 +240,7 @@ export const ProfileAvatar = ({
                     disabled={isBusy}
                     className="inline-flex items-center gap-[clamp(0.25rem,0.4vw,0.4rem)] text-white text-[clamp(0.7rem,1.4vw,1rem)] hover:text-gray-200 cursor-pointer transition-colors"
                   >
-                    <Camera className="size-[clamp(0.9rem,1.2vw,1.25rem)]" />
+                    <CameraIcon className="size-[clamp(0.9rem,1.2vw,1.25rem)]" />
                     Change
                   </button>
                 </FileUploadTrigger>
@@ -251,7 +251,7 @@ export const ProfileAvatar = ({
                     className="inline-flex items-center gap-[clamp(0.25rem,0.4vw,0.4rem)] text-red-300 hover:text-red-100 text-[clamp(0.7rem,1.4vw,1rem)] cursor-pointer transition-colors"
                     aria-label="Reset to default avatar"
                   >
-                    <Trash2 className="size-[clamp(0.9rem,1.2vw,1.25rem)]" />
+                    <TrashIcon className="size-[clamp(0.9rem,1.2vw,1.25rem)]" />
                     Remove
                   </button>
                 )}

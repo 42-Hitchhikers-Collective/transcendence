@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   gameEvents.ts                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 16:51:49 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 17:28:46 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/09 13:35:06 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ export function playCard(playerId: string, cardIndex: number): RoomIdResult {
 
   const res = room.game.playCard(playerId, card);
 
-  if (!res.success)
+  if (!res.success)   
     return { success: false, roomId: roomId, error: res.error };
   return { success: true, roomId: roomId };
 }

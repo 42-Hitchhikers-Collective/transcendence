@@ -46,6 +46,9 @@ export class GameMaster {
 
     if (table.pendingDraw == 0 && table.draw == 0) return false;
 
+    if (table.playerPlayed)
+      return false;
+
     let amount = table.pendingDraw;
     if (amount == 0) amount = table.draw;
 
@@ -98,6 +101,9 @@ export class GameMaster {
   // ============================================================
 
   private validateMove(table: Table, playerId: string, card: Card): msgResult {
+    if (table.playerPlayed)
+      return { success: false, error: "You just played a card" };
+    
     if (!this.isPlayerTurn(table, playerId)) {
       console.log("validateMove: false, not your turn");
       return { success: false, error: "Is not your turn" };
@@ -106,6 +112,7 @@ export class GameMaster {
       return { success: false, error: "Draw cards first" };
     if (!this.isCardPlayable(table, card))
       return { success: false, error: "Card not playable" };
+
 
     return { success: true, msg: "" };
   }
