@@ -6,7 +6,7 @@
 /*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:03:27 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/09 16:30:39 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/09 17:08:48 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,6 @@ export function registerRoomHandlers(
     });
     systemChatMsg(playerId, roomId, socket, ChatMsgType.DROP_ROOM);
     broadcastGamePage(roomId); //update GamePage when a player drops (and timer started)
-    broadcastGameCanvas(roomId);
   });
 
   // --- Helpers ---

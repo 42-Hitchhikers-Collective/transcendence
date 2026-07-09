@@ -85,7 +85,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
         {/*  Right bar Game canvas (top on mobile via order-1, right column on desktop via natural flow)  */}
 
-        <div className="flex flex-col order-1 lg:order-0 w-full max-w-250 2xl:max-w-1000 aspect-5/4 min-h-0 min-w-0">
+        <div className="flex flex-col order-1 lg:order-0 w-full max-w-250 aspect-5/4 min-h-0 min-w-0">
           {gameOver === null ? (
             <PhaserGame />
           ) : (
