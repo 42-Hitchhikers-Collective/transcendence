@@ -2,7 +2,8 @@ _This project has been created as part of the 42 curriculum by grial, ilazar, js
 
 # transcendence
 
-A real-time multiplayer UNO card game as our final project for the 42 Common Core. Play UNO with friends, chat in real time, track your stats on a leaderboard and more!
+Our final project for the 42 school common core.
+A real-time multiplayer UNO card game: Play UNO with up to 4 people, chat in real time, track your stats on a leaderboard and more!
 
 ---
 
@@ -10,7 +11,7 @@ A real-time multiplayer UNO card game as our final project for the 42 Common Cor
 
 **Project name:** Transcendence (UNO)
 
-**Our Goal:** Our main goal for this project was mainly to learn full stack web development principles. Most of our previous projects were based on low level programming languages and old programming libraries, this has been our first project where we could finally use a modern development stack and we wanted to use this as an opportunioty to mostly learn and practice. So we decided to build a simple single-page web application of a game that everyone knows and likes, UNO!
+**Our Goal:** Our main goal for this project was mainly to learn full stack web development principles. Most of our previous projects were based on low level programming languages and old programming libraries, this has been our first project to use a modern development stack, So we decided to build a simple single-page web application of a game that everyone knows and likes, UNO!
 
 The project is a website hosting a real-time multiplayer UNO. The game is a classic card game where players take turns matching a card in their hand with the current card shown on top of the deck either by color or number. The goal is to be the first player to get rid of all their cards. The game includes special action cards that can change the flow of the game, such as Skip, Reverse, Draw Two, Wild, and Wild Draw Four cards.
 
@@ -165,7 +166,7 @@ All AI-generated code was reviewed and tested, thoroughly, human verification wa
 
 - grial: Game developer across backend (UNO engine) and frontend (Phaser canvas). Designed and built the core game mechanics (card logic, rule enforcement, turn management) and integrated the game engine with the real-time socket layer.
 
-- ilazar: Backend developer focused on real-time communication and room management. Built the Socket.IO layer, room lifecycle (create/join/leave), drop timer and reconnection system.
+- ilazar: Backend developer focused on real-time communication and room management. Built the Socket.IO layer, room lifecycle (create/join/leave), online players tracking, chat, drop timer and reconnection system.
 
 - jslusark: Full-stack developer and project manager. Organised and coordinated team efforts, deadlines, feature planning, and code reviews. Contributed to both frontend (UI, routing, authentication, state management) and backend (final feature implementations, bug fixes and optimizations).
 
@@ -246,7 +247,7 @@ Browser ──HTTPS──▶ NGINX ──proxy──▶ Fastify API (:3000)
 
 ### Major Technical Choices
 
-| Choice                               | Why                                                                               |
+| Choice                               | Why                                                                   g            |
 | ------------------------------------ | --------------------------------------------------------------------------------- |
 | **TLS Termination at NGINX**         | Single encryption point, backend stays simple (plain HTTP internally)             |
 | **HttpOnly JWT Cookies**             | XSS-resistant token storage — JS cannot read the token                            |
@@ -308,31 +309,27 @@ A detailed list of modules that we have chosen to implement for this project can
 
 ## Individual Contributions
 
-> [TO FILL: Replace each section with actual contributions, features, and challenges for each team member.]
+For individual contribution of each member regarding Modules, see Modules section through the link above.
 
 ### grial
 
-- **Features:** [TO FILL]
-- **Modules:** [TO FILL]
-- **Challenges:** [TO FILL]
+- **Features:** Phaser game canvas, UNO game engine
+- **Challenges:** Using Phaser library. Communicating between backend and frontend.
 
 ### ilazar
 
-- **Features:** [TO FILL]
-- **Modules:** [TO FILL]
-- **Challenges:** [TO FILL]
+- **Features:** Tracking rooms and online players. JWT socket side. Real-time updates of user actions/game moves. Chat.
+- **Challenges:** Managing the socket layer between backend and frontend.
 
 ### jslusark
 
-- **Features:** [TO FILL]
-- **Modules:** [TO FILL]
-- **Challenges:** [TO FILL]
+- **Features:** Web interface with Authentication and react state managment.
+- **Challenges:** Handling a large code-base and sockets on the frontend.
 
 ### wlucke
 
-- **Features:** [TO FILL]
-- **Modules:** [TO FILL]
-- **Challenges:** [TO FILL]
+- **Features:** API. Database and initial setup.
+- **Challenges:** Adjusting the database to the needs of the project.
 
 ---
 
@@ -345,5 +342,3 @@ A detailed list of modules that we have chosen to implement for this project can
 ---
 
 **Confirmed total: 14 pts** — Remote Players and AI Opponent are optional buffer modules.
-
-## Individual Contributions
