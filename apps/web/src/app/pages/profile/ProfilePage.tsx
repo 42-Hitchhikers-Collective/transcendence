@@ -22,7 +22,7 @@ export default function ProfilePage() {
 
   // useEffect to fetch the user's game history only when we get the isAuthenticated state (which happens on every mount of the profile page) )
   useEffect(() => {
-    console.log("isAuthenticated changed:", isAuthenticated);
+    // console.log("isAuthenticated changed:", isAuthenticated);
     if (!isAuthenticated) {
       setHistory([]);
       return;

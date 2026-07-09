@@ -30,9 +30,9 @@ export default function CreateCard({
     });
 
     socket.once("room_created", ({ roomName }: { roomName: string }) => {
-      console.log(`1 Room created successfully: ${roomName}`);
+      // console.log(`1 Room created successfully: ${roomName}`);
       setTimeout(() => {
-        console.log(`Room created successfully: ${roomName}`);
+        // console.log(`Room created successfully: ${roomName}`);
         setIsCreating(false);
         setErrorMessage(null);
         navigate(`/game?room=${encodeURIComponent(roomName)}`);

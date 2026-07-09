@@ -18,7 +18,7 @@ export default function StartGameButton({
   const startGame = useCallback(() => {
     socket.emit("start_game");
     socket.emit("canvas_ready");
-    console.log(`[GamePage] start_game emitted`);
+    // console.log(`[GamePage] start_game emitted`);
   }, []);
 
   if (!gameStarted && gameOver == null) 
@@ -26,7 +26,7 @@ export default function StartGameButton({
     <>
       <button
         onClick={() => {
-          console.log(`[GamePage] Start Game button clicked`);
+          // console.log(`[GamePage] Steart Game button clicked`);
           startGame();
         }}
         className="rounded-lg bg-emerald-500 px-3 md:px-5 py-2 md:py-3 text-sm md:text-base font-semibold text-white gameStarted:bg-gray-400 mt-3 md:mt-4 truncate max-w-full"

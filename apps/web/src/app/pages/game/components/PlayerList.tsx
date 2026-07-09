@@ -97,9 +97,9 @@ function PlayerItem({
           );
           (e.target as HTMLImageElement).src = "/avatars/default.png";
 
-          console.log(
-            `Avatar URL for ${player.userName}: ${player.avatarUrl}, defaulting to /avatars/default.png`,
-          );
+          // console.log(
+          //   `Avatar URL for ${player.userName}: ${player.avatarUrl}, defaulting to /avatars/default.png`,
+          // );
           // Jess to Inbar -> This is not a bug that the frontend has to handle, it is caused because
           // the backend is incorrectly returning a default avatar string while it should return `null`
           // when a player has no custom avatar.
@@ -192,11 +192,11 @@ export default function PlayerList({
 
   if (playerList.length > 0) {
     // Debugging logs to track changes
-    console.log(`👤👤👤👤 PLAYER LIST UPDATED`);
+    // console.log(`👤👤👤👤 PLAYER LIST UPDATED`);
     playerList.forEach((p, i) => {
-      console.log(
-        ` ${i++}. ${p.userName} - ${p.dropped ? "(dropped)" : "in room"} - Is player turn: ${p.isPlayerTurn}`,
-      );
+      // console.log(
+      //   ` ${i++}. ${p.userName} - ${p.dropped ? "(dropped)" : "in room"} - Is player turn: ${p.isPlayerTurn}`,
+      // );
     });
   }
 

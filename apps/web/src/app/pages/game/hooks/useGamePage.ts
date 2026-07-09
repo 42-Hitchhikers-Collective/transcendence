@@ -91,13 +91,13 @@ export function useGamePage(roomName: string) {
   useEffect(() => {
     // if (!user || !socket.connected) return; // waits for user and socket connection before doing anything
     if (!user) return; // waits for user and socket connection before doing anything
-    console.log(
-      `🔌 [GamePage] User info received "${user.username}", new socket id: ${socket.connected}`,
-    );
+    // console.log(
+    //   `🔌 [GamePage] User info received "${user.username}", new socket id: ${socket.connected}`,
+    // );
     socket.on("phaser_ready", () => {
-      console.log(
-        `[GamePage] Phaser canvas is ready, requesting room state...`,
-      );
+      // console.log(
+      //   `[GamePage] Phaser canvas is ready, requesting room state...`,
+      // );
     });
 
     // TODO:
@@ -134,19 +134,19 @@ export function useGamePage(roomName: string) {
       socket.off("game_finished");
       socket.off("lonely_player");
 
-      console.log(
-        `💦 ${playerInfoRef.current?.userName} dropped from room ${roomNameRef.current}.`,
-      );
+      // console.log(
+      //   `💦 ${playerInfoRef.current?.userName} dropped from room ${roomNameRef.current}.`,
+      // );
     };
   }, [user]); // ⬅️ runs when user becomes available
 
   useEffect(() => {
     if (playerList.length > 0) {
-      console.log(
-        `👤👤👤👤 PLAYER LIST UPDATED: ${playerList.map((p) => p.userName)}`,
-      );
-      console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
-      console.log(`Winner ID: ${RoomDataRef.current?.playerTurnId}`);
+      // console.log(
+      //   `👤👤👤👤 PLAYER LIST UPDATED: ${playerList.map((p) => p.userName)}`,
+      // );
+      // console.log(`🚻 ROOM STATE UPDATED: ${RoomDataRef.current?.roomState}`);
+      // console.log(`Winner ID: ${RoomDataRef.current?.playerTurnId}`);
     }
     if (RoomDataRef.current?.roomState === "playing") {
       // socket.emit("canvas_ready"); // trigger game canvas to refresh with the latest room state when game starts (e.g. in case player refreshes page during game or joins late)
@@ -170,7 +170,7 @@ export function useGamePage(roomName: string) {
   }, [playerList, RoomDataRef.current?.roomState]); // ⬅️ runs whenever players or room state changes to keep the game canvas in sync with the latest room state (e.g. new player joins, game starts, etc)
 
   useEffect(() => {
-    console.log(`Game Started state changed: ${gameStarted}`);
+    // console.log(`Game Started state changed: ${gameStarted}`);
   }, [gameStarted]); // ⬅️ can be used for any side effects that need to run when game starts, currently not used but can be useful for future features like showing a "Game Started" banner or something
 
   //#region -------------- SOCKET HANDLERS -----------------
@@ -212,12 +212,12 @@ export function useGamePage(roomName: string) {
   const handlePlayerData = (playerData: PlayerData) => {
     setPlayerData(playerData);
 
-    console.log(
-      `🎮 PLAYER DATA RECEIVED FROM SOCKET \n` +
-        Object.entries(playerData)
-          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-          .join("\n"),
-    );
+    // console.log(
+    //   `🎮 PLAYER DATA RECEIVED FROM SOCKET \n` +
+    //     Object.entries(playerData)
+    //       .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+    //       .join("\n"),
+    // );
   };
 
   const handleRoomDataResponse = (roomData: RoomData | null) => {
@@ -225,12 +225,12 @@ export function useGamePage(roomName: string) {
       return;
     }
     RoomDataRef.current = roomData; // current stores the latest full room state for replaying on EventBus
-    console.log(
-      `🎮 ROOM DATA RECEIVED FROM SOCKET\n` +
-        Object.entries(roomData)
-          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-          .join("\n"),
-    );
+    // console.log(
+    //   `🎮 ROOM DATA RECEIVED FROM SOCKET\n` +
+    //     Object.entries(roomData)
+    //       .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+    //       .join("\n"),
+    // );
     if (roomData) {
       const playersData = roomData.players.map((p) => ({
         ...p,
@@ -245,12 +245,12 @@ export function useGamePage(roomName: string) {
   };
 
   const handleGameStartSuccess = ({ roomId }: GameStartSuccessPayload) => {
-    console.log(`[GamePage] game_start_success received for room ${roomId}`);
+    // console.log(`[GamePage] game_start_success received for room ${roomId}`);
     setGameStarted(true);
   };
 
   const handleGameStartFailed = ({ message }: GameStartFailedPayload) => {
-    console.log(`[GamePage] game_start_error received: ${message}`);
+    // console.log(`[GamePage] game_start_error received: ${message}`);
     setCanvasError(message ?? "Unable to start the game.");
   };
 

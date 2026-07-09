@@ -29,9 +29,9 @@ export default function PhaserGame() {
     const game = new Phaser.Game(config);
 
     game.canvas.style.borderRadius = "16px";
-    console.log(
-      `[PhaserGame] Canvas: ${game.canvas.width}×${game.canvas.height}`,
-    );
+    // console.log(
+    //   `[PhaserGame] Canvas: ${game.canvas.width}×${game.canvas.height}`,
+    // );
 
     return () => {
       game.destroy(true);

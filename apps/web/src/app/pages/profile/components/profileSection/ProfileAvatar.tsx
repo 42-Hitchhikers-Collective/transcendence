@@ -129,7 +129,7 @@ export const ProfileAvatar = ({
       // ── Reset FileUpload state so a subsequent selection of the same file
       //     still triggers onChange ──
       setFiles([]);
-      console.log("New avatar URL:", data.avatarUrl);
+      // console.log("New avatar URL:", data.avatarUrl);
 
       // ── Refresh the auth context's cached /api/users/me response so that
       //     other components (navbar, friends list, etc.) pick up the new URL
