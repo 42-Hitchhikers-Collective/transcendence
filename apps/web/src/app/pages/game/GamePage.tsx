@@ -49,7 +49,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
         backgroundBlendMode: "saturation",
       }}
     >
-      <div className="grid flex-1 min-h-0 w-full max-w-7xl 2xl:max-w-[90vw] mx-auto grid-cols-1 grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[30%_1fr] 2xl:grid-cols-[26%_1fr] gap-3 md:gap-4 lg:gap-6">
+      <div className="grid flex-1 min-h-0 w-full max-w-7xl 2xl:max-w-[90vw] mx-auto grid-cols-1 grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[30%_1fr] 2xl:grid-cols-[26%_1fr] gap-3 md:gap-4 lg:gap-6">
         {/*  Sidebar column */}
         <div className="flex flex-col gap-3 md:gap-4 order-2 lg:order-0 min-w-0 min-h-0 overflow-hidden self-start lg:self-stretch">
           <RoomCode
@@ -85,7 +85,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
         {/*  Right bar Game canvas (top on mobile via order-1, right column on desktop via natural flow)  */}
 
-        <div className="flex flex-col order-1 lg:order-0 h-full w-full min-h-0 min-w-0">
+        <div className="flex flex-col order-1 lg:order-0 w-full max-w-250 2xl:max-w-1000 aspect-5/4 min-h-0 min-w-0">
           {gameOver === null ? (
             <PhaserGame />
           ) : (
