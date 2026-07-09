@@ -158,7 +158,7 @@ We give cover error edge cases for every possible invalid interaction that a pla
   - Player is left alone when a game has started (game is aborted and not recorded in match history)
   - After leaving, Player tries to join a room where the game already started
   - All players leave (room auto-deleted)
-  - Duplicate joins (no double partecipation, user has only one socket connection per room)
+  - Duplicate joins (no double participation, user has only one socket connection per room)
 
 - **Chat history for each room:**
   - chat messages are not lost on page refreshes
@@ -172,7 +172,7 @@ Why we suggest as a bonus module:
 
 Our room is not a standard join/leave mechanism.
 Our system implements a complete lifecycle manager with dual-index lookups, a formal state machine, cross-layer consistency (backend ↔ frontend ↔ canvas ↔ database), a race-condition-safe disconnect grace period with cancellation, comprehensive edge-case error handling for every invalid interaction, automatic resource cleanup and database-level game outcome integrity.
-The value of this module is that it provides a robust, user-friendly, and secure experience for players, ensuring that the game state is always consistent and intuitive. It's importnat top provide an experience that allows the user not to break the app navigation and to always be able to recover from any unexpected situation.
+The value of this module is that it provides a robust, user-friendly, and secure experience for players, ensuring that the game state is always consistent and intuitive. It's important top provide an experience that allows the user not to break the app navigation and to always be able to recover from any unexpected situation.
 ```
 
 <p align="right"><a href="#1-list-of-chosen-modules">↑ back to top</a></p>
@@ -208,12 +208,12 @@ Our transformation pipeline solves this by acting as a server-side privacy firew
 ---
 
 <a id="interactive-frontend"></a>
-### Minor: personaised and Interactive frontend with reactive animated components.
+### Minor: personalized and Interactive frontend with reactive animated components.
 
 - **Reactive state management:** Every UI component reacts instantly to state changes without needing a page refresh.
 - **Real-time UX management:** Socket-driven lifecycle where the frontend proactively manages connections — emits `user_dropped` on tab close/refresh/navigation, shows a drop timer UI with rejoin/leave options during the 30s grace period, and handles bfcache reconnection cleanly.
-- **Personalised experience across all states:** Contextual game-end screens (win/lose/lonely), a one-time welcome prompt for new players with game instructions, match history capped at 5 recent entries, paginated leaderboard, and distinct login/signup UIs for a sense of belonging.
-- **Interactive real-time player list:** Live player list states (Dropped, Dropped while playing, Is playing, left, won) with pulse animations to be easilt spotted by the user.
+- **Personalized experience across all states:** Contextual game-end screens (win/lose/lonely), a one-time welcome prompt for new players with game instructions, match history capped at 5 recent entries, paginated leaderboard, and distinct login/signup UIs for a sense of belonging.
+- **Interactive real-time player list:** Live player list states (Dropped, Dropped while playing, Is playing, left, won) with pulse animations to be easily spotted by the user.
 - **Responsive & animated UI:** Grid reordering for mobile/desktop, mobile chat drawer, staggered entrance animations on profile and avatar upload with spinner guard.
 
 ```Team members: jslusark```
