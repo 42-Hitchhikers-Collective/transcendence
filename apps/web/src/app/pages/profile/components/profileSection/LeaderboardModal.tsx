@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   XMarkIcon,
   TrophyIcon,
@@ -33,11 +33,10 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
   const [allData, setAllData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const fetchedRef = useRef(false);
 
-  // Fetch all data once when modal opens
+  // Fetch fresh data every time the modal opens
   useEffect(() => {
-    if (!open || fetchedRef.current) return;
+    if (!open) return;
     setLoading(true);
     fetch("/api/users/leaderboard")
       .then(async (res) => {
@@ -47,7 +46,6 @@ export function LeaderboardModal({ open, onClose }: LeaderboardModalProps) {
       })
       .then((entries) => {
         setAllData(entries);
-        fetchedRef.current = true;
       })
       .catch(() => setAllData([]))
       .finally(() => setLoading(false));

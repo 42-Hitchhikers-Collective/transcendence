@@ -136,20 +136,20 @@ export function Form({
 
   return (
     <form onSubmit={handleSubmit}>
-      <FieldGroup className="gap-[clamp(0.5rem,2vw,1rem)]">
+      <FieldGroup className="gap-2 md:gap-4">
         {formFields.map((field) => (
           <Field key={field.id}>
             <div className="flex items-center">
               <FieldLabel
                 htmlFor={field.id}
-                className="text-[clamp(0.65rem,2.2vw,0.875rem)]"
+                className="text-xs md:text-sm"
               >
                 {field.label}
               </FieldLabel>
               {field.extra}
             </div>
             <Input
-              className="bg-slate-500/20 text-slate-800 border-0 text-[clamp(0.7rem,2.2vw,0.875rem)] h-[clamp(2rem,5vw,2.5rem)]"
+              className="bg-slate-500/20 text-slate-800 border-0 text-xs md:text-sm h-8 md:h-10"
               id={field.id}
               type={field.type}
               placeholder={field.placeholder}
@@ -161,14 +161,14 @@ export function Form({
         ))}
 
         {displayError && (
-          <p className="text-destructive text-center text-[clamp(0.6rem,2vw,0.8rem)]">{displayError}</p>
+          <p className="text-destructive text-center text-xs">{displayError}</p>
         )}
 
         <Field>
           <Button
             type="submit"
             disabled={isLoading}
-            className="bg-emerald-400 mt-5 hover:bg-emerald-500 text-white active:scale-95 transition-transform text-[clamp(0.65rem,2.2vw,0.875rem)] h-[clamp(2rem,5vw,2.75rem)]"
+            className="bg-emerald-400 mt-5 hover:bg-emerald-500 text-white active:scale-95 transition-transform text-xs md:text-sm h-8 md:h-11"
           >
             {isLoading ? `Loading ${submitLabel} request..` : submitLabel}
           </Button>

@@ -31,7 +31,7 @@ export function Signup({
         toggleTarget="login"
         onRequestMode={onRequestMode}
       />
-      <CardContent className="flex flex-col gap-[clamp(0.5rem,2vw,1rem)] px-[clamp(1rem,5vw,5rem)]">
+      <CardContent className="flex flex-col gap-2 md:gap-4 px-4 md:px-8 lg:px-20">
         <Form
           formFields={formFields}
           onSubmit={handleSubmit}

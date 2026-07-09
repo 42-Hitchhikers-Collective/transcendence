@@ -31,15 +31,15 @@ export function Footer() {
 
   return (
     <footer
-      className="text-[clamp(0.8rem,0.95vw,0.875rem)] text-white"
+      className="text-xs md:text-sm text-white"
       role="contentinfo"
       aria-label="Site footer"
     >
       <div className="flex flex-col gap-4">
 
-        <div className="flex w-full flex-col items-end gap-[clamp(0.5rem,1vw,1rem)]">
+        <div className="flex w-full flex-col items-end gap-2 md:gap-4">
           <div
-            className="flex flex-col items-end gap-[clamp(0.3rem,0.6vw,0.5rem)] md:flex-row md:gap-[clamp(0.8rem,1.5vw,1.5rem)]"
+            className="flex flex-col items-end gap-1 md:flex-row md:gap-3"
             aria-label="Legal links"
           >
             {LEGAL_LINKS.map((link) => (

@@ -3,16 +3,22 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ProfileSection } from "./components/profileSection/ProfileSection";
 import { GamesHistorySection } from "./components/GameHistorySection/GameHistorySection";
-import type { GameHistory } from "@/app/auth/mockProfiles";
+import type { GameHistory } from "./components/GameHistorySection/types";
 import { GameCard} from "./components/GameCard/GameCard";
 
 import { Footer } from "@/shared/components/footer";
 import background from "@/assets/backgrounds/unocards_gemini.png";
 
 export default function ProfilePage() {
-  const { user, logout, isAuthenticated } = useAuthContext(); // pulls the auth state every time the profile page is mounted (or re-mounted) and sets the user state in the auth context
+  const { user, logout, isAuthenticated, refreshUser } = useAuthContext(); // pulls the auth state every time the profile page is mounted (or re-mounted) and sets the user state in the auth context
   const [history, setHistory] = useState<GameHistory[]>([]); // stores the game history for the user
   const [historyLoading, setHistoryLoading] = useState(false); // tracks loading state for the history fetch
+
+  // Refresh user data (stats, rank, avatar) on every profile page mount
+  // so that game results are reflected immediately without needing a manual refresh
+  useEffect(() => {
+    if (isAuthenticated) refreshUser();
+  }, [isAuthenticated, refreshUser]);
 
   // useEffect to fetch the user's game history only when we get the isAuthenticated state (which happens on every mount of the profile page) )
   useEffect(() => {
@@ -47,7 +53,7 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="bg-neutral-800 px-[clamp(1rem,4vw,12.5rem)] py-[clamp(2rem,4vw,5rem)] overflow-auto h-screen"
+      className="bg-neutral-800 px-4 md:px-16 lg:px-48 py-8 md:py-16 lg:py-20 overflow-auto h-screen "
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -66,17 +72,17 @@ export default function ProfilePage() {
         </button>
       </div>
       <ProfileSection user={user} stats={stats} onLogout={logout} />
-      <div className="grid grid-cols-1 gap-[clamp(1rem,1.5vw,2rem)] lg:grid-cols-[1fr_2fr]">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:gap-8 lg:grid-cols-[1fr_2fr]">
           {/* switches view order between children */}
         <div className="order-2 lg:order-1 h-full">
           <GamesHistorySection games={historyLoading ? [] : history} />
         </div>
-        <div className="order-1 lg:order-2 flex flex-col" style={{ minHeight: "clamp(400px, 60vh, 700px)" }}>
+        <div className="order-1 lg:order-2 flex flex-col min-h-[400px] md:min-h-[60vh] lg:min-h-[700px]">
           <GameCard />
         </div>
       </div>
-      <div className="mt-[clamp(1rem,2vw,2rem)] flex justify-end">
-        <div className="w-full max-w-[clamp(16rem,30vw,28rem)]">
+      <div className="mt-4 md:mt-6 lg:mt-8 flex justify-end">
+        <div className="w-full max-w-md">
           <Footer />
         </div>
       </div>

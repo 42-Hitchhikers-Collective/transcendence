@@ -1,4 +1,4 @@
-import type { GameHistory } from "@/app/auth/mockProfiles";
+import type { GameHistory } from "./types";
 import { HistoryCard } from "./HistoryCard";
 
 export function GamesHistorySection({

@@ -12,16 +12,16 @@ export default function ChatOverlay({
   if (!chatOpen) return null;
 
   return (
-    <div className="absolute inset-0 z-40 flex bg-white">
+    <div className="fixed inset-0 z-50 flex bg-white ">
       <div className="w-full h-full flex flex-col min-h-0 relative">
         {/*  Red X close button, top-left corner  */}
         <button
           type="button"
           onClick={() => setChatOpen(false)}
-          className="absolute top-[clamp(0.5rem,1.5vw,0.75rem)] right-[clamp(0.5rem,1.5vw,0.75rem)] z-10 rounded-full bg-red-500 p-[clamp(0.35rem,0.6vw,0.5rem)] text-white shadow-lg hover:bg-red-400 transition"
+          className="absolute top-3 md:top-4 right-3 md:right-4 z-10 rounded-full bg-red-500 p-2 md:p-3 text-white shadow-lg hover:bg-red-400 transition"
           aria-label="Close chat"
         >
-          <XMarkIcon className="size-[clamp(1.25rem,2vw,1.5rem)]" />
+          <XMarkIcon className="size-5 md:size-6" />
         </button>
         <Chat />
       </div>

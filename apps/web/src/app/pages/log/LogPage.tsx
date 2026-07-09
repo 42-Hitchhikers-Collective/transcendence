@@ -50,7 +50,7 @@ export default function EntryPage() {
         transition={{ duration: 0.6, ease: easeOut }}
       />
       {/* Login / Signup tab animated switch */}
-      <div className="relative z-10 w-[92vw] sm:w-[450px] h-[clamp(380px,75vh,550px)] perspective-1000">
+      <div className="relative z-10 w-[92vw] sm:w-[450px] min-h-[480px] md:min-h-[550px] perspective-1000 overflow-hidden ">
         {/* FRONT: Login (white card face) */}
         <motion.div
           className="absolute inset-0 backface-hidden"
@@ -68,7 +68,7 @@ export default function EntryPage() {
 
         {/* BACK: Signup (dark-mode card) */}
         <motion.div
-          className="absolute inset-0 backface-hidden"
+          className="absolute inset-0 backface-hidden "
           initial={{ rotateY: 180 }}
           animate={mode === "signup" ? "front" : "back"} // back and front are card variants style of the component
           variants={cardVariants}
