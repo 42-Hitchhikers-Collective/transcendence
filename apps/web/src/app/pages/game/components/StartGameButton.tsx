@@ -18,7 +18,7 @@ export default function StartGameButton({
   const startGame = useCallback(() => {
     socket.emit("start_game");
     socket.emit("canvas_ready");
-    console.log(`[GamePage] start_game emitted`);
+    // console.log(`[GamePage] start_game emitted`);
   }, []);
 
   if (!gameStarted && gameOver == null) 
@@ -26,25 +26,22 @@ export default function StartGameButton({
     <>
       <button
         onClick={() => {
-          console.log(`[GamePage] Start Game button clicked`);
+          // console.log(`[GamePage] Steart Game button clicked`);
           startGame();
         }}
-        className={` rounded-lg bg-emerald-500 px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.4rem,0.8vw,0.6rem)] text-[clamp(0.75rem,1vw,0.875rem)] font-semibold text-white gameStarted:bg-gray-400 mt-[clamp(0.5rem,1vw,0.75rem)] truncate max-w-full`}
+        className="rounded-lg bg-emerald-500 px-3 md:px-5 py-2 md:py-3 text-sm md:text-base font-semibold text-white gameStarted:bg-gray-400 mt-3 md:mt-4 truncate max-w-full"
       >
         Start Game
       </button>
       {canvasError && !gameStarted && (
-        <div className="rounded text-red-500  mt-[clamp(0.3rem,0.6vw,0.5rem)] text-[clamp(0.6rem,0.9vw,0.75rem)] wrap-break-word">{canvasError}</div>
+        <div className="rounded text-red-500 mt-2 text-xs md:text-sm wrap-break-word">{canvasError}</div>
       )}
     </>
   );
 
-  // ── Placeholder: keeps the card height stable when game has started ──
+  // Keeps the card height stable when game has started and button is hidden
   return (
-    <div
-      className="mt-[clamp(0.5rem,1vw,0.75rem)]"
-      style={{ height: "clamp(1.4rem, 2vw, 2rem)" }}
-      aria-hidden
+    <div className="mt-3 md:mt-4" style={{ height: "2.5rem" }} aria-hidden
     />
   );
 }

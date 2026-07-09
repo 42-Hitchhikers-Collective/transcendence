@@ -1,5 +1,5 @@
 import { cn } from "@/shared/lib/utils";
-import type { GameHistory } from "@/app/auth/mockProfiles";
+import type { GameHistory } from "./types";
 import { OpponentsList } from "./OpponentsList";
 import { HandThumbDownIcon, TrophyIcon } from "@heroicons/react/24/solid";
 
@@ -82,7 +82,7 @@ function MatchResult({
       <div className="pb-[clamp(0.5rem,1vw,1rem)] min-[450px]:pb-[clamp(0.75rem,1.5vw,1.5rem)] lg:pb-[clamp(0.5rem,1vw,1rem)]">
         <p className="text-[clamp(0.6rem,1vw,1rem)] min-[450px]:text-[clamp(0.85rem,1.5vw,1.3rem)] lg:text-[clamp(0.6rem,1vw,1rem)] text-end font-medium">{formatMatchDate(game.date)}</p>
         <h1 className={resultView.titleStyle}>{resultView.title}</h1>
-        <h3 className="text-[clamp(0.85rem,1.3vw,1.25rem)] min-[450px]:text-[clamp(1.1rem,1.8vw,1.6rem)] lg:text-[clamp(0.85rem,1.3vw,1.25rem)] text-start">
+        <h3 className="text-[clamp(0.85rem,1.3vw,1.25rem)] min-[450px]:text-[clamp(1.1rem,1.8vw,1.6rem)] lg:text-[clamp(0.85rem,1.3vw,1.25rem)] text-start ">
           In the{" "}
           <span className="font-extrabold">
             "{game.roomName || "Unnamed Room"}"

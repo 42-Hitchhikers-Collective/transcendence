@@ -6,7 +6,7 @@
 /*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/24 14:58:47 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 19:36:38 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/09 16:30:32 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ import { gameManager } from "../../gameManager";
 import { getIdentity } from "../socket.utils";
 import { systemChatMsg } from ".";
 import { ChatMsgType } from "../../gameManager/chatEvents";
-// import { RECONNECTION_GRACE_PERIOD } from "../../gameManager/types";
 
 
 // --- Connection Events ---
@@ -28,7 +27,6 @@ export function registerConnectionHandlers(
 ) {
     const { playerId, userName } = getIdentity(socket);
     
-    // cancelDisconnectTimer(playerId);
     
     // Auto-rejoin player to their room if they were in one (handles reconnections)
     const roomId = gameManager.getPlayerRoomId(playerId);
@@ -36,7 +34,6 @@ export function registerConnectionHandlers(
         console.log(`[Socket] ${userName} reconnected with new socketId: ${socket.id}`);
         socket.join(roomId); // join back the room with the new socket to be able to receive room updates
         console.log(`Player ${userName} automatically rejoin room ${roomId}`);
-        // broadcastGameCanvas(roomId); // This refreshes canvas for everyone and bug 
     }
     
     // Disconnect and leave room if in any
@@ -50,40 +47,3 @@ export function registerConnectionHandlers(
         }
     });
 }
-
-
-
-/// --- Older Grace period implementation ---
-
-// Start grace period before removing player from their room
-/*
-function startGracePeriod(
-  app: FastifyInstance,
-  socket: Socket,
-  playerId: string,
-  broadcastRoomState: (roomId: string) => void
-) {
-    const userName = (socket as any).userName;
-    console.log(`[Grace period] starting for: ${userName} `);
-    const timeoutId = setTimeout(async () => {
-        const res = gameManager.leaveRoom(playerId);
-         gameManager.removePlayerFromOnlinePlayers(playerId);
-        console.log(`[Grace period] ended for player ${userName}, removed from online players and left room if in any.`);
-        if (res.success) {
-            broadcastRoomState(res.roomId);
-            console.log(`[Grace period] ${userName} removed from online players`);       
-        }
-    }, RECONNECTION_GRACE_PERIOD);
-    gameManager.setPlayerTimeout(playerId, timeoutId); // Store the timeout in the Map
-}
-
-// --- Private ---
-
-// Cancel the disconnection timer
-function cancelDisconnectTimer(playerId: string) {
-    const player = gameManager.getOnlinePlayer(playerId);
-    const playerName = player ? player.userName : playerId;
-    // console.log("[Grace period] check if to cancel for:", playerName);
-    gameManager.clearPlayerTimeout(playerId);
-}
-*/

@@ -119,8 +119,8 @@ function Stats({
   ];
 
   return (
-    <div className="w-full my-[clamp(0.15rem,1.2vw,1.5rem)]">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-[clamp(0.15rem,1.2vw,1.5rem)]">
+    <div className="w-full my-2 md:my-4 lg:my-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 lg:gap-6">
         {cardStats.map(({ label, value, color, bgColor, icon: Icon }, idx) => (
           <div
             key={idx}
@@ -128,10 +128,10 @@ function Stats({
              style={{ animationDelay: `${idx * 200}ms` }}
           >
             <div
-              className={`flex items-center justify-center w-[clamp(3rem,8vw,7rem)] p-[clamp(0.3rem,0.5vw,1rem)] ${bgColor}`}
+              className={`flex items-center justify-center w-12 md:w-16 lg:w-28 p-1 md:p-2 lg:p-4 ${bgColor}`}
             >
               <Icon
-                className={`w-[clamp(1.5rem,3vw,3rem)] h-[clamp(1.5rem,3vw,3rem)] ${color}`}
+                className={`size-6 md:size-8 lg:size-12 ${color}`}
               />
             </div>
             <div className="flex-1 flex flex-col justify-center px-[clamp(0.75rem,2vw,1.5rem)] py-[clamp(0.5rem,1vw,0.75rem)]">

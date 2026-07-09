@@ -38,7 +38,7 @@ export default function JoinCard({
         // setErrorMessage(null);
         // navigate(`/game?room=${encodeURIComponent(roomName)}`);
         setTimeout(() => {
-          console.log(`Room joined successfully: ${roomName}`);
+          // console.log(`Room joined successfully: ${roomName}`);
           setIsJoining(false);
           setErrorMessage(null);
           navigate(`/game?room=${encodeURIComponent(roomName)}`);

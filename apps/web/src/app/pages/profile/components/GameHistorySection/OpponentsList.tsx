@@ -16,7 +16,7 @@ function getInitial(username: string) {
 }
 
 export const OpponentsList = ({opponent} :{opponent: {
-    id: number;
+    id: string;
     username: string;
     avatar: string;
   }[]}) => {

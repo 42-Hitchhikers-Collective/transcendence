@@ -19,7 +19,7 @@ export function GameCard() {
 
   useEffect(() => {
     socket.on("leave_room", () => {
-      console.log("Leave_room event received on GameCard");
+      // console.log("Leave_room event received on GameCard");
       setHasPendingRoom(null);
     });
     socket.on("player_info_response", handlePlayerInfo);
@@ -33,9 +33,9 @@ export function GameCard() {
 
   useEffect(() => {
     if (!hasPendingRoom) {
-      console.log(
-        "User has no pending room: room was pending or dropout timer just expired.",
-      );
+      // console.log(
+      //   "User has no pending room: room was pending or dropout timer just expired.",
+      // );
     } else {
       console.warn(
         `⏰ User has a pending active room: ${hasPendingRoom}. \n They can rejoin as long as the dropout timer is active.`,
@@ -46,12 +46,12 @@ export function GameCard() {
   const handlePlayerInfo = (data: any) => {
     // prints json data in a readable format without needing to remember the structure of the data object
 
-    console.log(
-      `🃏 CREATE GAME CARD: Player info received:\n` +
-        Object.entries(data)
-          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-          .join("\n"),
-    );
+    // console.log(
+    //   `🃏 CREATE GAME CARD: Player info received:\n` +
+    //     Object.entries(data)
+    //       .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+    //       .join("\n"),
+    // );
 
     // Only show rejoin card if player is in an active (not finished) room
     if (data.activeRoom && data.activeRoom !== null) {

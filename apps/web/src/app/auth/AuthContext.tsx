@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
       }
     } catch {
-      console.log("👤 AUTHENTICATION: profile could not load due to user not being logged in or token session expiration");
+      // console.log("👤 AUTHENTICATION: profile could not load due to user not being logged in or token session expiration");
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -90,21 +90,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isAuthenticated) {
       if (!socket.connected) {
         socket.once("connect", () => {
-          console.log(`👤 AUTHENTICATION: socket connected, ID: ${socket.id}`);
+          // console.log(`👤 AUTHENTICATION: socket connected, ID: ${socket.id}`);
         });
         socket.connect();
       }
     } else {
       if (socket.connected) {
         socket.disconnect();
-        console.log("👤 AUTHENTICATION: socket disconnected");
+        // console.log("👤 AUTHENTICATION: socket disconnected");
       }
       setUser(null);
     }
   }, [isAuthenticated]);
 
   const login = async (email: string, password: string) => {
-    console.log("🚪 LOGIN: sending request to backend");
+    // console.log("🚪 LOGIN: sending request to backend");
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -114,10 +114,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const raw = await res.text();
     if (!res.ok) {
       const err = raw ? JSON.parse(raw) : null;
-      console.log("🚪 LOGIN: failed with error ", err);
+      // console.log("🚪 LOGIN: failed with error ", err);
       throw new Error(err?.error ?? err?.message ?? "login failed");
     }
-    console.log("🚪 LOGIN: success, cookie set");
+    // console.log("🚪 LOGIN: success, cookie set");
     // Cookie is now set — fetch user to hydrate state
     await fetchUser();
   };
@@ -130,12 +130,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       credentials: "include",
       body: JSON.stringify({ email, password, username }),
     });
-    console.log("📋 SIGNUP: status", res.status);
+    // console.log("📋 SIGNUP: status", res.status);
     const signupRawText = await res.text(); 
-    console.log("📋 SIGNUP: signupRawText body", signupRawText);
+    // console.log("📋 SIGNUP: signupRawText body", signupRawText);
     if (!res.ok) {
       const err = signupRawText ? JSON.parse(signupRawText) : null;
-      console.log("📋 SIGNUP: error payload", err);
+      // console.log("📋 SIGNUP: error payload", err);
       throw new Error(err?.error ?? err?.message ?? "signup failed");
     }
     // Register succeeded, awaits login to set the cookie and fetches user
@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore network errors; clear client state regardless
     }
-    console.log("👋 LOGOUT: clearing auth state");
+    // console.log("👋 LOGOUT: clearing auth state");
     setIsAuthenticated(false);
     setUser(null);
     console.info("LOGOUT: success");

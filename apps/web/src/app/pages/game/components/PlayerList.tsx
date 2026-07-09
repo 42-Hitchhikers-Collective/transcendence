@@ -8,7 +8,7 @@ type PlayerListProps = {
   gameOver?: {
     reason: "finished" | "lonely";
     winnerId?: string;
-  };
+  } | null;
 };
 
 function PlayerStatus({
@@ -19,56 +19,37 @@ function PlayerStatus({
 }: {
   dropped: boolean;
   isPlayerTurn: boolean;
-  gameOver?: { reason: "finished" | "lonely"; winnerId?: string };
+  gameOver?: { reason: "finished" | "lonely"; winnerId?: string } | null;
   playerId: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5 min-h-[clamp(1.1rem,2.8vw,1.4rem)] lg:min-h-[clamp(1.2rem,2vw,1.5rem)] 2xl:min-h-[clamp(1.6rem,1.5vw,2rem)]">
+    <div className="flex flex-col items-center justify-center gap-0.5 min-h-5 lg:min-h-6 2xl:min-h-8">
       {gameOver?.reason === "finished" && gameOver.winnerId === playerId && (
-        <span className="text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-yellow-600">
+        <span className="text-[11px] lg:text-xs 2xl:text-sm font-medium text-yellow-600">
           Won!
         </span>
       )}
       {dropped && (
         <>
-          <span className="flex items-center justify-center gap-[clamp(0.15rem,0.3vw,0.25rem)] text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-slate-500">
-            <ClockIcon className="size-[clamp(0.5rem,1vw,0.6rem)] lg:size-[clamp(0.55rem,0.7vw,0.7rem)] 2xl:size-[clamp(0.75rem,0.6vw,0.9rem)]" />
+          <span className="flex items-center justify-center gap-0.5 text-[11px] lg:text-xs 2xl:text-sm font-medium text-slate-500">
+            <ClockIcon className="size-2 lg:size-2.5 2xl:size-3" />
             Dropped
           </span>
         </>
       )}
       {!dropped && isPlayerTurn && !gameOver && (
-        <span className="text-[clamp(0.4rem,1vw,0.5rem)] lg:text-[clamp(0.45rem,0.7vw,0.55rem)] 2xl:text-[clamp(0.6rem,0.6vw,0.8rem)] font-medium text-emerald-600 animate-pulse">
+        <span className="text-[10px] lg:text-[11px] 2xl:text-xs font-medium text-emerald-600 animate-pulse">
           Is playing
         </span>
       )}
       {dropped && isPlayerTurn && !gameOver && (
-        <span className="text-[clamp(0.4rem,1vw,0.5rem)] lg:text-[clamp(0.45rem,0.7vw,0.55rem)] 2xl:text-[clamp(0.6rem,0.6vw,0.8rem)] font-medium text-emerald-600 animate-pulse">
+        <span className="text-[10px] lg:text-[11px] 2xl:text-xs font-medium text-emerald-600 animate-pulse">
           Dropped while playing
         </span>
       )}
     </div>
   );
 }
-
-// function TurnStatus({
-//   turnPlayer,
-// }: {
-//   turnPlayer: PlayerListItem | undefined;
-// }) {
-//   if (!turnPlayer) return null;
-
-//   return (
-//     <div className="mt-[clamp(0.4rem,0.8vw,0.6rem)]">
-//       <p className="lg:mt-[clamp(0.25rem,0.5vw,0.5rem)] text-[clamp(0.8rem,3vw,1rem)] lg:text-[clamp(1rem,2.5vw,1.5rem)] 2xl:text-[clamp(1.5rem,1.5vw,2.2rem)] font-normal wrap-break-word overflow-hidden">
-//         <span className="animate-bounce text-emerald-500">
-//           {turnPlayer.userName}
-//         </span>{" "}
-//         is playing
-//       </p>
-//     </div>
-//   );
-// }
 
 function PlayerItem({
   player,
@@ -77,7 +58,7 @@ function PlayerItem({
 }: {
   player: PlayerListItem;
   clientUsername?: string;
-  gameOver?: { reason: "finished" | "lonely"; winnerId?: string };
+  gameOver?: { reason: "finished" | "lonely"; winnerId?: string } | null;
 }) {
   const cacheBuster = useRef(Date.now()); // cache buster to force reload the avatar image when the src changes
   const isYou = player.userName === clientUsername;
@@ -85,19 +66,19 @@ function PlayerItem({
   return (
     /* player item */
     <div
-      className={`flex w-[clamp(3.5rem,10vw,4.5rem)] lg:w-[clamp(4.5rem,7vw,5.5rem)] 2xl:w-[clamp(5.5rem,5vw,7rem)] min-w-0 flex-col items-center justify-center gap-[clamp(0.15rem,0.4vw,0.3rem)] rounded-xl border-2 p-[clamp(0.3rem,0.7vw,0.5rem)] shadow-md ${
+      className={`flex w-14 lg:w-18 2xl:w-28 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border-2 p-1 lg:p-2 shadow-md ${
         player.dropped
           ? "border-slate-300 bg-slate-200 text-slate-400"
           : gameOver && player.playerId === gameOver.winnerId
             ? "border-yellow-400 bg-yellow-100 animate-pulse"
             : player.isPlayerTurn
-              ? "border-emerald-300 animate-bounce bg-emerald-200 shadow-emerald-200 text-emerald-900" // ← turn highlight
+              ? "border-emerald-300 animate-bounce bg-emerald-200 shadow-emerald-200 text-emerald-900"
               : ""
       }`}
     >
       {/* username */}
       <p
-        className="text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight truncate w-full"
+        className="text-center text-[11px] lg:text-xs 2xl:text-sm font-semibold leading-tight truncate w-full"
       >
         {player.playerId === gameOver?.winnerId ? "🎉 " : ""}
         {isYou ? `You` : player.userName}
@@ -106,7 +87,7 @@ function PlayerItem({
       <img
         src={`${player.avatarUrl}?t=${cacheBuster.current}`} // add cache buster to force reload the image when the src changes
         alt={player.userName}
-        className={`h-[clamp(1.3rem,5vw,2rem)] lg:h-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:h-[clamp(2.5rem,3vw,3.5rem)] w-[clamp(1.3rem,5vw,2rem)] lg:w-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:w-[clamp(2.5rem,3vw,3.5rem)] max-w-full shrink-0 rounded-full object-cover ${
+        className={`h-6 lg:h-8 2xl:h-12 w-6 lg:w-8 2xl:w-12 max-w-full shrink-0 rounded-full object-cover ${
           player.dropped ? "grayscale opacity-50" : ""
         }`}
         onError={(e) => {
@@ -116,9 +97,9 @@ function PlayerItem({
           );
           (e.target as HTMLImageElement).src = "/avatars/default.png";
 
-          console.log(
-            `Avatar URL for ${player.userName}: ${player.avatarUrl}, defaulting to /avatars/default.png`,
-          );
+          // console.log(
+          //   `Avatar URL for ${player.userName}: ${player.avatarUrl}, defaulting to /avatars/default.png`,
+          // );
           // Jess to Inbar -> This is not a bug that the frontend has to handle, it is caused because
           // the backend is incorrectly returning a default avatar string while it should return `null`
           // when a player has no custom avatar.
@@ -150,20 +131,20 @@ function LeavingPlayerItem({ player }: { player: PlayerListItem }) {
   const cacheBuster = useRef(Date.now());
 
   return (
-    <div className="flex w-[clamp(3.5rem,10vw,4.5rem)] lg:w-[clamp(4.5rem,7vw,5.5rem)] 2xl:w-[clamp(5.5rem,5vw,7rem)] min-w-0 flex-col items-center justify-center gap-[clamp(0.15rem,0.4vw,0.3rem)] rounded-xl border-2 border-red-300 bg-red-100 p-[clamp(0.3rem,0.7vw,0.5rem)] shadow-md animate-[fadeOut_1.5s_ease-out_forwards]">
+    <div className="flex w-14 lg:w-18 2xl:w-28 min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl border-2 border-red-300 bg-red-100 p-1 lg:p-2 shadow-md animate-[fadeOut_1.5s_ease-out_forwards]">
       <img
         src={`${player.avatarUrl}?t=${cacheBuster.current}`}
         alt={player.userName}
-        className="h-[clamp(1.3rem,5vw,2rem)] lg:h-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:h-[clamp(2.5rem,3vw,3.5rem)] w-[clamp(1.3rem,5vw,2rem)] lg:w-[clamp(1.8rem,3.5vw,2.3rem)] 2xl:w-[clamp(2.5rem,3vw,3.5rem)] max-w-full shrink-0 rounded-full object-cover grayscale opacity-50"
+        className="h-6 lg:h-8 2xl:h-12 w-6 lg:w-8 2xl:w-12 max-w-full shrink-0 rounded-full object-cover grayscale opacity-50"
         onError={(e) => {
           (e.target as HTMLImageElement).src = "/avatars/default.png";
         }}
       />
-      <p className="text-center text-[clamp(0.45rem,1.8vw,0.6rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(0.8rem,0.8vw,1.1rem)] font-semibold leading-tight truncate w-full text-red-400">
+      <p className="text-center text-[11px] lg:text-xs 2xl:text-sm font-semibold leading-tight truncate w-full text-red-400">
         {player.userName}
       </p>
-      <div className="flex flex-col items-center justify-center gap-0.5 min-h-[clamp(1.1rem,2.8vw,1.4rem)] lg:min-h-[clamp(1.2rem,2vw,1.5rem)] 2xl:min-h-[clamp(1.6rem,1.5vw,2rem)]">
-        <span className="text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-red-400">
+      <div className="flex flex-col items-center justify-center gap-0.5 min-h-5 lg:min-h-6 2xl:min-h-8">
+        <span className="text-[11px] lg:text-xs 2xl:text-sm font-medium text-red-400">
           Left
         </span>
       </div>
@@ -211,29 +192,29 @@ export default function PlayerList({
 
   if (playerList.length > 0) {
     // Debugging logs to track changes
-    console.log(`👤👤👤👤 PLAYER LIST UPDATED`);
+    // console.log(`👤👤👤👤 PLAYER LIST UPDATED`);
     playerList.forEach((p, i) => {
-      console.log(
-        ` ${i++}. ${p.userName} - ${p.dropped ? "(dropped)" : "in room"} - Is player turn: ${p.isPlayerTurn}`,
-      );
+      // console.log(
+      //   ` ${i++}. ${p.userName} - ${p.dropped ? "(dropped)" : "in room"} - Is player turn: ${p.isPlayerTurn}`,
+      // );
     });
   }
 
   return (
     <div className="min-w-0 overflow-hidden flex flex-col">
-      <h2 className="text-[clamp(0.6rem,2vw,0.7rem)] lg:text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.2rem,1vw,1.6rem)] font-semibold uppercase tracking-[0.2em] py-0.5 lg:py-[clamp(0.35rem,0.6vw,0.5rem)] mb-[clamp(0.4rem,0.8vw,0.6rem)] truncate">
+      <h2 className="text-[11px] lg:text-sm 2xl:text-lg font-semibold uppercase tracking-[0.2em] py-1 lg:py-1 mb-1 truncate">
         Joined:
-        <span className="ml-1 lg:ml-2 rounded-full bg-emerald-100 p-[clamp(0.15rem,0.5vw,0.3rem)] lg:p-[clamp(0.25rem,0.5vw,0.5rem)] 2xl:p-[clamp(0.5rem,0.6vw,0.9rem)] text-[clamp(0.5rem,2vw,0.65rem)] lg:text-[clamp(0.6rem,0.9vw,0.75rem)] 2xl:text-[clamp(1.1rem,1vw,1.4rem)] font-medium text-emerald-800">
+        <span className="ml-1 lg:ml-2 rounded-full bg-emerald-100 p-0.5 text-[11px] lg:text-xs 2xl:text-sm font-medium text-emerald-800">
           {playerList.length}
         </span>
       </h2>
       {allPlayers.length === 0 && (
-        <p className="text-[clamp(0.6rem,2vw,0.7rem)] lg:text-[clamp(0.7rem,1vw,0.875rem)] 2xl:text-[clamp(1.2rem,1vw,1.5rem)] text-slate-400">
+        <p className="text-xs lg:text-sm 2xl:text-base text-slate-400">
           Waiting for someone to join...
         </p>
       )}
       <div
-        className={`${allPlayers.length === 4 ? "lg:grid lg:grid-cols-2 [&>*:nth-child(odd)]:justify-self-end [&>*:nth-child(even)]:justify-self-start" : ""} flex flex-nowrap gap-[clamp(0.25rem,1.5vw,0.5rem)] lg:gap-[clamp(0.5rem,1vw,0.75rem)] justify-center items-center my-[clamp(0.75rem,1.5vw,1.25rem)]`}
+        className={`${allPlayers.length === 4 ? "lg:grid lg:grid-cols-2 [&>*:nth-child(odd)]:justify-self-end [&>*:nth-child(even)]:justify-self-start" : ""} flex flex-nowrap gap-1 lg:gap-2 justify-center items-center `}
       >
         {/* Sorts list before rendering, so that clientUser is set first */}
         {[...allPlayers]

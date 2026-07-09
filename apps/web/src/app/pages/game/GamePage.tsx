@@ -40,7 +40,7 @@ function GamePageContent({ roomName }: { roomName: string }) {
 
   return (
     <div
-      className="bg-neutral-800 flex flex-col relative h-screen overflow-hidden py-[clamp(1rem,2vw,2.5rem)] px-[clamp(0.5rem,2vw,3rem)]"
+      className="bg-neutral-800 flex flex-col relative h-screen overflow-hidden py-4 md:py-8 lg:py-10 px-2 md:px-6 lg:px-12"
       style={{
         backgroundImage: `url(${background})`,
         backgroundSize: "cover",
@@ -49,45 +49,43 @@ function GamePageContent({ roomName }: { roomName: string }) {
         backgroundBlendMode: "saturation",
       }}
     >
-      <div className="grid flex-1 min-h-0 w-full max-w-7xl 2xl:max-w-[90vw] mx-auto grid-cols-1 grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[30%_1fr] 2xl:grid-cols-[26%_1fr] gap-[clamp(0.75rem,1.5vw,1.5rem)]">
+      <div className="grid flex-1 min-h-0 w-full max-w-7xl 2xl:max-w-[90vw] mx-auto grid-cols-1 grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[30%_1fr] 2xl:grid-cols-[26%_1fr] gap-3 md:gap-4 lg:gap-6">
         {/*  Sidebar column */}
-        <div className="flex flex-col gap-[clamp(0.75rem,1.5vw,1rem)] order-2 lg:order-0 px-[clamp(0.5rem,2vw,2.5rem)] lg:px-0 min-w-0 min-h-0 overflow-hidden self-start lg:self-stretch">
+        <div className="flex flex-col gap-3 md:gap-4 order-2 lg:order-0 min-w-0 min-h-0 overflow-hidden self-start lg:self-stretch">
           <RoomCode
             gameStarted={gameStarted}
             gameOver={gameOver}
             roomName={roomName}
           />
 
-          <div className="items-center gap-[clamp(0.5rem,1vw,1rem)] rounded-xl border bg-white shadow-sm p-[clamp(0.75rem,1.5vw,1.5rem)]">
+          <div className="flex flex-col items-center gap-1 md:gap-2 rounded-xl border bg-white shadow-sm p-3 md:p-4 lg:p-6">
             <PlayerList
               playerList={playerList}
               clientUsername={playerInfo?.userName}
               gameOver={gameOver}
             />
+            {/*  Chat button on its own row below Start Game button  */}
+            <button
+              type="button"
+              onClick={() => setChatOpen(true)}
+              className="lg:hidden flex items-center rounded-lg bg-rose-500 px-5 md:px-5 py-2  text-sm md:text-base font-semibold text-white shadow-md hover:bg-rose-400 transition mt-3 md:mt-4 truncate max-w-full"
+            >
+              <ChatBubbleLeftIcon className="size-4 md:size-5 mr-2" />
+              Chat
+            </button>
             <StartGameButton
               gameStarted={gameStarted}
               canvasError={canvasError}
               gameOver={gameOver}
             />
-            {/*  Chat button (mobile only, above player list)  */}
-            <button
-              type="button"
-              onClick={() => setChatOpen(true)}
-              className="lg:hidden flex items-center justify-center gap-2 rounded-xl bg-rose-500 px-[clamp(0.75rem,1.5vw,1.25rem)] py-[clamp(0.5rem,1vw,0.75rem)] text-[clamp(0.75rem,1vw,0.875rem)] font-semibold text-white shadow-md hover:bg-rose-400 transition"
-            >
-              <ChatBubbleLeftIcon className="size-[clamp(1rem,1.5vw,1.25rem)]" />
-              Show Chat
-            </button>
+
           </div>
-          <ChatContainer
-            chatOpen={chatOpen}
-            setChatOpen={setChatOpen}
-          />
+          <ChatContainer chatOpen={chatOpen} setChatOpen={setChatOpen} />
         </div>
 
         {/*  Right bar Game canvas (top on mobile via order-1, right column on desktop via natural flow)  */}
 
-        <div className="flex flex-col order-1 lg:order-0 h-full w-full min-h-0 min-w-0">
+        <div className="flex flex-col order-1 lg:order-0 w-full max-w-250 2xl:max-w-1000 aspect-5/4 min-h-0 min-w-0">
           {gameOver === null ? (
             <PhaserGame />
           ) : (

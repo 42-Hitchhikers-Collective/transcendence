@@ -32,24 +32,24 @@ export class GameScene extends Scene {
   init() {}
 
   create() {
-    LOG("Creating GameScene..."); // JESS: keep this log to help with debugging tha game scene
+    // LOG("Creating GameScene..."); // JESS: keep this log to help with debugging tha game scene
 
     // Initialize managers
     this.boardManager = new BoardManager(this);
     const { pile, boardContainer } = this.boardManager.create();
-    LOG("BoardManager initialized"); // JESS: keep this log to help with debugging tha game scene
+    // LOG("BoardManager initialized"); // JESS: keep this log to help with debugging tha game scene
 
     this.renderManager = new RenderManager(this, boardContainer);
-    LOG("RenderManager initialized"); // JESS: keep this log to help with debugging tha game scene
+    // LOG("RenderManager initialized"); // JESS: keep this log to help with debugging tha game scene
 
     this.inputManager = new InputManager(this, pile);
     this.uiManager = new UIManager(this);
     this.announcement = new Announcement(this);
 
     this.inputManager.setup();
-    LOG("InputManager initialized & setup"); // JESS: keep this log to help with debugging tha game scene
-    LOG("UIManager initialized"); // JESS: keep this log to help with debugging tha game scene
-    LOG("Announcement initialized"); // JESS: keep this log to help with debugging tha game scene
+    // LOG("InputManager initialized & setup"); // JESS: keep this log to help with debugging tha game scene
+    // LOG("UIManager initialized"); // JESS: keep this log to help with debugging tha game scene
+    // LOG("Announcement initialized"); // JESS: keep this log to help with debugging tha game scene
 
     this.cameras.main.centerOn(500, 400); // JESS: centers the camera on the game board (which is centered at 500, 400)
 
@@ -60,7 +60,7 @@ export class GameScene extends Scene {
     EventBus.on("uno", this.uno_announcemente, this);
     EventBus.on("error_front", this.onError, this);
     EventBus.on("not_turn", this.showNotTurn, this); // JESS: WE NEED AN EVENT BUS ALSO 
-    LOG("  EventBus listeners registered");
+    // LOG("  EventBus listeners registered");
 
     this.events.once("shutdown", () => {
       EventBus.off("room_state", this.onRoomState, this);
@@ -70,10 +70,10 @@ export class GameScene extends Scene {
       EventBus.off("not_turn", this.showNotTurn, this);
       EventBus.off("error_front", this.onError, this);
       this.uiManager.hideAll();
-      LOG("💀 GameScene shutdown — all listeners removed"); // JESS: keep this log to help with debugging tha game scene
+      // LOG("💀 GameScene shutdown — all listeners removed"); // JESS: keep this log to help with debugging tha game scene
     });
 
-    LOG("GameScene ready"); // JESS: keep this log to help with debugging tha game scene
+    // LOG("GameScene ready"); // JESS: keep this log to help with debugging tha game scene
     canvasRefresh();
   }
 
@@ -105,11 +105,11 @@ export class GameScene extends Scene {
     if(turnName !== "Unknown") { 
       const myCards =
         room.players.find((p) => p.id === this.myPlayerId)?.cardCount ?? "?";
-      LOG(`GAME STATE \n    Is ${turnName} 's turn is playing with ${myCards} cards`); // // JESS: keep this log to help with debugging tha game scene
-      LOG(`OBSERVER STATE \n    Observer: ${this.myPlayerName} , Is my turn: ${isMyTurn}, Cards: ${myCards}`); // JESS: keep this log to help with debugging tha game scenn   
+      // LOG(`GAME STATE \n    Is ${turnName} 's turn is playing with ${myCards} cards`); // // JESS: keep this log to help with debugging tha game scene
+      // LOG(`OBSERVER STATE \n    Observer: ${this.myPlayerName} , Is my turn: ${isMyTurn}, Cards: ${myCards}`); // JESS: keep this log to help with debugging tha game scenn   
     }
     if (this.myPlayerId !== room.current_turn) {
-      console.log(`🕹️ ${this.myPlayerName} - turn pass button hidden`); // JESS: added precision for debugging message to show better context to all team members
+      // console.log(`🕹️ ${this.myPlayerName} - turn pass button hidden`); // JESS: added precision for debugging message to show better context to all team members
       this.uiManager.hidePassTurnButtons();
       this.uiManager.hideWildColorButtons(); // JESS: You also need to hide the wild color buttons to other players if it's not their turn, otherwise they will see the wild color buttons and get confused about why they are showing up
     }
@@ -118,13 +118,13 @@ export class GameScene extends Scene {
 
   private selectColor() {
     //if (this.myPlayerId !== this.room?.current_turn) return; // JESS: put a guard to prevent other players to see and interact with the wild color buttons if it's not their turn
-    LOG("Wild card played — showing color picker");
+    // LOG("Wild card played — showing color picker");
     this.uiManager.showWildColorButtons();
   }
 
   private passTurn() {
     if (this.myPlayerId !== this.room?.current_turn) return; // JESS: put a guard to prevent other players to see and interact with the pass turn button if it's not their turn
-    LOG(`${this.myPlayerName} passed turn`);
+    // LOG(`${this.myPlayerName} passed turn`);
     this.uiManager.showPassTurnButtons();
   }
 
@@ -154,7 +154,7 @@ export class GameScene extends Scene {
 
   private onError(text: string)
   {
-    console.log("######################## On Error Signal")
+    // console.log("######################## On Error Signal")
     this.announcement.announceError(text)
   }
 }
