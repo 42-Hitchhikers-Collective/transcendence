@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.ts                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ilazar <ilazar@student.42.fr>              +#+  +:+       +#+        */
+/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/14 15:08:01 by ilazar            #+#    #+#             */
-/*   Updated: 2026/06/18 15:45:14 by ilazar           ###   ########.fr       */
+/*   Updated: 2026/07/09 16:06:00 by jslusark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,12 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 
 export function createAuthMiddleware(app: FastifyInstance) {
   return async (socket: Socket, next: Next) => {
-    const cookieHeader = socket.handshake.headers.cookie as string | undefined; // JESS: Gets the cookie header from the handshake
-    const cookies = cookieHeader ? parseCookies(cookieHeader) : {}; // JESS: Parses the cookies from the header and it returns an object with key-value pairs of cookie names and values or an empty object if no cookies are present
+    const cookieHeader = socket.handshake.headers.cookie as string | undefined;
+    const cookies = cookieHeader ? parseCookies(cookieHeader) : {};
 
     // token can come from either the cookie, the socket handshake auth, or the authorization header
     const token =
-      cookies.token || // JESS: added cookie as a source of the token because we are storing the JWT in a cookie to handle XXS attacks (we had it in local storage before but that is not secure)
+      cookies.token || 
       socket.handshake.auth?.token ||
       (socket.handshake.headers.authorization || "").replace(/^Bearer\s+/i, "");
 
