@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   game.handlers.ts                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jslusark <jslusark@student.42berlin.de>    +#+  +:+       +#+        */
+/*   By: gabrielrial <gabrielrial@student.42.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/10 15:31:52 by ilazar            #+#    #+#             */
-/*   Updated: 2026/07/06 19:50:41 by jslusark         ###   ########.fr       */
+/*   Updated: 2026/07/09 13:38:56 by gabrielrial      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,13 @@ export function registerGameHandlers(
     if (!res.success) {
       console.log(`Are we here? ${res.error}`);
       socket.emit("error_front", res.error);
+      const roomId = gameManager.getPlayerRoomId(playerId);
+      const room = gameManager.getRoomById(roomId);
+      broadcastGameCanvas(res.roomId);
+      broadcastGamePage(res.roomId);
+      if (room?.game?.table.draw == 0)
+        socket.emit("display_pass_button");
+      return;
     }
     // this was encapsulated in an else statement
     if (!res.success) socket.emit("error", { message: res.error });
@@ -67,8 +74,9 @@ export function registerGameHandlers(
       socket.emit("show_colors", { roomId: res.roomId });
       return;
     }
+    if (res.success === true)
+      gameManager.passTurn(playerId, res.roomId);
     console.log(`[play_card] player ${playerId} played card index ${cardIndex} in room ${res.roomId}`);
-    gameManager.passTurn(playerId, res.roomId);
     broadcastGameCanvas(res.roomId);
     broadcastGamePage(res.roomId);
   });
