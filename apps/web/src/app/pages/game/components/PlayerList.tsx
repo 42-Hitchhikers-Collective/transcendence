@@ -1,6 +1,6 @@
 import type { PlayerListItem } from "../hooks/useGamePage";
 import { useRef, useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { ClockIcon } from "@heroicons/react/24/solid";
 
 type PlayerListProps = {
   playerList: PlayerListItem[];
@@ -32,7 +32,7 @@ function PlayerStatus({
       {dropped && (
         <>
           <span className="flex items-center justify-center gap-[clamp(0.15rem,0.3vw,0.25rem)] text-[clamp(0.45rem,1.2vw,0.55rem)] lg:text-[clamp(0.5rem,0.8vw,0.65rem)] 2xl:text-[clamp(0.7rem,0.7vw,1rem)] font-medium text-slate-500">
-            <Clock className="size-[clamp(0.5rem,1vw,0.6rem)] lg:size-[clamp(0.55rem,0.7vw,0.7rem)] 2xl:size-[clamp(0.75rem,0.6vw,0.9rem)]" />
+            <ClockIcon className="size-[clamp(0.5rem,1vw,0.6rem)] lg:size-[clamp(0.55rem,0.7vw,0.7rem)] 2xl:size-[clamp(0.75rem,0.6vw,0.9rem)]" />
             Dropped
           </span>
         </>
