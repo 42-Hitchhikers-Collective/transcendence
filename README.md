@@ -64,7 +64,7 @@ Build a single-page web application where users can play the UNO card game again
 | Docker Compose | 2+      | Multi-container orchestration  |
 | Make           | (any)   | Build automation               |
 | OpenSSL        | (any)   | SSL certificate generation     |
-| Node.js        | 20+     | Required for `.env` generation |
+| Node.js        | 20+     | Running TypeScript             |
 
 ### Quick Start
 
@@ -318,7 +318,7 @@ For individual contribution of each member regarding Modules, see Modules sectio
 
 ### ilazar
 
-- **Features:** Tracking rooms and online players. JWT socket side. Real-time updates of user actions/game moves. Chat.
+- **Features:** Socket multi-player layer. Chat.
 - **Challenges:** Managing the socket layer between backend and frontend.
 
 ### jslusark
