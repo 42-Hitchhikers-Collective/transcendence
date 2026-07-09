@@ -5,6 +5,9 @@ export class InputManager {
   private pile!: Phaser.GameObjects.Zone;
   private canPlay = false; //JESS: we need a flag to disable the discard pile when it's not the player's turn, or it will create unexpected behaviors in the game scene
 
+  private lastClickedCard?: Phaser.GameObjects.Image;
+  private lastClickTime = 0;
+  private readonly DOUBLE_CLICK_DELAY = 300;
   // Phaser scene reference — class field because 'private' in constructor
   // is not allowed with erasableSyntaxOnly
   private scene: Phaser.Scene;
@@ -32,6 +35,7 @@ export class InputManager {
     this.scene.input.on("drag", this.onDrag, this);
     this.scene.input.on("drop", this.onDrop, this);
     this.scene.input.on("dragend", this.onDragEnd, this);
+    this.scene.input.on("gameobjectdown", this.helenclick, this);
   }
 
   private onDrag(
@@ -59,6 +63,40 @@ export class InputManager {
     }
     if (zone !== this.pile) {
       this.resetCard(obj);
+      return;
+    }
+
+    const cardIndex = obj.getData("cardIndex");
+    playCard(cardIndex);
+    obj.disableInteractive();
+  }
+
+  private helenclick(
+    pointer: Phaser.Input.Pointer,
+    obj: Phaser.GameObjects.GameObject,
+  ) {
+    if (!this.isSceneAlive()) return;
+
+    if (!(obj instanceof Phaser.GameObjects.Image)) return;
+
+    const now = pointer.downTime;
+
+    if (
+      this.lastClickedCard === obj &&
+      now - this.lastClickTime < this.DOUBLE_CLICK_DELAY
+    ) {
+      this.lastClickedCard = undefined;
+      this.playCardFromDoubleClick(obj);
+      return;
+    }
+
+    this.lastClickedCard = obj;
+    this.lastClickTime = now;
+  }
+
+  private playCardFromDoubleClick(obj: Phaser.GameObjects.Image) {
+    if (!this.canPlay) {
+      EventBus.emit("not_turn", { message: "❌ Wait for your turn ❌" });
       return;
     }
 
