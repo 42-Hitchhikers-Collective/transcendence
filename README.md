@@ -279,6 +279,7 @@ Schema file: [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma)
 
 ---
 
+
 ## Features List
 
  Feature | Description | Lead |
@@ -311,6 +312,15 @@ A detailed list of modules that we have chosen to implement for this project can
 
 For individual contribution of each member regarding Modules, see Modules section through the link above.
 
+
+| Member   | Project Role                                                                        | Development Role                 |
+| -------- | ----------------------------------------------------------------------------------- | -------------------------------- |
+| jslusark | Project Manager (PM)                                                                | Full-stack Developer             |
+| grial    | Technical Lead                                                                      | Game Engine & Frontend Developer |
+| ilazar   | Backend Lead                                                                        | Real-time Networking Developer   |
+| wlucke   | | Backend & Database Developer     |
+
+
 ### grial
 
 - **Features:** Phaser game canvas, UNO game engine
@@ -330,6 +340,16 @@ For individual contribution of each member regarding Modules, see Modules sectio
 
 - **Features:** API. Database and initial setup.
 - **Challenges:** Adjusting the database to the needs of the project.
+
+
+## Roles
+
+| Role                 | Member(s)                       |
+| -------------------- | ------------------------------- |
+| Product Owner (PO)   | ...                             |
+| Project Manager (PM) | jslusark                        |
+| Technical Lead       | Shared by the team              |
+| Developers           | grial, ilazar, jslusark, wlucke |
 
 ---
 
