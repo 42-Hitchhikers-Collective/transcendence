@@ -252,14 +252,14 @@ Browser ──HTTPS──▶ NGINX ──proxy──▶ Fastify API (:3000)
 | **TLS Termination at NGINX**         | Single encryption point, backend stays simple (plain HTTP internally)             |
 | **HttpOnly JWT Cookies**             | XSS-resistant token storage — JS cannot read the token                            |
 | **In-Memory Game State**             | UNO games are ephemeral, no need to persist every card draw to DB                |
-| **Phaser Canvas (not WebGL)**        | Eliminates Firefox GPU pipeline warnings; Canvas 2D is sufficient for a card game |
-| **`prisma db push` over Migrations** | Faster dev iteration; schema is small and controlled                              |
+| **Phaser Canvas (not WebGL)**        | Canvas 2D is sufficient for a card game |
+| **Prisma Migrations**                | Full migration history with `prisma migrate dev` ensures schema consistency across environments and rollback support |
 
 ---
 
 ## Database Schema
 
-![Database Schema](apps/api/db_schema.png)
+![Database Schema](apps/api/prisma-db.svg)
 
 ### Tables
 
@@ -305,20 +305,14 @@ Schema file: [`apps/api/prisma/schema.prisma`](apps/api/prisma/schema.prisma)
 
 ## Modules
 A detailed list of modules that we have chosen to implement for this project can be found in [docs/readme_files/modules.md](docs/readme_files/modules.md).
+Here we show the modules on which each person worked and total points for each module.
+The modules are divided into mandatory and bonus modules.
 
 ---
 
 ## Individual Contributions
 
 For individual contribution of each member regarding Modules, see Modules section through the link above.
-
-
-| Member   | Project Role                                                                        | Development Role                 |
-| -------- | ----------------------------------------------------------------------------------- | -------------------------------- |
-| jslusark | Project Manager (PM)                                                                | Full-stack Developer             |
-| grial    | Technical Lead                                                                      | Game Engine & Frontend Developer |
-| ilazar   | Backend Lead                                                                        | Real-time Networking Developer   |
-| wlucke   | | Backend & Database Developer     |
 
 
 ### grial
@@ -333,12 +327,12 @@ For individual contribution of each member regarding Modules, see Modules sectio
 
 ### jslusark
 
-- **Features:** Web interface with Authentication and react state managment.
-- **Challenges:** Handling a large code-base and sockets on the frontend.
+- **Features:** Web interface with authentication and react state management.
+- **Challenges:** Handling a large code-base and manage socket data races on the frontend.
 
 ### wlucke
 
-- **Features:** API. Database and initial setup.
+- **Features:** API, Database and initial setup.
 - **Challenges:** Adjusting the database to the needs of the project.
 
 
@@ -346,7 +340,7 @@ For individual contribution of each member regarding Modules, see Modules sectio
 
 | Role                 | Member(s)                       |
 | -------------------- | ------------------------------- |
-| Product Owner (PO)   | ...                             |
+| Product Owner (PO)   | Shared by the team              |
 | Project Manager (PM) | jslusark                        |
 | Technical Lead       | Shared by the team              |
 | Developers           | grial, ilazar, jslusark, wlucke |
@@ -355,10 +349,12 @@ For individual contribution of each member regarding Modules, see Modules sectio
 
 ## Known Limitations
 
-- **No OAuth** — only email/password authentication (42 login, Google, etc. not implemented)
-- **Self-Signed Certificate** — browsers show a security warning on first visit (click "Advanced" → "Proceed")
-- **No Password Reset** — no email system configured with SMTP; users cannot reset forgotten passwords
+- **No OAuth**: only email/password authentication (login via Google, Apple etc. not implemented)
+- **Game Canvas not ported to portrait mode**: the game canvas is responsive but is not optimized for playing on portrait mobile devices (still playable just not ideal)
+- **Self-Signed Certificate**: browsers show a security warning on first visit (click "Advanced" → "Proceed")
+- **No Password Reset and email update**: no email system configured with SMTP; users cannot reset forgotten passwords
 
 ---
 
-**Confirmed total: 14 pts** — Remote Players and AI Opponent are optional buffer modules.
+- **Confirmed total mandatory: 15 pts**.
+- **Confirmed total mandatory + bonus: 20 pts**.
